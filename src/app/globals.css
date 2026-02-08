@@ -34,7 +34,7 @@
   --success-light: #7bdcb5;
   --error: #e0284f;
   --error-dark: #d63637;
-  --link-hover: #cf2e2e;
+  --link-hover: #044a78;
 
   /* Spacing & Layout */
   --field-margin: 1em;
@@ -121,13 +121,16 @@ h3 {
 }
 
 /* BHG Design System - Links */
-a {
+a:not([class*="text-"]) {
   color: var(--accent);
+}
+
+a {
   text-decoration: none;
   transition: color var(--transition-speed) ease;
 }
 
-a:hover {
+a:not([class*="text-"]):hover {
   color: var(--link-hover);
 }
 

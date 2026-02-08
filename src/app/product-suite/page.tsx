@@ -1,294 +1,231 @@
 import Header from "../components/header";
 import Footer from "../components/footer";
 
-interface ProductTier {
-  name: string;
-  description: string;
-  features: string[];
-  documentationUrl?: string;
-}
+/* ── Shared icons ── */
+const ArrowIcon = ({ className = "h-3.5 w-3.5" }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+  </svg>
+);
+const ExternalIcon = ({ className = "h-3.5 w-3.5" }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[var(--bhg-blue)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  </svg>
+);
 
-interface ProductCategory {
-  category: string;
+/* ── Status badge ── */
+type Status = "production" | "in-development" | "coming-soon";
+const statusConfig: Record<Status, { label: string; cls: string }> = {
+  production: { label: "Production", cls: "bg-[var(--success)]/10 text-[var(--success)]" },
+  "in-development": { label: "In Development", cls: "bg-[var(--bhg-blue)]/10 text-[var(--bhg-blue)]" },
+  "coming-soon": { label: "Coming Soon", cls: "bg-amber-500/10 text-amber-600" },
+};
+const Badge = ({ status }: { status: Status }) => {
+  const { label, cls } = statusConfig[status];
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${cls}`}>{label}</span>;
+};
+
+/* ── Link buttons ── */
+const LinkPair = ({ docsUrl, appUrl, size = "sm" }: { docsUrl?: string; appUrl?: string; size?: "sm" | "xs" }) => {
+  if (!docsUrl && !appUrl) return null;
+  const isSm = size === "sm";
+  return (
+    <div className="flex items-center gap-2">
+      {docsUrl && (
+        <a href={docsUrl} target="_blank" rel="noopener noreferrer"
+          className={`inline-flex items-center gap-1.5 rounded-md bg-[var(--bhg-blue)] font-medium text-white shadow-sm transition-all duration-200 hover:bg-[var(--bhg-deep-blue)] ${isSm ? "px-3.5 py-1.5 text-sm" : "px-2.5 py-1 text-xs"}`}>
+          Docs <ArrowIcon className={isSm ? "h-3.5 w-3.5" : "h-3 w-3"} />
+        </a>
+      )}
+      {appUrl && (
+        <a href={appUrl} target="_blank" rel="noopener noreferrer"
+          className={`inline-flex items-center gap-1.5 rounded-md border border-[var(--bhg-blue)] font-medium text-[var(--bhg-blue)] transition-all duration-200 hover:bg-[var(--bhg-blue)] hover:text-white ${isSm ? "px-3.5 py-1.5 text-sm" : "px-2.5 py-1 text-xs"}`}>
+          Launch <ExternalIcon className={isSm ? "h-3.5 w-3.5" : "h-3 w-3"} />
+        </a>
+      )}
+    </div>
+  );
+};
+
+/* ── Data ── */
+interface Product {
+  name: string;
   tagline: string;
   description: string;
-  tiers: ProductTier[];
-  keyFeatures: string[];
-  status: "production" | "in-development" | "coming-soon" | "mixed";
-  documentationUrl?: string;
+  features: string[];
+  status: Status;
+  docsUrl?: string;
+  appUrl?: string;
 }
 
-const productCategories: ProductCategory[] = [
+interface Layer {
+  id: string;
+  label: string;
+  icon: string;
+  heading: string;
+  subtitle: string;
+  products: Product[];
+}
+
+const layers: Layer[] = [
   {
-    category: "AICR Platform",
-    tagline: "Enterprise AI Governance & Operations",
-    description:
-      "Self-aware, AI-native platform orchestrating the creation, operation, and commercialization of software products through a three-layer architecture.",
-    tiers: [
+    id: "foundation",
+    label: "Foundation",
+    icon: "1",
+    heading: "Platform Foundation",
+    subtitle: "Core infrastructure and AI framework that powers every product in the ecosystem",
+    products: [
       {
-        name: "Studio Tier",
-        description: "Learning and development environment",
+        name: "AICR Platform",
+        tagline: "Enterprise AI Governance & Operations",
+        description: "Self-aware, AI-native platform orchestrating creation, operation, and commercialization through a three-layer architecture.",
         features: [
+          "Studio / Edge / Summit tiers",
           "240-table database architecture",
           "19 interconnected control centers",
           "14 specialized AI agents",
-          "Complete self-documentation",
           "Pack system for capability management",
+          "Complete self-documentation",
         ],
+        status: "in-development",
+        docsUrl: "https://aicr.docs.bluehorizonsgroup.com",
+        appUrl: "https://aicr.aicoderally.com",
       },
       {
-        name: "Edge Tier",
-        description: "Business operations and tenant runtime",
+        name: "Rally Stack",
+        tagline: "Platform Factory & Module System",
+        description: "Modular platform factory with 130+ reusable modules, multi-model AI orchestration, and agent protocol for rapid app development.",
         features: [
-          "AI compliance checks",
-          "Knowledge retrieval system",
-          "Feature flags and telemetry",
-          "Multi-tenant architecture",
-          "Real-time operations",
-        ],
-      },
-      {
-        name: "Summit Tier",
-        description: "Enterprise governance and intelligence",
-        features: [
-          "Cross-tenant analytics",
-          "Model governance",
-          "Enterprise compliance",
-          "Policy management",
-          "Executive dashboards",
-        ],
-      },
-    ],
-    keyFeatures: [
-      "Self-awareness through indexed canonical documentation",
-      "AI-native design with collaborative agent system",
-      "Deterministic pack system with audit trails",
-      "Multi-tier value chain (Studio → Edge → Summit)",
-    ],
-    status: "in-development",
-    documentationUrl: "https://aicr.docs.bluehorizonsgroup.com",
-  },
-  {
-    category: "AICodeRally Ecosystem",
-    tagline: "Platform Factory & Module System",
-    description:
-      "Comprehensive platform factory enabling rapid creation of business applications through modular architecture and AI orchestration.",
-    tiers: [
-      {
-        name: "Rally Stack Platform",
-        description: "Core framework and infrastructure",
-        features: [
-          "130+ reusable modules",
+          "130+ production-ready modules",
           "Turborepo monorepo structure",
           "Next.js 14-15 & React 19",
-          "Prisma ORM + PostgreSQL",
-          "TypeScript 5 throughout",
+          "Rally AI Framework (multi-model)",
+          "Agent Protocol for AI coordination",
+          "Four-layer architecture (Data → Client)",
         ],
-      },
-      {
-        name: "Rally AI Framework",
-        description: "Multi-model AI orchestration",
-        features: [
-          "Model routing and fallback",
-          "Context optimization",
-          "Cost management",
-          "Response streaming",
-          "Persistent memory across sessions",
-        ],
-      },
-      {
-        name: "Agent Protocol",
-        description: "AI coordination and collaboration",
-        features: [
-          "Role-based agent separation",
-          "Shared context management",
-          "Task delegation system",
-          "Session persistence",
-          "Collaborative workflows",
-        ],
+        status: "production",
+        docsUrl: "https://rally.docs.bluehorizonsgroup.com",
+        appUrl: "https://rally.aicoderally.com",
       },
     ],
-    keyFeatures: [
-      "130+ production-ready modules across 9 categories",
-      "Four-layer architecture (Data → Service → API → Client)",
-      "Complete vertical solution accelerators",
-      "AI-first development approach",
-    ],
-    status: "production",
-    documentationUrl: "https://rally.docs.bluehorizonsgroup.com",
   },
   {
-    category: "Vertical Solutions",
-    tagline: "Industry-Specific Applications",
-    description:
-      "Pre-built, customizable solutions for specific industries, demonstrating the full capabilities of the AICodeRally ecosystem.",
-    tiers: [
+    id: "sales",
+    label: "Sales & Governance",
+    icon: "2",
+    heading: "Sales & Compensation Governance",
+    subtitle: "End-to-end sales compensation management, policy governance, and AI-powered document intelligence",
+    products: [
       {
-        name: "TowEdge Platform",
-        description: "Towing industry operations",
+        name: "SCM - Sales Comp Manager",
+        tagline: "Compensation Plan Management",
+        description: "Full lifecycle compensation management with policy design, multi-stage approval workflows, dispute resolution, and executive oversight dashboards.",
         features: [
-          "Service request management",
-          "Driver/vehicle tracking",
-          "Customer portal",
-          "Billing and invoicing",
-          "Dispatch optimization",
+          "Compensation plan templates & builders",
+          "Multi-stage approval workflows",
+          "Dispute tracking & resolution",
+          "Executive performance dashboards",
+          "Compliance monitoring & audit trails",
+          "CRM and finance integration",
         ],
-        documentationUrl: "https://towedge.docs.bluehorizonsgroup.com",
+        status: "production",
+        docsUrl: "https://sgm.docs.bluehorizonsgroup.com",
+        appUrl: "https://sgm.aicoderally.com",
       },
       {
-        name: "SGM SPARCC",
-        description: "Sales governance and compensation",
+        name: "Document Intelligence",
+        tagline: "AI-Powered Document Analysis",
+        description: "Automated compliance assessments and policy-backed insights. Multi-format ingestion, structure recognition, anomaly detection, and executive summaries.",
         features: [
-          "Compensation plan design",
-          "Approval workflows",
-          "Dispute resolution",
-          "Policy management",
-          "Executive oversight",
+          "Multi-format OCR & extraction",
+          "Automated compliance checks",
+          "Policy alignment scoring",
+          "Risk identification & flagging",
+          "Predictive insights & trends",
+          "SPARCC workflow integration",
         ],
-        documentationUrl: "https://sgm.docs.bluehorizonsgroup.com",
-      },
-      {
-        name: "Nonprofit Platform (PS Edge)",
-        description: "Nonprofit management",
-        features: [
-          "Donor management",
-          "Grant tracking",
-          "Program management",
-          "Volunteer coordination",
-          "Impact measurement",
-        ],
-        documentationUrl: "https://psedge.docs.bluehorizonsgroup.com",
-      },
-      {
-        name: "Startup Financial Planning (SFP)",
-        description: "Financial planning workflows",
-        features: [
-          "Scenario modeling",
-          "Deterministic calculations",
-          "Forecast generation",
-          "Budget planning",
-          "Financial reporting",
-        ],
-        documentationUrl: "https://sfp.docs.bluehorizonsgroup.com",
+        status: "coming-soon",
+        docsUrl: "https://docai.docs.bluehorizonsgroup.com",
       },
       {
         name: "IntelligentSPM",
-        description: "Sales performance management (planned)",
+        tagline: "Sales Performance Management",
+        description: "AI-powered quota management, territory planning, performance analytics, and incentive design for optimized sales operations.",
         features: [
-          "Quota management",
-          "Territory planning",
-          "Performance analytics",
-          "Incentive design",
-          "AI-powered insights",
-        ],
-        documentationUrl: "https://ispm.docs.bluehorizonsgroup.com",
-      },
-    ],
-    keyFeatures: [
-      "Built on Rally Stack foundation",
-      "Industry-specific workflows",
-      "Customizable and extensible",
-      "Production-ready demos",
-    ],
-    status: "mixed",
-  },
-  {
-    category: "Sales Compensation Management",
-    tagline: "SCM - Sales Comp Manager",
-    description:
-      "Comprehensive sales compensation plan management and governance platform with policy design, approval workflows, and executive oversight.",
-    tiers: [
-      {
-        name: "Policy Design",
-        description: "Create and manage compensation plans",
-        features: [
-          "Plan templates and builders",
-          "Rule configuration",
-          "Territory assignments",
-          "Quota management",
-          "Incentive structures",
-        ],
-      },
-      {
-        name: "Workflow Management",
-        description: "Approval and dispute resolution",
-        features: [
-          "Multi-stage approvals",
-          "Dispute tracking",
-          "Audit trails",
-          "Change management",
-          "Stakeholder notifications",
-        ],
-      },
-      {
-        name: "Executive Oversight",
-        description: "Governance and analytics",
-        features: [
-          "Performance dashboards",
-          "Compliance monitoring",
-          "Cost analysis",
-          "Policy effectiveness",
-          "Strategic insights",
-        ],
-      },
-    ],
-    keyFeatures: [
-      "Full lifecycle compensation management",
-      "Policy-driven governance",
-      "Automated compliance checks",
-      "Integration with CRM and finance systems",
-    ],
-    status: "production",
-    documentationUrl: "https://sgm.docs.bluehorizonsgroup.com",
-  },
-  {
-    category: "Document Intelligence",
-    tagline: "Sales Document Analyzer",
-    description:
-      "AI-powered document analysis service for automated compliance assessments and policy-backed insights within the SPARCC ecosystem.",
-    tiers: [
-      {
-        name: "Document Processing",
-        description: "Intelligent document ingestion",
-        features: [
-          "Multi-format support",
-          "OCR and text extraction",
-          "Structure recognition",
-          "Metadata extraction",
-          "Version tracking",
-        ],
-      },
-      {
-        name: "Compliance Analysis",
-        description: "Policy-based validation",
-        features: [
-          "Automated compliance checks",
-          "Policy alignment scoring",
-          "Risk identification",
-          "Exception flagging",
-          "Remediation suggestions",
-        ],
-      },
-      {
-        name: "Insights Generation",
-        description: "AI-powered analysis",
-        features: [
-          "Pattern recognition",
-          "Trend analysis",
+          "Quota planning & allocation",
+          "Territory design & optimization",
+          "Performance analytics dashboards",
+          "Incentive plan design",
+          "AI-powered forecasting",
           "Anomaly detection",
-          "Predictive insights",
-          "Executive summaries",
         ],
+        status: "coming-soon",
+        docsUrl: "https://ispm.docs.bluehorizonsgroup.com",
+        appUrl: "https://ispm.bluehorizonsgroup.com",
       },
     ],
-    keyFeatures: [
-      "AI-native document processing",
-      "Policy-backed compliance validation",
-      "Real-time analysis and alerts",
-      "Integration with SPARCC workflow",
+  },
+  {
+    id: "vertical",
+    label: "Industry Solutions",
+    icon: "3",
+    heading: "Industry Vertical Solutions",
+    subtitle: "Production-ready applications built on Rally Stack, customized for specific industries",
+    products: [
+      {
+        name: "TowEdge",
+        tagline: "Towing & Roadside Assistance",
+        description: "Complete towing operations platform with dispatch optimization, driver/vehicle tracking, customer portal, and billing.",
+        features: [
+          "Service request management",
+          "AI-powered dispatch optimization",
+          "Real-time driver & vehicle tracking",
+          "Customer self-service portal",
+          "Billing & invoicing",
+          "GPS & payment integrations",
+        ],
+        status: "production",
+        docsUrl: "https://towedge.docs.bluehorizonsgroup.com",
+        appUrl: "https://towedge.bluehorizonsgroup.com",
+      },
+      {
+        name: "PS Edge",
+        tagline: "Nonprofit Management",
+        description: "Donor management, grant tracking, program management, volunteer coordination, and impact measurement for nonprofits.",
+        features: [
+          "Donor profiles & giving history",
+          "Grant lifecycle tracking",
+          "Program planning & outcomes",
+          "Volunteer scheduling & engagement",
+          "Impact measurement & reporting",
+          "Campaign management",
+        ],
+        status: "production",
+        docsUrl: "https://psedge.docs.bluehorizonsgroup.com",
+        appUrl: "https://psedge.bluehorizonsgroup.com",
+      },
+      {
+        name: "SFP",
+        tagline: "Startup Financial Planning",
+        description: "Deterministic financial modeling with scenario comparison, forecast generation, budget tracking, and investor-ready reporting.",
+        features: [
+          "Scenario modeling & comparison",
+          "Deterministic calculation engine",
+          "Revenue & expense forecasting",
+          "Cash flow & runway analysis",
+          "Budget variance tracking",
+          "Investor & board reports",
+        ],
+        status: "production",
+        docsUrl: "https://sfp.docs.bluehorizonsgroup.com",
+        appUrl: "https://sfp.bluehorizonsgroup.com",
+      },
     ],
-    status: "coming-soon",
-    documentationUrl: "https://docai.docs.bluehorizonsgroup.com",
   },
 ];
 
@@ -297,204 +234,166 @@ export default function ProductSuite() {
     <div className="min-h-screen bg-[var(--background)] font-[family-name:var(--font-geist-sans)] transition-colors duration-200">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-6 py-20">
-        <div className="mb-16 text-center">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl">
+      <main className="mx-auto max-w-7xl px-6 py-16">
+        {/* Page header */}
+        <div className="mb-10 text-center">
+          <h1 className="mb-3 text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl">
             Product Suite
           </h1>
-          <p className="mx-auto max-w-3xl text-lg text-[var(--text-secondary)]">
-            Comprehensive ecosystem of AI-powered platforms, frameworks, and
-            vertical solutions for enterprise operations, governance, and
-            industry-specific workflows.
+          <p className="mx-auto max-w-2xl text-[var(--text-secondary)]">
+            A layered ecosystem: foundation platforms power specialized solutions,
+            which power industry applications.
           </p>
         </div>
 
-        <div className="space-y-16">
-          {productCategories.map((category) => (
-            <section
-              key={category.category}
-              className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-8 shadow-sm transition-colors duration-200"
-            >
-              <div className="mb-8">
-                <div className="mb-2 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-                    {category.category}
-                  </h2>
-                  {category.status === "production" && (
-                    <span className="rounded-full bg-[var(--success)]/10 px-3 py-1 text-sm font-medium text-[var(--success)]">
-                      Production
-                    </span>
-                  )}
-                  {category.status === "in-development" && (
-                    <span className="rounded-full bg-[var(--bhg-blue)]/10 px-3 py-1 text-sm font-medium text-[var(--bhg-blue)]">
-                      In Development
-                    </span>
-                  )}
-                  {category.status === "coming-soon" && (
-                    <span className="rounded-full bg-amber-500/10 px-3 py-1 text-sm font-medium text-amber-600">
-                      Coming Soon
-                    </span>
-                  )}
-                  {category.status === "mixed" && (
-                    <span className="rounded-full bg-[var(--bhg-coral)]/10 px-3 py-1 text-sm font-medium text-[var(--bhg-coral)]">
-                      Multiple Stages
-                    </span>
-                  )}
+        {/* Layer navigation */}
+        <nav className="mb-10 flex justify-center">
+          <div className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-color)] bg-[var(--card-bg)] p-1">
+            {layers.map((layer, i) => (
+              <a
+                key={layer.id}
+                href={`#${layer.id}`}
+                className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--light-gray)] hover:text-[var(--text-primary)]"
+              >
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--bhg-blue)]/10 text-[10px] font-bold text-[var(--bhg-blue)]">
+                  {layer.icon}
+                </span>
+                {layer.label}
+                {i < layers.length - 1 && (
+                  <svg className="ml-1 h-3 w-3 text-[var(--border-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </a>
+            ))}
+          </div>
+        </nav>
+
+        {/* Layers */}
+        <div className="space-y-12">
+          {layers.map((layer, layerIdx) => (
+            <section key={layer.id} id={layer.id}>
+              {/* Layer header with vertical connector */}
+              <div className="mb-5 flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--bhg-blue)] text-sm font-bold text-white shadow-sm">
+                  {layer.icon}
                 </div>
-                <p className="mb-2 text-sm font-medium text-[var(--bhg-blue)]">
-                  {category.tagline}
-                </p>
-                <p className="text-[var(--text-secondary)]">{category.description}</p>
+                <div>
+                  <h2 className="text-lg font-bold text-[var(--text-primary)]">{layer.heading}</h2>
+                  <p className="text-sm text-[var(--text-secondary)]">{layer.subtitle}</p>
+                </div>
               </div>
 
-              <div className="mb-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {category.tiers.map((tier) => (
-                  <div
-                    key={tier.name}
-                    className="rounded-lg border border-[var(--border-color)] bg-[var(--light-gray)] p-5 transition-all duration-200 hover:shadow-md"
-                  >
-                    <h3 className="mb-2 text-lg font-semibold text-[var(--text-primary)]">
-                      {tier.name}
-                    </h3>
-                    <p className="mb-4 text-sm text-[var(--text-secondary)]">
-                      {tier.description}
-                    </p>
-                    <ul className="mb-4 space-y-2">
-                      {tier.features.map((feature, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start gap-2 text-sm text-[var(--text-secondary)]"
-                        >
-                          <svg
-                            className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--bhg-blue)]"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    {tier.documentationUrl && (
-                      <a
-                        href={tier.documentationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--bhg-blue)] transition-colors hover:text-[var(--bhg-deep-blue)]"
+              {/* Connector line between layers */}
+              {layerIdx < layers.length - 1 && (
+                <div className="relative">
+                  {/* Products grid */}
+                  <div className={`grid gap-4 ${layer.products.length === 2 ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3"}`}>
+                    {layer.products.map((product) => (
+                      <div
+                        key={product.name}
+                        className="group flex flex-col overflow-hidden rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] transition-all duration-200 hover:border-[var(--bhg-blue)]/30 hover:shadow-md"
                       >
-                        View Docs
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2}
-                          stroke="currentColor"
-                          className="h-3.5 w-3.5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                          />
-                        </svg>
-                      </a>
-                    )}
+                        {/* Product header */}
+                        <div className="border-b border-[var(--border-color)] px-5 py-4">
+                          <div className="mb-1 flex items-center justify-between">
+                            <h3 className="font-semibold text-[var(--text-primary)]">{product.name}</h3>
+                            <Badge status={product.status} />
+                          </div>
+                          <p className="text-xs font-medium text-[var(--bhg-blue)]">{product.tagline}</p>
+                          <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">{product.description}</p>
+                        </div>
+
+                        {/* Features */}
+                        <div className="flex-1 px-5 py-3">
+                          <ul className="grid grid-cols-1 gap-1.5">
+                            {product.features.map((f, i) => (
+                              <li key={i} className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)]">
+                                <CheckIcon />
+                                <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="border-t border-[var(--border-color)] px-5 py-3">
+                          <LinkPair docsUrl={product.docsUrl} appUrl={product.appUrl} size="xs" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              <div className="rounded-lg border border-[var(--border-color)] bg-gradient-to-br from-[var(--bhg-blue)]/5 to-transparent p-5">
-                <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-primary)]">
-                  Key Features
-                </h4>
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {category.keyFeatures.map((feature, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2 text-sm text-[var(--text-secondary)]"
-                    >
-                      <svg
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--bhg-coral)]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
+                  {/* Vertical connector arrow to next layer */}
+                  <div className="flex justify-center py-4">
+                    <div className="flex flex-col items-center text-[var(--border-color)]">
+                      <div className="h-4 w-px bg-[var(--border-color)]" />
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7" />
                       </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                      <span className="mt-1 text-[10px] font-medium uppercase tracking-widest text-[var(--text-secondary)]">powers</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              {category.documentationUrl && (
-                <div className="mt-6">
-                  <a
-                    href={category.documentationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-[var(--border-radius-base)] bg-[var(--bhg-blue)] px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-[var(--bhg-deep-blue)]"
-                  >
-                    View Documentation
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="h-4 w-4"
+              {/* Last layer (no connector) */}
+              {layerIdx === layers.length - 1 && (
+                <div className={`grid gap-4 ${layer.products.length === 2 ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3"}`}>
+                  {layer.products.map((product) => (
+                    <div
+                      key={product.name}
+                      className="group flex flex-col overflow-hidden rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] transition-all duration-200 hover:border-[var(--bhg-blue)]/30 hover:shadow-md"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                      />
-                    </svg>
-                  </a>
+                      <div className="border-b border-[var(--border-color)] px-5 py-4">
+                        <div className="mb-1 flex items-center justify-between">
+                          <h3 className="font-semibold text-[var(--text-primary)]">{product.name}</h3>
+                          <Badge status={product.status} />
+                        </div>
+                        <p className="text-xs font-medium text-[var(--bhg-blue)]">{product.tagline}</p>
+                        <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">{product.description}</p>
+                      </div>
+                      <div className="flex-1 px-5 py-3">
+                        <ul className="grid grid-cols-1 gap-1.5">
+                          {product.features.map((f, i) => (
+                            <li key={i} className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)]">
+                              <CheckIcon />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="border-t border-[var(--border-color)] px-5 py-3">
+                        <LinkPair docsUrl={product.docsUrl} appUrl={product.appUrl} size="xs" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </section>
           ))}
         </div>
 
-        <div className="mt-16 rounded-lg border border-[var(--border-color)] bg-gradient-to-br from-[var(--bhg-blue)]/10 to-transparent p-8 text-center shadow-sm">
-          <h2 className="mb-4 text-2xl font-bold text-[var(--text-primary)]">
-            Platform Ecosystem
-          </h2>
-          <p className="mx-auto mb-6 max-w-2xl text-[var(--text-secondary)]">
-            All products share a common foundation of 130+ reusable modules,
-            AI-native architecture, and enterprise-grade governance. Built on
-            Next.js, React, TypeScript, and PostgreSQL with comprehensive
-            documentation and self-aware platform capabilities.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <span className="rounded-full border border-[var(--bhg-blue)]/20 bg-[var(--bhg-blue)]/10 px-4 py-2 text-sm font-medium text-[var(--bhg-blue)]">
-              130+ Modules
-            </span>
-            <span className="rounded-full border border-[var(--bhg-coral)]/20 bg-[var(--bhg-coral)]/10 px-4 py-2 text-sm font-medium text-[var(--bhg-coral)]">
-              14 AI Agents
-            </span>
-            <span className="rounded-full border border-[var(--bhg-blue)]/20 bg-[var(--bhg-blue)]/10 px-4 py-2 text-sm font-medium text-[var(--bhg-blue)]">
-              240-Table Architecture
-            </span>
-            <span className="rounded-full border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-2 text-sm font-medium text-[var(--success)]">
-              Multi-Tier Deployment
-            </span>
-            <span className="rounded-full border border-[var(--bhg-coral)]/20 bg-[var(--bhg-coral)]/10 px-4 py-2 text-sm font-medium text-[var(--bhg-coral)]">
-              Self-Documenting
-            </span>
+        {/* Ecosystem summary */}
+        <div className="mt-14 overflow-hidden rounded-lg border border-[var(--border-color)]">
+          <div className="bg-gradient-to-r from-[var(--bhg-blue)]/5 via-transparent to-[var(--bhg-coral)]/5 px-6 py-5 text-center">
+            <h2 className="mb-1 text-lg font-bold text-[var(--text-primary)]">Ecosystem at a Glance</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Shared infrastructure across every product</p>
+          </div>
+          <div className="grid grid-cols-2 gap-px bg-[var(--border-color)] sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              { value: "130+", label: "Modules" },
+              { value: "14", label: "AI Agents" },
+              { value: "240", label: "DB Tables" },
+              { value: "19", label: "Control Centers" },
+              { value: "3", label: "Platform Tiers" },
+              { value: "8", label: "Products" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-[var(--card-bg)] px-4 py-4 text-center">
+                <div className="text-xl font-bold text-[var(--bhg-blue)]">{stat.value}</div>
+                <div className="text-xs text-[var(--text-secondary)]">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </main>
