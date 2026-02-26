@@ -31,6 +31,12 @@ export default function Header() {
           >
             Quick Reference
           </Link>
+          <Link
+            href="/api-reference"
+            className="text-sm text-[var(--text-secondary)] transition-colors duration-200 hover:text-[var(--link-hover)]"
+          >
+            API
+          </Link>
           <a
             href="https://www.aicoderally.com"
             target="_blank"

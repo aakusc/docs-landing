@@ -31,7 +31,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="https://sgm.docs.bluehorizonsgroup.com" target="_blank" rel="noopener noreferrer" className="transition-colors duration-200 hover:text-[var(--link-hover)]">
-                  SCM - Sales Comp Manager
+                  SGM - Sales Governance Manager
                 </a>
               </li>
               <li>

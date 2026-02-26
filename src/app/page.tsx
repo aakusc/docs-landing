@@ -3,7 +3,7 @@ import Footer from "./components/footer";
 
 const products = [
   {
-    name: "SCM - Sales Comp Manager",
+    name: "SGM - Sales Governance Manager",
     description:
       "Sales compensation plan management and governance platform. Policy design, approval workflows, dispute resolution, and executive oversight.",
     icon: (

@@ -37,7 +37,7 @@ const LinkPair = ({ docsUrl, appUrl, size = "sm" }: { docsUrl?: string; appUrl?:
   return (
     <div className="flex items-center gap-2">
       {docsUrl && (
-        <a href={docsUrl} target="_blank" rel="noopener noreferrer"
+        <a href={docsUrl}
           className={`inline-flex items-center gap-1.5 rounded-md bg-[var(--bhg-blue)] font-medium text-white shadow-sm transition-all duration-200 hover:bg-[var(--bhg-deep-blue)] ${isSm ? "px-3.5 py-1.5 text-sm" : "px-2.5 py-1 text-xs"}`}>
           Docs <ArrowIcon className={isSm ? "h-3.5 w-3.5" : "h-3 w-3"} />
         </a>
@@ -93,7 +93,7 @@ const layers: Layer[] = [
           "Complete self-documentation",
         ],
         status: "in-development",
-        docsUrl: "https://aicr.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/aicr",
         appUrl: "https://aicr.aicoderally.com",
       },
       {
@@ -109,7 +109,7 @@ const layers: Layer[] = [
           "Four-layer architecture (Data → Client)",
         ],
         status: "production",
-        docsUrl: "https://rally.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/rally",
         appUrl: "https://rally.aicoderally.com",
       },
     ],
@@ -122,7 +122,7 @@ const layers: Layer[] = [
     subtitle: "End-to-end sales compensation management, policy governance, and AI-powered document intelligence",
     products: [
       {
-        name: "SCM - Sales Comp Manager",
+        name: "SGM - Sales Governance Manager",
         tagline: "Compensation Plan Management",
         description: "Full lifecycle compensation management with policy design, multi-stage approval workflows, dispute resolution, and executive oversight dashboards.",
         features: [
@@ -134,7 +134,7 @@ const layers: Layer[] = [
           "CRM and finance integration",
         ],
         status: "production",
-        docsUrl: "https://sgm.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/sgm",
         appUrl: "https://sgm.aicoderally.com",
       },
       {
@@ -150,7 +150,7 @@ const layers: Layer[] = [
           "SPARCC workflow integration",
         ],
         status: "coming-soon",
-        docsUrl: "https://docai.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/docai",
       },
       {
         name: "IntelligentSPM",
@@ -165,7 +165,7 @@ const layers: Layer[] = [
           "Anomaly detection",
         ],
         status: "coming-soon",
-        docsUrl: "https://ispm.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/ispm",
         appUrl: "https://ispm.bluehorizonsgroup.com",
       },
     ],
@@ -190,7 +190,7 @@ const layers: Layer[] = [
           "GPS & payment integrations",
         ],
         status: "production",
-        docsUrl: "https://towedge.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/towedge",
         appUrl: "https://towedge.bluehorizonsgroup.com",
       },
       {
@@ -206,7 +206,7 @@ const layers: Layer[] = [
           "Campaign management",
         ],
         status: "production",
-        docsUrl: "https://psedge.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/psedge",
         appUrl: "https://psedge.bluehorizonsgroup.com",
       },
       {
@@ -222,7 +222,7 @@ const layers: Layer[] = [
           "Investor & board reports",
         ],
         status: "production",
-        docsUrl: "https://sfp.docs.bluehorizonsgroup.com",
+        docsUrl: "/docs/sfp",
         appUrl: "https://sfp.bluehorizonsgroup.com",
       },
     ],

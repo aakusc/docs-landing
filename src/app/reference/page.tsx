@@ -348,7 +348,7 @@ export default function Reference() {
                         <div><span className="font-mono text-[var(--accent)]">SPARCC</span> <span className="text-[var(--text-secondary)]">— Sales Performance and Revenue Control Center</span></div>
                         <div><span className="font-mono text-[var(--accent)]">SGM</span> <span className="text-[var(--text-secondary)]">— Sales Governance Manager</span></div>
                         <div><span className="font-mono text-[var(--accent)]">SDA</span> <span className="text-[var(--text-secondary)]">— Sales Document Analyzer</span></div>
-                        <div><span className="font-mono text-[var(--accent)]">SCM</span> <span className="text-[var(--text-secondary)]">— Sales Comp Manager</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">SGM</span> <span className="text-[var(--text-secondary)]">— Sales Governance Manager</span></div>
                         <div><span className="font-mono text-[var(--accent)]">SFP</span> <span className="text-[var(--text-secondary)]">— Startup Financial Planning</span></div>
                       </div>
                     </div>
