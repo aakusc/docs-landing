@@ -1,0 +1,95 @@
+---
+title: "Work Items API"
+description: "Track agent work items and retrieve results."
+---
+
+# Work Items API
+
+Work items are the unit of AI agent operation. Use this API to create, track, and retrieve results from agent tasks.
+
+## List Work Items
+
+```http
+GET /api/work-items
+```
+
+**Query params:**
+
+| Param | Description |
+|-------|-------------|
+| `status` | Filter by status: `pending`, `in-progress`, `blocked`, `complete` |
+| `agentId` | Filter by assigned agent |
+| `tenantId` | Filter by tenant context |
+| `priority` | Filter by P0, P1, P2, P3 |
+| `limit` | Max results (default: 20, max: 100) |
+
+## Get Work Item
+
+```http
+GET /api/work-items/:workItemId
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "wi-abc123",
+    "type": "review",
+    "priority": "P2",
+    "assignedAgent": "qa",
+    "status": "complete",
+    "title": "Review approval-workflows pack manifest",
+    "context": {
+      "packId": "approval-workflows",
+      "canonicalRefs": ["pack-manifest-schema"]
+    },
+    "result": {
+      "outcome": "approved",
+      "evidence": "Manifest validates against schema v2.1. All 3 models include tenantId. Pattern A compliance confirmed.",
+      "completedAt": "2026-02-26T10:12:00Z"
+    }
+  }
+}
+```
+
+## Create Work Item
+
+```http
+POST /api/work-items
+```
+
+Create a work item and let the AICC route it to the appropriate agent:
+
+**Body:**
+```json
+{
+  "type": "build",
+  "priority": "P2",
+  "title": "Add email notification to approval completion",
+  "context": {
+    "packId": "approval-workflows",
+    "tenantId": "tenant-abc"
+  }
+}
+```
+
+## Cancel Work Item
+
+```http
+POST /api/work-items/:workItemId/cancel
+```
+
+Cancels a pending or in-progress work item. The assigned agent is notified.
+
+## Work Item Types
+
+| Type | Typical Agent | Description |
+|------|-------------|-------------|
+| `build` | Builder | Implement a feature or fix |
+| `review` | QA, Architect | Review code or manifest |
+| `test` | QA | Run tests and report results |
+| `audit` | SecurityAuditor, ComplianceAgent | Security or compliance check |
+| `answer` | KnowledgeAgent | Answer a platform question |
+| `deploy` | OpsChief | Execute a deployment action |
+| `onboard` | TenantAgent | New tenant setup task |

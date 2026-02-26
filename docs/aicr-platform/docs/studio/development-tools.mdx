@@ -1,0 +1,90 @@
+---
+title: "Development Tools"
+description: "CLI tools, hot reload, and local development utilities for Studio."
+---
+
+# Development Tools
+
+Studio includes a set of CLI tools and development utilities that streamline pack authoring.
+
+## CLI Reference
+
+```bash
+# Create a new pack scaffold
+pnpm pack:create --name <pack-name> --tier <studio|edge|summit>
+
+# Validate a pack manifest
+pnpm pack:validate --pack <pack-name>
+
+# Run pack tests
+pnpm pack:test --pack <pack-name>
+
+# Build pack for promotion
+pnpm pack:build --pack <pack-name>
+
+# Submit promotion request
+pnpm pack:promote --pack <pack-name> --target edge
+
+# List all packs and their status
+pnpm pack:list
+
+# Inspect a pack's resolved dependency graph
+pnpm pack:graph --pack <pack-name>
+```
+
+## Neon Branch Management
+
+Each developer gets their own Neon database branch. The CLI handles branch lifecycle:
+
+```bash
+# Create a branch for your feature
+pnpm db:branch --name feature/my-feature
+
+# Push schema changes to your branch
+pnpm db:push
+
+# Reset branch to main database state
+pnpm db:reset
+
+# Delete branch when done
+pnpm db:branch:delete --name feature/my-feature
+```
+
+Branches are automatically created on `git checkout -b` via the git hook installed by `pnpm setup`.
+
+## Hot Reload
+
+Studio runs a local development server with hot reload for surface components. Changes to surfaces, API routes, and agent prompts reload instantly without restarting:
+
+```bash
+# Start Studio development server
+pnpm --filter aicr dev
+
+# Watch a specific pack for changes
+pnpm pack:watch --pack approval-workflows
+```
+
+## Schema Sync
+
+When you modify a pack's `schema.prisma`, sync it to your Neon branch:
+
+```bash
+# Merge pack schemas and push to branch database
+pnpm db:sync
+
+# Generate updated Prisma client
+pnpm prisma:generate
+```
+
+## Debugging
+
+```bash
+# Inspect resolved pack capabilities for a tenant
+pnpm debug:packs --tenant <tenantId>
+
+# Check Database Guard logs
+pnpm debug:guard --last 50
+
+# Replay a failed agent work item
+pnpm debug:workitem --id <workItemId>
+```

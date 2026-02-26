@@ -1,0 +1,117 @@
+---
+title: "Architecture"
+description: "The three-layer architecture of the AICR Platform — Studio, Edge, and Summit."
+---
+
+# Architecture
+
+AICR is built on a **three-layer architecture** that separates development, runtime, and governance concerns. Each layer has a distinct role and communicates upward through the pack system.
+
+## Three-Layer Overview
+
+```
+┌──────────────────────────────────────────────┐
+│              SUMMIT LAYER                    │
+│   Pack marketplace, partner management,      │
+│   promotion workflows, enterprise oversight  │
+└──────────────────┬───────────────────────────┘
+                   │ packs promoted upward
+┌──────────────────▼───────────────────────────┐
+│               EDGE LAYER                     │
+│   Tenant runtime, feature flags,             │
+│   pack resolver, telemetry, cost tracking    │
+└──────────────────┬───────────────────────────┘
+                   │ packs deployed to tenants
+┌──────────────────▼───────────────────────────┐
+│              STUDIO LAYER                    │
+│   Pack authoring, manifest validation,       │
+│   surface testing, development tools         │
+└──────────────────────────────────────────────┘
+```
+
+## Studio Layer
+
+**Purpose:** Development and authoring environment.
+
+Developers use Studio to:
+- Author capability **packs** with typed manifests
+- Validate manifests against the schema contract
+- Run surface tests before deploying
+- Use local development tooling with hot reload
+
+Packs created in Studio are promoted to Edge once they pass gate enforcement.
+
+## Edge Layer
+
+**Purpose:** Tenant runtime and daily operations.
+
+Edge handles:
+- **Multi-tenant isolation** — 48 tenant-scoped Prisma models with automatic `tenantId` enforcement
+- **Pack resolver** — deterministic resolution of which packs are active for a given tenant
+- **Feature flags** — controlled rollouts and per-tenant capability overrides
+- **Telemetry** — usage metrics, error tracking, cost per operation
+- **19 Control Centers** — specialized dashboards for each operational domain
+
+## Summit Layer
+
+**Purpose:** Marketplace, governance, and partner ecosystem.
+
+Summit manages:
+- **Pack marketplace** — discovery and distribution of capability bundles
+- **Promotion workflows** — controlled path from Studio → Edge → Summit with full audit trail
+- **Partner onboarding** — third-party pack authors and white-label enterprise clients
+- **Capability mapping** — understanding what each tenant has access to across the ecosystem
+
+## Monorepo Structure
+
+```
+AICR/
+├── apps/
+│   └── aicr/              # Main platform app (Next.js 15)
+├── packages/
+│   ├── core/              # Shared types and contracts
+│   ├── ui/                # Design system components
+│   └── packs/             # Pack definitions and manifests
+├── services/
+│   └── agent-conductor/   # AI agent orchestration service
+├── prisma/                # 240-table schema (286,668 lines)
+└── docs/canonical/        # 96 self-awareness documents
+```
+
+## Database Architecture
+
+AICR uses a **single Neon PostgreSQL database** governed by three laws:
+
+| Law | Rule |
+|-----|------|
+| **Neon Everywhere** | All environments use Neon — dev, staging, production |
+| **Neon Branches** | Each feature branch gets a Neon branch, not a new cluster |
+| **Prisma Only** | All database access through Prisma ORM — no raw SQL, no other ORMs |
+
+**Database scale:**
+
+| Metric | Value |
+|--------|-------|
+| Total tables | 240 |
+| Tenant-scoped models | 48 |
+| Global models | 192 |
+| Enums | 41 |
+| Migrations | 18 |
+| Schema lines | 286,668 |
+
+## Self-Awareness
+
+AICR is **self-documenting**. The `docs/canonical/` directory holds 96 canonical documents indexed by the KBCC (Knowledge Base Control Center). AI agents query these at runtime to understand current contracts, approved patterns, and model relationships — preventing architectural drift.
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15, React 19, TypeScript 5 |
+| Database | Neon PostgreSQL via Prisma ORM |
+| Auth | NextAuth v5 |
+| AI (primary) | Claude Sonnet 4.5 via Vercel AI SDK |
+| AI (gateway) | Vercel AI SDK Gateway (multi-model) |
+| Embeddings | pgvector on Neon |
+| Hosting | Vercel |
+| Package manager | pnpm (monorepo) |

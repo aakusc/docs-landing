@@ -1,0 +1,292 @@
+---
+title: Tenant Configuration
+description: Configure multi-tenant settings for client organizations.
+---
+
+# Tenant Configuration
+
+SGM supports multi-tenancy, allowing you to manage multiple client organizations with isolated data and configurations.
+
+## Understanding Tenants
+
+A **tenant** represents a client organization in SGM. Each tenant has:
+- Isolated data (policies, documents, plans, cases)
+- Separate user base
+- Custom configuration
+- Independent dashboards
+
+## Tenant Tiers
+
+| Tier | Features | Use Case |
+|------|----------|----------|
+| **DEMO** | Limited features, synthetic data | Demonstrations |
+| **BETA** | Full features, limited support | Pilots |
+| **PRODUCTION** | Full features, full support | Live clients |
+
+## Creating a Tenant
+
+### Via Admin UI
+
+<Steps>
+  <Step title="Navigate to Admin">
+    Go to Settings → Admin → Tenants
+  </Step>
+  <Step title="Click Add Tenant">
+    Click the + button to create a new tenant
+  </Step>
+  <Step title="Enter tenant details">
+    - Name: Display name
+    - Slug: URL-friendly identifier
+    - Tier: DEMO, BETA, or PRODUCTION
+    - Features: Enabled feature flags
+  </Step>
+  <Step title="Save tenant">
+    Tenant is created and ready for users
+  </Step>
+</Steps>
+
+### Via API
+
+```bash
+POST /api/admin/tenants
+Content-Type: application/json
+
+{
+  "name": "Acme Corporation",
+  "slug": "acme-corp",
+  "tier": "PRODUCTION",
+  "features": ["gap-analysis", "ai-assistant", "advanced-reporting"]
+}
+```
+
+## Tenant Settings
+
+### Basic Information
+
+| Setting | Description |
+|---------|-------------|
+| **Name** | Display name shown in UI |
+| **Slug** | URL identifier (e.g., `/client/acme-corp`) |
+| **Tier** | Feature tier level |
+| **Status** | Active or Inactive |
+
+### Feature Flags
+
+Enable or disable features per tenant:
+
+| Feature | Description |
+|---------|-------------|
+| `gap-analysis` | Document gap analysis |
+| `ai-assistant` | AskSGM AI queries |
+| `advanced-reporting` | Custom report builder |
+| `api-access` | API integration access |
+| `sso` | Single sign-on |
+
+### Branding
+
+Customize tenant appearance:
+
+| Setting | Description |
+|---------|-------------|
+| **Logo** | Tenant logo (light/dark variants) |
+| **Primary Color** | Brand color for accents |
+| **Theme** | Light, dark, or system |
+
+## Managing Tenants
+
+### List Tenants
+
+Navigate to Settings → Admin → Tenants to see all tenants.
+
+View:
+- Tenant name and slug
+- Tier badge
+- User count
+- Status
+
+### Edit Tenant
+
+1. Click tenant row to open details
+2. Modify settings
+3. Save changes
+
+### Deactivate Tenant
+
+1. Open tenant details
+2. Click **Deactivate**
+3. Confirm action
+
+Deactivated tenants:
+- Users cannot access
+- Data is preserved
+- Can be reactivated
+
+## Tenant Users
+
+### Assigning Users
+
+When creating a user, specify their tenant:
+
+```json
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "role": "ADMIN",
+  "tenantId": "acme-corp"
+}
+```
+
+### Tenant Administrators
+
+Each tenant should have at least one ADMIN:
+- Can manage users within their tenant
+- Can configure tenant-specific settings
+- Cannot access other tenants
+- Cannot modify system settings
+
+### Cross-Tenant Access
+
+SUPER_ADMIN users can:
+- View all tenants
+- Switch between tenants
+- Manage any tenant's users
+- Access system settings
+
+## Tenant Dashboards
+
+Each tenant has dedicated dashboards:
+
+| Dashboard | Path | Content |
+|-----------|------|---------|
+| **Overview** | `/client/[slug]` | Summary metrics |
+| **Coverage** | `/client/[slug]/coverage` | Policy coverage |
+| **Gaps** | `/client/[slug]/gaps` | Compliance gaps |
+| **Plans** | `/client/[slug]/plans` | Compensation plans |
+| **Roadmap** | `/client/[slug]/roadmap` | Implementation roadmap |
+
+## Data Isolation
+
+Tenant data is fully isolated:
+
+| Data Type | Isolation |
+|-----------|-----------|
+| Users | Per tenant |
+| Documents | Per tenant |
+| Plans | Per tenant |
+| Cases | Per tenant |
+| Audit logs | Per tenant |
+| Policies | Shared + tenant-specific |
+
+### Shared vs. Tenant Data
+
+| Shared | Tenant-Specific |
+|--------|-----------------|
+| SCP policies | Custom policies |
+| System templates | Custom templates |
+| Knowledge Base | Tenant documents |
+| Framework definitions | Client plans |
+
+## API Access by Tenant
+
+API requests include tenant context:
+
+```bash
+# Query string
+GET /api/sgm/policies?tenantId=acme-corp
+
+# Header
+GET /api/sgm/policies
+X-Tenant-ID: acme-corp
+```
+
+SUPER_ADMIN can query any tenant. ADMIN/USER restricted to their tenant.
+
+## Onboarding a New Tenant
+
+<Steps>
+  <Step title="Create tenant">
+    Set up tenant with name, slug, and tier
+  </Step>
+  <Step title="Configure features">
+    Enable appropriate feature flags
+  </Step>
+  <Step title="Create admin user">
+    Add at least one ADMIN for the tenant
+  </Step>
+  <Step title="Import policies">
+    Copy or customize policies for the tenant
+  </Step>
+  <Step title="Add users">
+    Tenant admin adds remaining users
+  </Step>
+  <Step title="Configure workflows">
+    Set up approval workflows and committees
+  </Step>
+</Steps>
+
+## Tenant Metrics
+
+Track tenant usage:
+
+| Metric | Description |
+|--------|-------------|
+| **Active users** | Users logged in last 30 days |
+| **Documents** | Total documents |
+| **Plans** | Total plans by status |
+| **Cases** | Open and resolved cases |
+| **API calls** | API usage count |
+
+View at Settings → Admin → Tenants → [tenant] → Metrics.
+
+## Offboarding a Tenant
+
+When decommissioning a tenant:
+
+<Steps>
+  <Step title="Notify users">
+    Communicate timeline to tenant users
+  </Step>
+  <Step title="Export data">
+    Generate data export for the tenant
+  </Step>
+  <Step title="Deactivate users">
+    Disable all tenant user accounts
+  </Step>
+  <Step title="Deactivate tenant">
+    Set tenant status to Inactive
+  </Step>
+  <Step title="Archive data">
+    Optionally archive or delete tenant data
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="User can't see tenant">
+    - Verify user's tenant assignment
+    - Check tenant is active
+    - Confirm user role has access
+  </Accordion>
+  <Accordion title="Feature not available">
+    - Check tenant's feature flags
+    - Verify tier supports the feature
+    - Review user role permissions
+  </Accordion>
+  <Accordion title="Data appearing in wrong tenant">
+    - Verify API requests include correct tenantId
+    - Check user's tenant assignment
+    - Review data creation workflow
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/admin-guide/user-management">
+    Manage tenant users
+  </Card>
+  <Card title="API Reference - Admin" icon="code" href="/api-reference/admin">
+    Tenant management API
+  </Card>
+</CardGroup>

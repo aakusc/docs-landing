@@ -1,0 +1,55 @@
+---
+title: "Self-Awareness"
+description: "How AICR understands and documents its own architecture in real time."
+---
+
+# Self-Awareness
+
+AICR is the only platform that **queries its own architecture in real time**. Instead of relying on documentation that goes stale, the platform indexes its own canonical docs and exposes them to AI agents as live context.
+
+## What Self-Awareness Means
+
+Traditional platforms document their architecture separately from the running system. AICR makes the documentation a **first-class runtime concern** — agents can ask "what does the canonical architecture say about tenant isolation?" and get a grounded answer from the live docs.
+
+This solves two fundamental problems:
+1. **Documentation drift** — docs that describe how things *were*, not how they *are*
+2. **Agent hallucination** — AI agents inventing patterns that conflict with the actual architecture
+
+## Canonical Documents
+
+The `docs/canonical/` directory contains **96 canonical documents** covering:
+
+| Category | Examples |
+|----------|---------|
+| Architecture contracts | Three Laws, Pattern A, tenant isolation rules |
+| Model definitions | All 240 table schemas with relationships |
+| Pack patterns | How to author, validate, and promote packs |
+| Agent protocols | Work item formats, agent roles, memory patterns |
+| Control center specs | What each of the 19 control centers owns |
+| API contracts | Endpoint schemas and auth requirements |
+
+## How It Works
+
+The KBCC (Knowledge Base Control Center) indexes all canonical documents using pgvector embeddings. When an agent needs context:
+
+```
+Agent question → Semantic search in KBCC → Relevant canonical docs retrieved
+→ Docs injected as grounding context → Agent responds based on actual architecture
+```
+
+## Self-Documentation Requirement
+
+Every architectural change **must update the canonical docs** before it can be promoted. The QA agent validates this as part of the promotion gate:
+
+- New model added → `docs/canonical/models/` must be updated
+- New pattern approved → `docs/canonical/patterns/` must reflect it
+- Three Laws modified → requires Architect agent sign-off + doc update
+
+This keeps the self-awareness system accurate as the platform evolves.
+
+## Benefits
+
+<Check>Agents always work from current architecture, never stale docs</Check>
+<Check>New developers can ask the platform to explain itself</Check>
+<Check>Architectural consistency enforced at the documentation level</Check>
+<Check>Audit trail of every architectural decision</Check>

@@ -1,0 +1,62 @@
+---
+title: "Knowledge Base Control Center"
+description: "Canonical documentation, semantic search, and agent memory management."
+---
+
+# Knowledge Base Control Center (KBCC)
+
+The KBCC is AICR's self-awareness engine. It indexes all 96 canonical documents, maintains agent memory, and provides semantic search across the platform's knowledge base.
+
+## What KBCC Manages
+
+- **96 canonical documents** — the authoritative record of AICR's architecture
+- **Agent memory** — persistent context each agent carries across sessions
+- **Semantic search** — find relevant docs by meaning, not just keyword
+- **Knowledge graph** — how concepts, models, and packs relate to each other
+- **Doc versioning** — history of architectural decisions and changes
+
+## Canonical Documents
+
+The 96 canonical docs are the ground truth for the platform. They cover:
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| Architecture contracts | 12 | Three Laws, Pattern A, tenant isolation |
+| Model definitions | 48 | All 240 tables grouped by domain |
+| Pack patterns | 8 | Manifest schema, surface conventions |
+| Agent protocols | 6 | Work item formats, agent roles |
+| Control center specs | 19 | What each center owns and manages |
+| API contracts | 3 | Endpoint schemas, auth requirements |
+
+## Semantic Search
+
+The KnowledgeAgent uses pgvector embeddings to answer natural language questions about the platform:
+
+> "How should I implement multi-tenant data isolation for a new pack?"
+> → Returns the tenant isolation contract doc with relevant sections highlighted
+
+## Agent Memory
+
+Each of the 14 agents has a persistent memory store in the KBCC:
+- **Session memory** — context from the current conversation
+- **Episodic memory** — past decisions and their outcomes
+- **Semantic memory** — facts about the platform the agent has learned
+- **Procedural memory** — patterns and workflows the agent follows
+
+Memory is queried automatically when an agent starts a new session, providing continuity across conversations.
+
+## Updating Canonical Docs
+
+Canonical docs must be updated when the platform changes. The update process:
+
+<Steps>
+  <Step title="Propose a change">
+    Create a doc update work item in the AICC with the proposed change and rationale.
+  </Step>
+  <Step title="Architect agent review">
+    The Architect agent reviews the proposed change against existing contracts.
+  </Step>
+  <Step title="Apply and re-index">
+    Once approved, the doc is updated and the KnowledgeAgent re-indexes it. Embeddings are refreshed automatically.
+  </Step>
+</Steps>

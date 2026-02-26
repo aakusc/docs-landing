@@ -1,0 +1,439 @@
+---
+title: Admin API
+description: API endpoints for user and tenant management.
+---
+
+# Admin API
+
+The Admin API provides endpoints for managing users, tenants, and system configuration. Most endpoints require SUPER_ADMIN or ADMIN role.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/admin/users` | List users |
+| POST | `/api/admin/users` | Create user |
+| GET | `/api/admin/users/[id]` | Get user |
+| PATCH | `/api/admin/users/[id]` | Update user |
+| DELETE | `/api/admin/users/[id]` | Delete user |
+| GET | `/api/admin/tenants` | List tenants |
+| POST | `/api/admin/tenants` | Create tenant |
+| GET | `/api/admin/tenants/[id]` | Get tenant |
+| PATCH | `/api/admin/tenants/[id]` | Update tenant |
+| DELETE | `/api/admin/tenants/[id]` | Delete tenant |
+
+## List Users
+
+Retrieve a list of users with optional filtering.
+
+### Request
+
+```bash
+GET /api/admin/users?tenantId=acme-corp&role=MANAGER&search=jane
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="tenantId" type="string">
+  Filter by tenant (ADMIN users restricted to own tenant)
+</ParamField>
+
+<ParamField query="role" type="string">
+  Filter by role: `SUPER_ADMIN`, `ADMIN`, `MANAGER`, `USER`, `VIEWER`
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name or email
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `active`, `inactive`
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "user-123",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "role": "MANAGER",
+      "tenantId": "acme-corp",
+      "status": "active",
+      "lastLogin": "2026-01-28T09:00:00Z",
+      "createdAt": "2025-06-01T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 25,
+    "byRole": {
+      "ADMIN": 2,
+      "MANAGER": 5,
+      "USER": 15,
+      "VIEWER": 3
+    }
+  }
+}
+```
+
+## Create User
+
+Create a new user account.
+
+<Note>
+ADMIN users can only create users in their own tenant.
+SUPER_ADMIN can create users in any tenant.
+</Note>
+
+### Request
+
+```bash
+POST /api/admin/users
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "John Smith",
+  "email": "john@example.com",
+  "role": "USER",
+  "tenantId": "acme-corp"
+}
+```
+
+### Parameters
+
+<ParamField path="name" type="string" required>
+  User's full name
+</ParamField>
+
+<ParamField path="email" type="string" required>
+  Email address (must be unique)
+</ParamField>
+
+<ParamField path="role" type="string" required>
+  User role
+</ParamField>
+
+<ParamField path="tenantId" type="string">
+  Tenant assignment
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "user-456",
+    "name": "John Smith",
+    "email": "john@example.com",
+    "role": "USER",
+    "tenantId": "acme-corp",
+    "status": "pending_invitation"
+  },
+  "invitation": {
+    "id": "inv-789",
+    "expiresAt": "2026-02-04T10:00:00Z"
+  }
+}
+```
+
+## Get User
+
+Retrieve a single user by ID.
+
+### Request
+
+```bash
+GET /api/admin/users/user-123
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "user-123",
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "role": "MANAGER",
+    "tenantId": "acme-corp",
+    "tenant": {
+      "id": "acme-corp",
+      "name": "Acme Corporation"
+    },
+    "status": "active",
+    "lastLogin": "2026-01-28T09:00:00Z",
+    "createdAt": "2025-06-01T00:00:00Z",
+    "updatedAt": "2026-01-15T00:00:00Z"
+  }
+}
+```
+
+## Update User
+
+Update user details.
+
+### Request
+
+```bash
+PATCH /api/admin/users/user-123
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "role": "ADMIN",
+  "status": "active"
+}
+```
+
+### Updatable Fields
+
+| Field | Description |
+|-------|-------------|
+| `name` | Display name |
+| `role` | User role |
+| `tenantId` | Tenant assignment (SUPER_ADMIN only) |
+| `status` | `active` or `inactive` |
+
+## Delete User
+
+Deactivate a user account.
+
+### Request
+
+```bash
+DELETE /api/admin/users/user-123
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "message": "User deactivated"
+}
+```
+
+<Note>
+Users are soft-deleted (deactivated) to preserve audit history.
+</Note>
+
+---
+
+## List Tenants
+
+Retrieve a list of tenants.
+
+<Note>
+Requires SUPER_ADMIN role.
+</Note>
+
+### Request
+
+```bash
+GET /api/admin/tenants?tier=PRODUCTION&search=acme
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="tier" type="string">
+  Filter by tier: `DEMO`, `BETA`, `PRODUCTION`
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name or slug
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `active`, `inactive`
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "acme-corp",
+      "name": "Acme Corporation",
+      "slug": "acme-corp",
+      "tier": "PRODUCTION",
+      "status": "active",
+      "userCount": 25,
+      "features": ["gap-analysis", "ai-assistant"],
+      "createdAt": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 10,
+    "byTier": {
+      "DEMO": 3,
+      "BETA": 2,
+      "PRODUCTION": 5
+    }
+  }
+}
+```
+
+## Create Tenant
+
+Create a new tenant organization.
+
+### Request
+
+```bash
+POST /api/admin/tenants
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Beta Company",
+  "slug": "beta-company",
+  "tier": "BETA",
+  "features": ["gap-analysis", "ai-assistant"]
+}
+```
+
+### Parameters
+
+<ParamField path="name" type="string" required>
+  Display name
+</ParamField>
+
+<ParamField path="slug" type="string" required>
+  URL identifier (lowercase, hyphens only)
+</ParamField>
+
+<ParamField path="tier" type="string" required>
+  Tier: `DEMO`, `BETA`, `PRODUCTION`
+</ParamField>
+
+<ParamField path="features" type="array">
+  Enabled feature flags
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "beta-company",
+    "name": "Beta Company",
+    "slug": "beta-company",
+    "tier": "BETA",
+    "status": "active",
+    "features": ["gap-analysis", "ai-assistant"],
+    "createdAt": "2026-01-28T10:00:00Z"
+  }
+}
+```
+
+## Get Tenant
+
+Retrieve a single tenant by ID.
+
+### Request
+
+```bash
+GET /api/admin/tenants/acme-corp
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "acme-corp",
+    "name": "Acme Corporation",
+    "slug": "acme-corp",
+    "tier": "PRODUCTION",
+    "status": "active",
+    "features": ["gap-analysis", "ai-assistant", "advanced-reporting"],
+    "userCount": 25,
+    "metrics": {
+      "documentsCount": 50,
+      "plansCount": 12,
+      "casesCount": 35
+    },
+    "createdAt": "2025-01-01T00:00:00Z",
+    "updatedAt": "2026-01-15T00:00:00Z"
+  }
+}
+```
+
+## Update Tenant
+
+Update tenant details.
+
+### Request
+
+```bash
+PATCH /api/admin/tenants/acme-corp
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "tier": "PRODUCTION",
+  "features": ["gap-analysis", "ai-assistant", "api-access"]
+}
+```
+
+## Delete Tenant
+
+Deactivate a tenant.
+
+### Request
+
+```bash
+DELETE /api/admin/tenants/beta-company
+Authorization: Bearer <token>
+```
+
+<Warning>
+Deactivating a tenant disables access for all its users. Data is preserved.
+</Warning>
+
+## User Roles
+
+| Role | Description | Scope |
+|------|-------------|-------|
+| `SUPER_ADMIN` | Full system access | All tenants |
+| `ADMIN` | Full tenant access | Own tenant |
+| `MANAGER` | Management features | Own tenant |
+| `USER` | Standard features | Own tenant |
+| `VIEWER` | Read-only access | Own tenant |
+
+## Tenant Tiers
+
+| Tier | Description | Features |
+|------|-------------|----------|
+| `DEMO` | Demonstrations | Limited, synthetic data |
+| `BETA` | Pilots | Full features, limited support |
+| `PRODUCTION` | Live clients | Full features, full support |
+
+## Feature Flags
+
+| Flag | Description |
+|------|-------------|
+| `gap-analysis` | Document gap analysis |
+| `ai-assistant` | AskSGM queries |
+| `advanced-reporting` | Custom reports |
+| `api-access` | API integration |
+| `sso` | Single sign-on |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `USER_NOT_FOUND` | User ID doesn't exist |
+| `TENANT_NOT_FOUND` | Tenant ID doesn't exist |
+| `EMAIL_EXISTS` | Email already registered |
+| `SLUG_EXISTS` | Tenant slug already exists |
+| `PERMISSION_DENIED` | Insufficient role |

@@ -1,0 +1,412 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for SGM administrators.
+---
+
+# Troubleshooting
+
+This guide covers common issues and their solutions for SGM administrators.
+
+## Application Issues
+
+### Application Won't Start
+
+<AccordionGroup>
+  <Accordion title="Port already in use">
+    **Symptom**: Error message "Port 3030 is already in use"
+
+    **Solution**:
+    ```bash
+    # Find process using port
+    lsof -i :3030
+
+    # Kill the process
+    kill -9 <PID>
+
+    # Or use a different port
+    npm run dev -- -p 3031
+    ```
+  </Accordion>
+  <Accordion title="Missing dependencies">
+    **Symptom**: Module not found errors
+
+    **Solution**:
+    ```bash
+    # Clean install
+    rm -rf node_modules
+    npm install
+    ```
+  </Accordion>
+  <Accordion title="Node version mismatch">
+    **Symptom**: Syntax errors or unexpected behavior
+
+    **Solution**:
+    ```bash
+    # Check version
+    node --version
+
+    # Should be 18.x or later
+    # Use nvm to switch versions if needed
+    nvm use 18
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Build Failures
+
+<AccordionGroup>
+  <Accordion title="TypeScript errors">
+    **Symptom**: Type errors during build
+
+    **Solution**:
+    ```bash
+    # Run type check
+    npm run type-check
+
+    # Fix errors or check tsconfig.json
+    ```
+  </Accordion>
+  <Accordion title="Memory issues">
+    **Symptom**: Build crashes with heap out of memory
+
+    **Solution**:
+    ```bash
+    # Increase memory
+    NODE_OPTIONS="--max-old-space-size=4096" npm run build
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Database Issues
+
+### Connection Failures
+
+<AccordionGroup>
+  <Accordion title="Database file not found">
+    **Symptom**: Prisma can't connect to database
+
+    **Solution**:
+    ```bash
+    # Verify DATABASE_URL in .env
+    DATABASE_URL="file:./prisma/data/sgm.db"
+
+    # Create directory if needed
+    mkdir -p prisma/data
+
+    # Initialize database
+    npx prisma db push
+    ```
+  </Accordion>
+  <Accordion title="Schema out of sync">
+    **Symptom**: Column/table doesn't exist errors
+
+    **Solution**:
+    ```bash
+    # Regenerate Prisma client
+    npx prisma generate
+
+    # Push schema changes
+    npx prisma db push
+    ```
+  </Accordion>
+  <Accordion title="Database locked">
+    **Symptom**: SQLite database is locked
+
+    **Solution**:
+    - Close Prisma Studio if open
+    - Restart the application
+    - Check for multiple instances
+  </Accordion>
+</AccordionGroup>
+
+### Data Issues
+
+<AccordionGroup>
+  <Accordion title="Missing data">
+    **Symptom**: Expected data not appearing
+
+    **Solution**:
+    - Check `BINDING_MODE` setting
+    - `synthetic` = demo data only
+    - `live` = database data
+    - Verify tenant ID in queries
+  </Accordion>
+  <Accordion title="Corrupted data">
+    **Symptom**: Malformed or invalid data
+
+    **Solution**:
+    ```bash
+    # Backup current database
+    cp prisma/data/sgm.db prisma/data/sgm.db.backup
+
+    # Reset database (CAUTION: data loss)
+    npx prisma db push --force-reset
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Authentication Issues
+
+### Login Problems
+
+<AccordionGroup>
+  <Accordion title="Can't log in">
+    **Checklist**:
+    - Verify email address is correct
+    - Check account is active
+    - Try password reset
+    - Clear browser cookies
+    - Check NEXTAUTH_URL matches site URL
+  </Accordion>
+  <Accordion title="Session expires immediately">
+    **Symptom**: User logged out right after login
+
+    **Solution**:
+    - Verify `NEXTAUTH_SECRET` is set
+    - Check for cookie issues
+    - Verify HTTPS configuration
+    ```bash
+    # Check .env
+    NEXTAUTH_SECRET="your-secret-at-least-32-chars"
+    NEXTAUTH_URL="http://localhost:3030"
+    ```
+  </Accordion>
+  <Accordion title="SSO not working">
+    **Checklist**:
+    - Verify OAuth credentials
+    - Check redirect URLs match exactly
+    - Confirm provider is configured
+    - Review browser console for errors
+  </Accordion>
+</AccordionGroup>
+
+### Permission Issues
+
+<AccordionGroup>
+  <Accordion title="Access denied">
+    **Symptom**: User can't access a feature
+
+    **Solution**:
+    - Verify user role
+    - Check mode-specific permissions
+    - Confirm tenant assignment
+    - Review feature flags for tenant
+  </Accordion>
+  <Accordion title="Admin features missing">
+    **Symptom**: Admin UI not showing
+
+    **Solution**:
+    - Verify user has ADMIN or SUPER_ADMIN role
+    - Check tenant configuration
+    - Try logging out and back in
+  </Accordion>
+</AccordionGroup>
+
+## AI Integration Issues
+
+### AskSGM Not Working
+
+<AccordionGroup>
+  <Accordion title="AI not responding">
+    **Checklist**:
+    - Verify `ANTHROPIC_API_KEY` is set
+    - Check key is valid (not expired)
+    - Test health endpoint: `/__ai/health`
+    - Review rate limits
+    ```bash
+    # Test API key
+    curl -H "x-api-key: $ANTHROPIC_API_KEY" \
+         https://api.anthropic.com/v1/messages
+    ```
+  </Accordion>
+  <Accordion title="Rate limit errors">
+    **Symptom**: 429 Too Many Requests
+
+    **Solution**:
+    ```bash
+    # Adjust limits in .env
+    AI_RATE_LIMIT_PER_MINUTE=60
+    AI_RATE_LIMIT_PER_DAY=2000
+    ```
+  </Accordion>
+  <Accordion title="Slow responses">
+    **Possible causes**:
+    - Network latency
+    - Large context size
+    - API overload
+
+    **Solution**:
+    - Check network connectivity
+    - Monitor API status
+    - Consider implementing caching
+  </Accordion>
+</AccordionGroup>
+
+## Performance Issues
+
+### Slow Page Loads
+
+<AccordionGroup>
+  <Accordion title="Slow initial load">
+    **Possible causes**:
+    - Cold start
+    - Large data sets
+    - Network latency
+
+    **Solution**:
+    - Enable caching
+    - Implement pagination
+    - Optimize queries
+  </Accordion>
+  <Accordion title="Memory usage high">
+    **Solution**:
+    ```bash
+    # Monitor memory
+    ps aux | grep node
+
+    # Increase Node memory if needed
+    NODE_OPTIONS="--max-old-space-size=4096"
+    ```
+  </Accordion>
+  <Accordion title="Database queries slow">
+    **Solution**:
+    ```bash
+    # Check query performance in Prisma Studio
+    npx prisma studio
+
+    # Consider adding indexes
+    # Update schema.prisma with @@index
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common Error Messages
+
+### Error Reference
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `ECONNREFUSED` | Service not running | Start the required service |
+| `ENOENT` | File not found | Check paths and permissions |
+| `UNAUTHORIZED` | Invalid credentials | Check API key or login |
+| `FORBIDDEN` | Insufficient permissions | Verify role and access |
+| `TIMEOUT` | Request too slow | Check network, increase timeout |
+| `EADDRINUSE` | Port in use | Use different port or kill process |
+
+## Logs and Debugging
+
+### Viewing Logs
+
+```bash
+# Application logs
+npm run dev 2>&1 | tee app.log
+
+# Filter for errors
+grep -i error app.log
+```
+
+### Debug Mode
+
+Enable verbose logging:
+
+```bash
+DEBUG=* npm run dev
+```
+
+### Browser Developer Tools
+
+For client-side issues:
+1. Open DevTools (F12)
+2. Check Console for errors
+3. Check Network tab for failed requests
+4. Check Application tab for storage issues
+
+## Getting Help
+
+### Before Asking for Help
+
+Gather this information:
+- Error messages (full text)
+- Steps to reproduce
+- Environment details (Node version, OS)
+- Configuration (sanitize secrets)
+- Recent changes
+
+### Log Collection
+
+```bash
+# Collect system info
+node --version
+npm --version
+cat package.json | grep version
+
+# Collect logs
+npm run dev 2>&1 | tee debug.log
+```
+
+### Reporting Issues
+
+When reporting issues:
+1. Describe expected behavior
+2. Describe actual behavior
+3. Provide reproduction steps
+4. Include relevant logs
+5. List any workarounds tried
+
+## Health Checks
+
+### Application Health
+
+```bash
+curl http://localhost:3030/api/health
+```
+
+### Database Health
+
+```bash
+npx prisma db pull --print
+```
+
+### AI Health
+
+```bash
+curl http://localhost:3030/__ai/health
+```
+
+## Quick Fixes
+
+### Reset Everything
+
+<Warning>
+This will delete all data. Use only as last resort.
+</Warning>
+
+```bash
+# Stop application
+# Backup if needed
+cp -r prisma/data prisma/data.backup
+
+# Clean slate
+rm -rf node_modules
+rm -rf .next
+rm prisma/data/sgm.db
+
+# Reinstall
+npm install
+npx prisma generate
+npx prisma db push
+
+# Restart
+npm run dev
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="System Setup" icon="server" href="/admin-guide/system-setup">
+    Initial configuration
+  </Card>
+  <Card title="Integrations" icon="plug" href="/admin-guide/integrations">
+    Integration troubleshooting
+  </Card>
+</CardGroup>

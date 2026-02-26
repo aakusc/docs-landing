@@ -1,0 +1,86 @@
+---
+title: "Agents API"
+description: "Query agent status and submit work items to AI agents."
+---
+
+# Agents API
+
+Interact with AICR's 14 AI agents via the API — check their status, retrieve their capabilities, and submit work items.
+
+## List Agents
+
+```http
+GET /api/agents
+```
+
+Returns all 14 agents with their current status and active work item count.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "agents": [
+      {
+        "id": "builder",
+        "name": "Builder",
+        "status": "available",
+        "activeWorkItems": 2,
+        "model": "claude-sonnet-4-5"
+      }
+    ]
+  }
+}
+```
+
+## Get Agent
+
+```http
+GET /api/agents/:agentId
+```
+
+Returns detailed agent information including current work items and recent memory entries.
+
+## Submit Work Item
+
+```http
+POST /api/agents/:agentId/work-items
+```
+
+Submit a task directly to a specific agent.
+
+**Body:**
+```json
+{
+  "type": "review",
+  "priority": "P2",
+  "title": "Review approval-workflows pack manifest",
+  "context": {
+    "packId": "approval-workflows",
+    "version": "1.3.0",
+    "canonicalRefs": ["pack-manifest-schema"]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "workItemId": "wi-abc123",
+    "status": "pending",
+    "estimatedStart": "2026-02-26T10:05:00Z"
+  }
+}
+```
+
+## Get Agent Memory
+
+```http
+GET /api/agents/:agentId/memory
+```
+
+Retrieve the agent's recent memory entries. Useful for understanding the agent's current context and past decisions.
+
+Requires `agents:read` scope.

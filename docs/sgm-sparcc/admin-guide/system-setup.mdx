@@ -1,0 +1,291 @@
+---
+title: System Setup
+description: Deploy and configure SGM for your environment.
+---
+
+# System Setup
+
+This guide covers deploying SGM and configuring the system for your environment.
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **Node.js** 18.x or later
+- **npm** 9.x or later
+- **Git** for version control
+- Server with at least 2GB RAM (for production)
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/your-org/sgm-sparcc-demo.git
+    cd sgm-sparcc-demo
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+  <Step title="Configure environment">
+    Copy the example environment file and configure:
+    ```bash
+    cp .env.example .env
+    ```
+  </Step>
+  <Step title="Initialize database">
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+  </Step>
+  <Step title="Start the application">
+    ```bash
+    npm run dev      # Development
+    npm run build && npm start  # Production
+    ```
+  </Step>
+</Steps>
+
+## Environment Configuration
+
+Configure SGM using environment variables in `.env`:
+
+### Required Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | Database connection string | `file:./data/sgm.db` |
+| `NEXTAUTH_SECRET` | Authentication secret | Random 32+ character string |
+| `NEXTAUTH_URL` | Application URL | `http://localhost:3030` |
+
+### Binding Mode
+
+| Variable | Values | Default |
+|----------|--------|---------|
+| `BINDING_MODE` | `synthetic`, `mapped`, `live` | `synthetic` |
+
+- **synthetic**: In-memory demo data, no database required
+- **mapped**: External API adapters
+- **live**: Prisma database with persistent data
+
+### AI Integration (Optional)
+
+| Variable | Description |
+|----------|-------------|
+| `ANTHROPIC_API_KEY` | Claude API key for AskSGM |
+| `AI_RATE_LIMIT_PER_MINUTE` | Rate limit (default: 30) |
+| `AI_RATE_LIMIT_PER_DAY` | Daily limit (default: 1000) |
+
+### Example Configuration
+
+```bash
+# .env
+DATABASE_URL="file:./prisma/data/sgm.db"
+NEXTAUTH_SECRET="your-secret-key-here-at-least-32-chars"
+NEXTAUTH_URL="http://localhost:3030"
+BINDING_MODE="live"
+
+# Optional AI
+ANTHROPIC_API_KEY="sk-ant-..."
+AI_RATE_LIMIT_PER_MINUTE=30
+AI_RATE_LIMIT_PER_DAY=1000
+```
+
+## Database Setup
+
+SGM uses SQLite by default with Prisma ORM.
+
+### Initialize Database
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to database
+npx prisma db push
+```
+
+### Database Administration
+
+Open Prisma Studio for visual database management:
+
+```bash
+npx prisma studio
+```
+
+This opens a web interface at `http://localhost:5555`.
+
+### Database Location
+
+Default: `prisma/data/sgm.db`
+
+Configure via `DATABASE_URL` in `.env`.
+
+### Migrations
+
+For production, use migrations:
+
+```bash
+# Create migration
+npx prisma migrate dev --name your-migration-name
+
+# Apply migrations
+npx prisma migrate deploy
+```
+
+## Build for Production
+
+<Steps>
+  <Step title="Install dependencies">
+    ```bash
+    npm ci
+    ```
+  </Step>
+  <Step title="Generate Prisma client">
+    ```bash
+    npx prisma generate
+    ```
+  </Step>
+  <Step title="Build application">
+    ```bash
+    npm run build
+    ```
+  </Step>
+  <Step title="Start production server">
+    ```bash
+    npm start
+    ```
+  </Step>
+</Steps>
+
+## Port Configuration
+
+Default port is 3030. To change:
+
+```bash
+# Development
+npm run dev -- -p 8080
+
+# Production
+PORT=8080 npm start
+```
+
+## Health Checks
+
+Verify the application is running:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/` | Main application |
+| `/api/health` | API health check |
+| `/__ai/health` | AI service health (if configured) |
+
+## Logging
+
+SGM logs to stdout by default. Configure log level:
+
+| Level | Description |
+|-------|-------------|
+| `error` | Errors only |
+| `warn` | Warnings and errors |
+| `info` | General information |
+| `debug` | Detailed debugging |
+
+## Performance Tuning
+
+### Memory
+
+For production, configure Node.js memory:
+
+```bash
+NODE_OPTIONS="--max-old-space-size=4096" npm start
+```
+
+### Caching
+
+SGM includes built-in caching for:
+- Policy library data
+- User sessions
+- API responses
+
+## Security Considerations
+
+<Warning>
+Review these settings before production deployment.
+</Warning>
+
+### Authentication
+
+- Configure strong `NEXTAUTH_SECRET`
+- Use HTTPS in production
+- Configure session timeout
+
+### Database
+
+- Secure database file permissions
+- Regular backups
+- Consider encryption at rest
+
+### API Security
+
+- Rate limiting is enabled by default
+- CORS configured for your domain
+- Input validation via Zod
+
+## Backup and Recovery
+
+### Database Backup
+
+```bash
+# SQLite backup
+cp prisma/data/sgm.db prisma/data/sgm.db.backup
+
+# With timestamp
+cp prisma/data/sgm.db "prisma/data/sgm-$(date +%Y%m%d).db"
+```
+
+### Restore
+
+```bash
+cp prisma/data/sgm.db.backup prisma/data/sgm.db
+```
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Application won't start">
+    - Check Node.js version: `node --version` (needs 18+)
+    - Verify dependencies: `npm install`
+    - Check port availability: `lsof -i :3030`
+  </Accordion>
+  <Accordion title="Database errors">
+    - Regenerate Prisma client: `npx prisma generate`
+    - Reset database: `npx prisma db push --force-reset`
+    - Check DATABASE_URL in .env
+  </Accordion>
+  <Accordion title="Authentication issues">
+    - Verify NEXTAUTH_SECRET is set
+    - Check NEXTAUTH_URL matches your domain
+    - Clear browser cookies
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/admin-guide/user-management">
+    Create users and assign roles
+  </Card>
+  <Card title="Tenant Configuration" icon="building" href="/admin-guide/tenant-configuration">
+    Set up multi-tenancy
+  </Card>
+  <Card title="Integrations" icon="plug" href="/admin-guide/integrations">
+    Configure external integrations
+  </Card>
+</CardGroup>

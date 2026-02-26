@@ -1,0 +1,145 @@
+---
+title: Quickstart
+description: Get SGM running locally in 5 minutes.
+---
+
+# Quickstart
+
+This guide helps you get SGM running on your local machine for evaluation or development.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js** 18.x or later
+- **npm** 9.x or later
+- A modern web browser (Chrome, Firefox, Safari, or Edge)
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/your-org/sgm-sparcc-demo.git
+    cd sgm-sparcc-demo
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+  <Step title="Start the development server">
+    ```bash
+    npm run dev
+    ```
+    The server starts on port 3030 by default.
+  </Step>
+  <Step title="Open SGM in your browser">
+    Navigate to [http://localhost:3030](http://localhost:3030)
+  </Step>
+</Steps>
+
+## First Login
+
+SGM runs in **synthetic mode** by default, which uses demo data for evaluation. You can sign in with any email address to explore the platform.
+
+<Info>
+In synthetic mode, all data is generated in-memory. Changes are not persisted between sessions.
+</Info>
+
+## Explore the Dashboard
+
+After logging in, you see the main dashboard with four operational modes:
+
+| Mode | What to Explore |
+|------|-----------------|
+| **Design** | Browse the Policy Library with 17 SCPs |
+| **Operate** | View Documents and Approvals queues |
+| **Dispute** | See active Cases with full workflows |
+| **Oversee** | Check Committees and Governance Matrix |
+
+## Try Key Features
+
+### 1. Browse the Policy Library
+
+1. Click **Design** mode
+2. Navigate to **Policies**
+3. Click any policy (try SCP-001 Clawback and Recovery)
+4. Explore sections, related documents, and metadata
+
+### 2. Run a Gap Analysis
+
+1. Navigate to **Governance** > **Upload**
+2. Upload a sample compensation document (PDF or DOCX)
+3. View the automated gap analysis results
+4. Review recommended patches for compliance
+
+### 3. Ask a Governance Question
+
+1. Click the **Ask** orb in the dock
+2. Type a question like:
+   - "What is the clawback policy for terminated reps?"
+   - "How do windfall deals get approved?"
+3. Review the AI-generated response with policy citations
+
+### 4. Explore Cases
+
+1. Click **Dispute** mode
+2. Navigate to **Cases**
+3. Click CASE-2025-1201 (Territory Change)
+4. Review the timeline, SLA tracking, and case details
+
+## Demo Data Summary
+
+SGM includes realistic demo data to explore:
+
+| Entity | Count | Description |
+|--------|-------|-------------|
+| Policies | 26 | 17 SCPs + 9 custom policies |
+| KB Cards | 929 | Knowledge Base across 8 pillars |
+| Documents | 70 | Various types and statuses |
+| Cases | 7 | Active and resolved examples |
+| Approvals | 7 | SGCC and CRB workflows |
+| Templates | 56 | Plan and policy templates |
+
+## Configuration Options
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BINDING_MODE` | `synthetic` | Data source: `synthetic`, `mapped`, or `live` |
+| `PORT` | `3030` | Server port |
+| `DATABASE_URL` | - | Prisma database connection (for live mode) |
+
+### Binding Modes
+
+<Tabs>
+  <Tab title="Synthetic">
+    **Default mode.** Uses in-memory demo data for evaluation and testing. No database required.
+  </Tab>
+  <Tab title="Mapped">
+    Connects to external APIs through adapters. Used for partner integrations.
+  </Tab>
+  <Tab title="Live">
+    Uses Prisma with SQLite database. Data persists between sessions.
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Guide" icon="user" href="/user-guide/overview">
+    Learn how to use each operational mode
+  </Card>
+  <Card title="Admin Guide" icon="gear" href="/admin-guide/overview">
+    Configure users, tenants, and workflows
+  </Card>
+  <Card title="Governance Analysis" icon="magnifying-glass" href="/user-guide/governance-analysis">
+    Deep dive into document gap analysis
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Integrate SGM with your systems
+  </Card>
+</CardGroup>

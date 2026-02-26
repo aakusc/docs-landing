@@ -1,0 +1,298 @@
+---
+title: User Management
+description: Manage users, roles, and permissions in SGM.
+---
+
+# User Management
+
+This guide covers creating users, assigning roles, and managing permissions in SGM.
+
+## User Roles
+
+SGM uses role-based access control (RBAC) with five roles:
+
+| Role | Description | Typical Users |
+|------|-------------|---------------|
+| **SUPER_ADMIN** | Full system access | System administrators |
+| **ADMIN** | Full tenant access | Tenant administrators |
+| **MANAGER** | Management features | Team leads, managers |
+| **USER** | Standard features | Regular users |
+| **VIEWER** | Read-only access | Auditors, observers |
+
+## Role Permissions
+
+### By Operational Mode
+
+| Mode | SUPER_ADMIN | ADMIN | MANAGER | USER | VIEWER |
+|------|-------------|-------|---------|------|--------|
+| **Design** | Full | Full | Read-only | - | - |
+| **Operate** | Full | Full | Full | Limited | Read-only |
+| **Dispute** | Full | Full | Full | Limited | - |
+| **Oversee** | Full | Full | - | - | - |
+
+### By Feature
+
+| Feature | SUPER_ADMIN | ADMIN | MANAGER | USER | VIEWER |
+|---------|-------------|-------|---------|------|--------|
+| Create policies | ✅ | ✅ | - | - | - |
+| Edit documents | ✅ | ✅ | ✅ | - | - |
+| Submit cases | ✅ | ✅ | ✅ | ✅ | - |
+| Process approvals | ✅ | ✅ | ✅ | - | - |
+| View reports | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Manage users | ✅ | Own tenant | - | - | - |
+| System settings | ✅ | - | - | - | - |
+
+## Creating Users
+
+### Via Admin UI
+
+<Steps>
+  <Step title="Navigate to Admin">
+    Go to Settings → Admin → Users
+  </Step>
+  <Step title="Click Add User">
+    Click the + button to create a new user
+  </Step>
+  <Step title="Enter user details">
+    - Name
+    - Email address
+    - Role
+    - Tenant assignment (if multi-tenant)
+  </Step>
+  <Step title="Send invitation">
+    User receives email to set password
+  </Step>
+</Steps>
+
+### Via API
+
+```bash
+POST /api/admin/users
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "role": "MANAGER",
+  "tenantId": "tenant-id"
+}
+```
+
+## Managing Existing Users
+
+### View Users
+
+Navigate to Settings → Admin → Users to see all users.
+
+Filter by:
+- Tenant
+- Role
+- Status (Active, Inactive)
+- Search by name or email
+
+### Edit User
+
+1. Click user row to open details
+2. Modify fields as needed
+3. Save changes
+
+Editable fields:
+- Name
+- Role
+- Tenant assignment
+- Status
+
+### Deactivate User
+
+1. Open user details
+2. Click **Deactivate**
+3. Confirm action
+
+Deactivated users:
+- Cannot log in
+- Retain audit history
+- Can be reactivated
+
+## First User Setup
+
+When deploying SGM for the first time:
+
+<Steps>
+  <Step title="Set environment variable">
+    In `.env`, set initial admin email:
+    ```bash
+    INITIAL_ADMIN_EMAIL="admin@yourcompany.com"
+    ```
+  </Step>
+  <Step title="Start the application">
+    The first user with this email becomes SUPER_ADMIN
+  </Step>
+  <Step title="Complete registration">
+    Navigate to the app and complete the registration flow
+  </Step>
+  <Step title="Create additional admins">
+    Use the admin UI to add more administrators
+  </Step>
+</Steps>
+
+## Password Management
+
+### Password Reset
+
+Users can reset passwords via:
+1. Click "Forgot Password" on login page
+2. Enter email address
+3. Receive reset link via email
+4. Set new password
+
+### Admin-Initiated Reset
+
+Administrators can force password reset:
+1. Open user details
+2. Click **Reset Password**
+3. User receives reset email
+
+### Password Requirements
+
+- Minimum 8 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+
+## User Invitations
+
+### Invite Flow
+
+1. Admin creates user with email
+2. System sends invitation email
+3. User clicks invitation link
+4. User sets password
+5. User can log in
+
+### Invitation Expiration
+
+- Invitations expire after 7 days
+- Admin can resend invitation
+- Expired invitations marked inactive
+
+## Session Management
+
+### Session Duration
+
+Default session length: 24 hours
+
+Configure via environment:
+```bash
+SESSION_MAX_AGE=86400  # seconds
+```
+
+### Active Sessions
+
+View active sessions for a user:
+1. Open user details
+2. Click **Sessions** tab
+3. See all active sessions
+
+### Terminate Sessions
+
+To force logout:
+1. Open user details
+2. Click **Sessions** tab
+3. Click **Terminate All** or individual session
+
+## Audit Trail
+
+All user management actions are logged:
+
+| Action | What's Recorded |
+|--------|-----------------|
+| Create user | Admin, user details, timestamp |
+| Edit user | Admin, changes made, timestamp |
+| Deactivate | Admin, reason, timestamp |
+| Password reset | Method, timestamp |
+| Login | IP, device, timestamp |
+| Logout | Session, timestamp |
+
+View audit logs at Settings → Audit → User Activity.
+
+## Bulk Operations
+
+### Import Users
+
+Import multiple users via CSV:
+
+```csv
+name,email,role,tenant
+Jane Doe,jane@example.com,MANAGER,tenant-1
+John Smith,john@example.com,USER,tenant-1
+```
+
+<Steps>
+  <Step title="Prepare CSV file">
+    Create CSV with required columns
+  </Step>
+  <Step title="Navigate to Import">
+    Settings → Admin → Users → Import
+  </Step>
+  <Step title="Upload file">
+    Select your CSV file
+  </Step>
+  <Step title="Review and confirm">
+    Verify data before importing
+  </Step>
+</Steps>
+
+### Export Users
+
+Export user list for reporting:
+1. Navigate to user list
+2. Apply filters as needed
+3. Click **Export**
+4. Choose format (CSV, Excel)
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Principle of least privilege">
+    Assign the minimum role needed for each user's job function. Start with USER role and elevate only when necessary.
+  </Accordion>
+  <Accordion title="Regular access reviews">
+    Quarterly, review all users and their roles. Remove access for departed employees. Verify role assignments match current responsibilities.
+  </Accordion>
+  <Accordion title="Admin accounts">
+    Limit SUPER_ADMIN accounts. Create named accounts (not shared). Use ADMIN role for tenant-specific administration.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="User can't log in">
+    - Verify account is active
+    - Check password is correct
+    - Ensure email is verified
+    - Check for account lockout
+  </Accordion>
+  <Accordion title="User missing permissions">
+    - Verify role assignment
+    - Check tenant assignment
+    - Review mode-specific permissions
+  </Accordion>
+  <Accordion title="Invitation not received">
+    - Check spam folder
+    - Verify email address
+    - Resend invitation
+    - Check email configuration
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Tenant Configuration" icon="building" href="/admin-guide/tenant-configuration">
+    Set up tenant-specific settings
+  </Card>
+  <Card title="API Reference - Admin" icon="code" href="/api-reference/admin">
+    User management API
+  </Card>
+</CardGroup>

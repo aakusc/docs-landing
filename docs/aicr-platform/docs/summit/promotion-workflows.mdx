@@ -1,0 +1,79 @@
+---
+title: "Promotion Workflows"
+description: "The controlled path for promoting packs from Studio through Edge to Summit."
+---
+
+# Promotion Workflows
+
+Promotion is the process of moving a pack from development (Studio) → tenant runtime (Edge) → marketplace (Summit). Each transition requires passing a gate enforced by AICR agents.
+
+## Promotion Path
+
+```
+Studio (authoring)
+    ↓  Gate: manifest valid + tests pass
+Edge (tenant runtime)
+    ↓  Gate: 30-day stability + security audit
+Summit (marketplace)
+```
+
+## Studio → Edge Promotion
+
+**Trigger:** Developer submits promotion request via CLI or Studio UI.
+
+**Gate checks (automated):**
+
+| Check | Owner |
+|-------|-------|
+| Manifest schema valid | Validator |
+| All dependencies resolvable | Pack resolver |
+| Surface tests pass (≥80% coverage) | QA agent |
+| Contract tests pass | QA agent |
+| Tenant isolation tests pass | DataEngineer agent |
+| No Pattern A violations | DataEngineer agent |
+| Canonical doc references valid | KnowledgeAgent |
+
+If all checks pass, the pack is available for tenant activation on Edge. The QA agent posts a promotion summary to the work item thread.
+
+**Estimated time:** Minutes (fully automated)
+
+## Edge → Summit Promotion
+
+**Trigger:** Platform admin or MarketplaceAgent submits marketplace listing request.
+
+**Gate checks (semi-automated):**
+
+| Check | Owner |
+|-------|-------|
+| 30 days runtime stability | OpsChief agent (automated) |
+| Zero P0 errors in stability period | OpsChief agent (automated) |
+| Security audit complete | SecurityAuditor agent |
+| GDPR/compliance audit | ComplianceAgent |
+| Full documentation complete | MarketplaceAgent (review) |
+| Pricing and licensing defined | ProductManager (manual) |
+
+**Estimated time:** 1-2 weeks
+
+## Rollback
+
+Any promotion can be rolled back:
+
+```bash
+# Roll back a pack version for all tenants
+pnpm pack:rollback --pack approval-workflows --version 1.2.0
+
+# Roll back for a specific tenant only
+pnpm pack:rollback --pack approval-workflows --tenant <tenantId>
+```
+
+Rollback is immediate — the pack resolver switches to the previous version within the next cache refresh.
+
+## Promotion Audit Trail
+
+Every promotion and rollback is recorded with:
+- Timestamp and actor
+- Gate check results
+- Agent review notes
+- Version being promoted/rolled back
+
+Accessible from the GOCC audit log.

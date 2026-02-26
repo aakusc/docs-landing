@@ -1,0 +1,338 @@
+---
+title: Integrations
+description: Configure external integrations with SGM.
+---
+
+# Integrations
+
+SGM integrates with external systems for authentication, AI capabilities, and data exchange.
+
+## Available Integrations
+
+| Integration | Purpose | Status |
+|-------------|---------|--------|
+| **Claude AI** | AskSGM governance assistant | Available |
+| **AICR Platform** | AI Center of Reference | Available |
+| **SSO Providers** | Single sign-on authentication | Configurable |
+| **CRM Systems** | Deal and account data | Roadmap |
+| **HRIS Systems** | Employee data | Roadmap |
+| **ERP Systems** | Financial data | Roadmap |
+
+## AI Integration
+
+### Claude API (AskSGM)
+
+SGM uses Claude for the AskSGM governance assistant.
+
+#### Configuration
+
+Add to `.env`:
+
+```bash
+ANTHROPIC_API_KEY="sk-ant-api03-..."
+AI_RATE_LIMIT_PER_MINUTE=30
+AI_RATE_LIMIT_PER_DAY=1000
+```
+
+#### Rate Limits
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `AI_RATE_LIMIT_PER_MINUTE` | 30 | Requests per minute per user |
+| `AI_RATE_LIMIT_PER_DAY` | 1000 | Requests per day per tenant |
+
+#### Testing Connection
+
+Check AI health:
+
+```bash
+curl http://localhost:3030/__ai/health
+```
+
+Expected response:
+```json
+{
+  "status": "healthy",
+  "provider": "anthropic",
+  "model": "claude-3"
+}
+```
+
+### AICR Platform
+
+For organizations using the AICR platform:
+
+```bash
+AICR_ENDPOINT="https://aicr.yourcompany.com"
+AICR_API_KEY="your-aicr-api-key"
+AICR_TENANT_ID="your-tenant-id"
+```
+
+AICR provides:
+- Expert routing hierarchy
+- Knowledge base integration
+- Policy citation verification
+
+### AI Fallback Chain
+
+SGM uses a fallback chain for AI requests:
+
+1. **AICR Platform** (if configured)
+2. **Claude Direct** (Anthropic API)
+3. **Local fallback** (limited functionality)
+
+## Authentication
+
+### NextAuth Providers
+
+SGM uses NextAuth for authentication. Configure providers:
+
+#### Credentials (Default)
+
+Built-in email/password authentication:
+
+```bash
+# No additional config needed
+NEXTAUTH_SECRET="your-secret"
+NEXTAUTH_URL="http://localhost:3030"
+```
+
+#### Google OAuth
+
+```javascript
+// lib/auth/config.ts
+providers: [
+  GoogleProvider({
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  }),
+]
+```
+
+Environment variables:
+```bash
+GOOGLE_CLIENT_ID="your-client-id"
+GOOGLE_CLIENT_SECRET="your-client-secret"
+```
+
+#### Microsoft Azure AD
+
+```javascript
+providers: [
+  AzureADProvider({
+    clientId: process.env.AZURE_AD_CLIENT_ID,
+    clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
+    tenantId: process.env.AZURE_AD_TENANT_ID,
+  }),
+]
+```
+
+Environment variables:
+```bash
+AZURE_AD_CLIENT_ID="your-client-id"
+AZURE_AD_CLIENT_SECRET="your-client-secret"
+AZURE_AD_TENANT_ID="your-tenant-id"
+```
+
+#### Okta
+
+```javascript
+providers: [
+  OktaProvider({
+    clientId: process.env.OKTA_CLIENT_ID,
+    clientSecret: process.env.OKTA_CLIENT_SECRET,
+    issuer: process.env.OKTA_ISSUER,
+  }),
+]
+```
+
+Environment variables:
+```bash
+OKTA_CLIENT_ID="your-client-id"
+OKTA_CLIENT_SECRET="your-client-secret"
+OKTA_ISSUER="https://your-domain.okta.com"
+```
+
+## API Integration
+
+### API Authentication
+
+External systems integrate via REST API with JWT authentication:
+
+```bash
+# Get token
+POST /api/auth/login
+{
+  "email": "api-user@example.com",
+  "password": "your-password"
+}
+
+# Response
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresAt": "2026-01-29T00:00:00Z"
+}
+```
+
+### Using the Token
+
+Include in subsequent requests:
+
+```bash
+GET /api/sgm/policies
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+### API Rate Limits
+
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| General API | 100 req | Per minute |
+| AI endpoints | 30 req | Per minute |
+| Admin endpoints | 50 req | Per minute |
+
+## Webhook Integration
+
+### Outgoing Webhooks
+
+Configure webhooks for events:
+
+```yaml
+# Settings → Integrations → Webhooks
+webhooks:
+  - name: "Document Approved"
+    event: "document.approved"
+    url: "https://your-system.com/webhook"
+    secret: "your-webhook-secret"
+
+  - name: "Case Created"
+    event: "case.created"
+    url: "https://your-system.com/webhook"
+    headers:
+      X-Custom-Header: "value"
+```
+
+### Webhook Events
+
+| Event | Trigger |
+|-------|---------|
+| `document.created` | New document created |
+| `document.approved` | Document approved |
+| `plan.created` | New plan created |
+| `plan.approved` | Plan approved |
+| `case.created` | New case submitted |
+| `case.resolved` | Case resolved |
+| `approval.completed` | Approval workflow completed |
+
+### Webhook Payload
+
+```json
+{
+  "event": "document.approved",
+  "timestamp": "2026-01-28T10:30:00Z",
+  "data": {
+    "id": "doc-123",
+    "type": "policy",
+    "title": "Clawback Policy",
+    "approvedBy": "user-456",
+    "tenantId": "acme-corp"
+  },
+  "signature": "sha256=..."
+}
+```
+
+## Data Import/Export
+
+### Import Formats
+
+| Data Type | Formats | Notes |
+|-----------|---------|-------|
+| Users | CSV | Name, email, role |
+| Policies | JSON, Markdown | Full policy content |
+| Documents | PDF, DOCX | With metadata |
+| Plans | JSON | Template format |
+
+### Export Formats
+
+| Data Type | Formats | Endpoint |
+|-----------|---------|----------|
+| Policies | JSON, Markdown | `/api/policies/export` |
+| Documents | PDF, DOCX | `/api/documents/[id]/download` |
+| Reports | PDF, Excel, CSV | `/api/reports/export` |
+| Audit logs | CSV | `/api/audit/export` |
+
+## GovLens Integration
+
+For advanced governance analysis:
+
+### Configuration
+
+```bash
+GOVLENS_API_URL="http://localhost:8000"
+GOVLENS_ENABLED=true
+```
+
+### Starting GovLens
+
+```bash
+cd govlens_prototype
+./start-api.sh
+```
+
+### Health Check
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="AI not responding">
+    - Verify ANTHROPIC_API_KEY is set
+    - Check `/__ai/health` endpoint
+    - Review rate limit settings
+    - Check API key has not expired
+  </Accordion>
+  <Accordion title="SSO login failing">
+    - Verify OAuth credentials
+    - Check redirect URLs match
+    - Review provider configuration
+    - Check NEXTAUTH_URL setting
+  </Accordion>
+  <Accordion title="Webhooks not firing">
+    - Verify webhook URL is accessible
+    - Check webhook secret
+    - Review event configuration
+    - Check webhook logs
+  </Accordion>
+  <Accordion title="API authentication failing">
+    - Verify token is not expired
+    - Check Authorization header format
+    - Confirm user has API access
+    - Review rate limits
+  </Accordion>
+</AccordionGroup>
+
+## Security Considerations
+
+<Warning>
+Store all API keys and secrets securely. Never commit to version control.
+</Warning>
+
+- Use environment variables for all secrets
+- Rotate API keys regularly
+- Monitor API usage for anomalies
+- Use webhook signatures for verification
+- Implement IP allowlisting where possible
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Full API documentation
+  </Card>
+  <Card title="System Setup" icon="server" href="/admin-guide/system-setup">
+    Initial configuration
+  </Card>
+</CardGroup>

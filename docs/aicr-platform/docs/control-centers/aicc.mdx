@@ -1,0 +1,52 @@
+---
+title: "AI Control Center"
+description: "Manage AI agents, work items, and model configuration from the AICC."
+---
+
+# AI Control Center (AICC)
+
+The AICC is the command center for all AI operations in AICR. It provides visibility into active agents, work item queues, model usage, and agent memory.
+
+## What AICC Manages
+
+- **14 AI agents** — view status, assign work items, review agent output
+- **Work item queue** — all pending, in-progress, and completed agent tasks
+- **Model configuration** — which AI model each agent uses, fallback models
+- **Token usage** — real-time and historical cost tracking per agent
+- **Agent memory** — view and manage what each agent remembers across sessions
+
+## Work Items
+
+Work items are the unit of AI operation. Every agent task is a work item with a defined type, assignee, and required evidence:
+
+| Field | Description |
+|-------|-------------|
+| `type` | build, review, test, deploy, audit, answer |
+| `assignedAgent` | Which of the 14 agents handles it |
+| `priority` | P0 (critical), P1, P2, P3 |
+| `context` | Canonical doc refs, tenantId, packId |
+| `status` | pending, in-progress, blocked, complete |
+| `evidence` | Required proof of completion |
+
+## Routing Rules
+
+The AICC routes work items based on type and content:
+- Code changes → Builder agent
+- UI feedback → Designer agent
+- Test failures → QA agent
+- Security concerns → SecurityAuditor agent
+- Architecture questions → Architect agent
+
+Custom routing rules can be configured per tenant.
+
+## Model Configuration
+
+| Agent | Default Model | Notes |
+|-------|--------------|-------|
+| Builder | claude-sonnet-4-5 | Long context for code generation |
+| Designer | claude-sonnet-4-5 | Vision-capable for UI review |
+| QA | claude-haiku-4-5 | Fast for automated test analysis |
+| KnowledgeAgent | claude-sonnet-4-5 | Semantic retrieval |
+| OpsChief | claude-sonnet-4-5 | Incident analysis |
+
+Models can be overridden per work item type via AICC settings.

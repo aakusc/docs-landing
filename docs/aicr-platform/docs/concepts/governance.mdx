@@ -1,0 +1,59 @@
+---
+title: "Governance"
+description: "AICR's runtime governance framework — contracts enforced at the code level."
+---
+
+# Governance
+
+AICR enforces governance at **runtime**, not just through documentation. Contracts are validated in code, not in wikis.
+
+## Runtime Enforcement
+
+The primary enforcement mechanism is `guard.ts` — a middleware layer that intercepts every database operation and validates it against defined contracts before execution.
+
+Key checks performed by `guard.ts`:
+- Every tenant-scoped query includes a valid `tenantId`
+- No direct SQL bypassing Prisma
+- Pack capability checks before accessing pack-gated features
+- Role-based access validation on every mutation
+
+## The Three Laws
+
+The Three Laws are the foundation of AICR's governance. They are locked — no exceptions, no overrides.
+
+| Law | Enforcement |
+|-----|------------|
+| **Neon Everywhere** | CI fails if non-Neon DATABASE_URL detected |
+| **Neon Branches** | PR checks verify branch strategy |
+| **Prisma Only** | Static analysis blocks raw SQL imports |
+
+## Promotion Gates
+
+Packs cannot move between layers without passing gates. Each gate is enforced by the QA agent:
+
+**Studio → Edge gate:**
+- Manifest schema validation passes
+- All surface tests pass
+- No canonical doc violations
+- DataEngineer reviews any schema changes
+
+**Edge → Summit gate:**
+- 30-day runtime stability (no P1 errors)
+- SecurityAuditor sign-off
+- ComplianceAgent audit complete
+- ProductManager acceptance criteria met
+
+## Audit Trails
+
+Every significant platform action creates an immutable audit record:
+- Pack promotions and rollbacks
+- Tenant capability changes
+- Agent decisions with evidence
+- Three Laws exception requests (always rejected)
+
+## Compliance
+
+AICR's governance framework is designed to support:
+- **SOC2 Type II** — audit trails and access controls
+- **GDPR** — tenant data isolation and deletion workflows
+- **CCPA** — data subject request handling via the GOCC

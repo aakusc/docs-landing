@@ -1,0 +1,374 @@
+---
+title: Authentication
+description: API authentication endpoints for login, tokens, and sessions.
+---
+
+# Authentication API
+
+SGM uses JWT-based authentication. This section covers login, token management, and session handling.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/login` | Authenticate and get token |
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/verify` | Verify token validity |
+| POST | `/api/auth/forgot-password` | Request password reset |
+| POST | `/api/auth/reset-password` | Complete password reset |
+| POST | `/api/auth/invite` | Send user invitation |
+| POST | `/api/auth/mode/switch` | Switch operational mode |
+
+## Login
+
+Authenticate a user and receive a JWT token.
+
+<ParamField path="email" type="string" required>
+  User's email address
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  User's password
+</ParamField>
+
+### Request
+
+```bash
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "your-password"
+}
+```
+
+### Response
+
+<CodeGroup>
+```json Success (200)
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresAt": "2026-01-29T10:00:00Z",
+  "user": {
+    "id": "user-123",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "ADMIN",
+    "tenantId": "acme-corp"
+  }
+}
+```
+
+```json Error (401)
+{
+  "error": "Invalid credentials",
+  "code": "INVALID_CREDENTIALS"
+}
+```
+</CodeGroup>
+
+## Register
+
+Create a new user account.
+
+<ParamField path="name" type="string" required>
+  User's full name
+</ParamField>
+
+<ParamField path="email" type="string" required>
+  User's email address
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  Password (min 8 chars, 1 uppercase, 1 number)
+</ParamField>
+
+### Request
+
+```bash
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123"
+}
+```
+
+### Response
+
+<CodeGroup>
+```json Success (201)
+{
+  "success": true,
+  "user": {
+    "id": "user-456",
+    "email": "john@example.com",
+    "name": "John Doe",
+    "role": "USER"
+  }
+}
+```
+
+```json Error (409)
+{
+  "error": "Email already registered",
+  "code": "EMAIL_EXISTS"
+}
+```
+</CodeGroup>
+
+## Verify Token
+
+Verify a JWT token is valid and get user details.
+
+### Request
+
+```bash
+POST /api/auth/verify
+Authorization: Bearer <token>
+```
+
+### Response
+
+<CodeGroup>
+```json Success (200)
+{
+  "valid": true,
+  "user": {
+    "id": "user-123",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "ADMIN",
+    "tenantId": "acme-corp"
+  },
+  "tenant": {
+    "id": "acme-corp",
+    "name": "Acme Corporation",
+    "tier": "PRODUCTION"
+  }
+}
+```
+
+```json Error (401)
+{
+  "valid": false,
+  "error": "Token expired",
+  "code": "TOKEN_EXPIRED"
+}
+```
+</CodeGroup>
+
+## Forgot Password
+
+Request a password reset email.
+
+<ParamField path="email" type="string" required>
+  User's email address
+</ParamField>
+
+### Request
+
+```bash
+POST /api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+### Response
+
+```json Success (200)
+{
+  "success": true,
+  "message": "If this email exists, a reset link has been sent"
+}
+```
+
+<Note>
+For security, this endpoint always returns success regardless of whether the email exists.
+</Note>
+
+## Reset Password
+
+Complete a password reset with the token from email.
+
+<ParamField path="token" type="string" required>
+  Reset token from email
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  New password
+</ParamField>
+
+### Request
+
+```bash
+POST /api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "reset-token-from-email",
+  "password": "NewSecurePass123"
+}
+```
+
+### Response
+
+<CodeGroup>
+```json Success (200)
+{
+  "success": true,
+  "message": "Password updated successfully"
+}
+```
+
+```json Error (400)
+{
+  "error": "Invalid or expired reset token",
+  "code": "INVALID_TOKEN"
+}
+```
+</CodeGroup>
+
+## Send Invitation
+
+Send an invitation email to a new user.
+
+<Note>
+Requires ADMIN or SUPER_ADMIN role.
+</Note>
+
+<ParamField path="email" type="string" required>
+  Email address to invite
+</ParamField>
+
+<ParamField path="role" type="string" required>
+  Role to assign (USER, MANAGER, ADMIN)
+</ParamField>
+
+<ParamField path="tenantId" type="string">
+  Tenant to assign (SUPER_ADMIN can specify any tenant)
+</ParamField>
+
+### Request
+
+```bash
+POST /api/auth/invite
+Authorization: Bearer <admin-token>
+Content-Type: application/json
+
+{
+  "email": "newuser@example.com",
+  "role": "MANAGER",
+  "tenantId": "acme-corp"
+}
+```
+
+### Response
+
+```json Success (200)
+{
+  "success": true,
+  "invitation": {
+    "id": "inv-123",
+    "email": "newuser@example.com",
+    "expiresAt": "2026-02-04T10:00:00Z"
+  }
+}
+```
+
+## Switch Mode
+
+Switch the user's operational mode context.
+
+<ParamField path="mode" type="string" required>
+  Target mode: `DESIGN`, `OPERATE`, `DISPUTE`, or `OVERSEE`
+</ParamField>
+
+### Request
+
+```bash
+POST /api/auth/mode/switch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "mode": "OPERATE"
+}
+```
+
+### Response
+
+```json Success (200)
+{
+  "success": true,
+  "mode": "OPERATE",
+  "permissions": ["documents", "approvals", "plans", "calendar"]
+}
+```
+
+## Using the Token
+
+Include the token in all authenticated requests:
+
+```bash
+GET /api/sgm/policies
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+## Token Lifetime
+
+| Token Type | Default Lifetime |
+|------------|------------------|
+| Access token | 24 hours |
+| Reset token | 1 hour |
+| Invite token | 7 days |
+
+Configure via environment:
+```bash
+JWT_EXPIRES_IN="24h"
+RESET_TOKEN_EXPIRES_IN="1h"
+INVITE_TOKEN_EXPIRES_IN="7d"
+```
+
+## Session Management
+
+Sessions are managed via NextAuth. The JWT token contains:
+
+```json
+{
+  "sub": "user-123",
+  "email": "user@example.com",
+  "role": "ADMIN",
+  "tenantId": "acme-corp",
+  "iat": 1706432400,
+  "exp": 1706518800
+}
+```
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `INVALID_CREDENTIALS` | Email or password incorrect |
+| `EMAIL_EXISTS` | Email already registered |
+| `TOKEN_EXPIRED` | JWT token has expired |
+| `INVALID_TOKEN` | Token is malformed or invalid |
+| `INSUFFICIENT_PERMISSIONS` | Role cannot perform action |
+| `ACCOUNT_DISABLED` | User account is deactivated |
+
+## Security Best Practices
+
+<Warning>
+Never expose tokens in URLs, logs, or client-side storage accessible to scripts.
+</Warning>
+
+- Store tokens securely (httpOnly cookies or secure storage)
+- Use HTTPS in production
+- Implement token refresh before expiration
+- Log out users when security events occur

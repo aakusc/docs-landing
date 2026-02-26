@@ -11,7 +11,7 @@ export default function MdxContent({ source }: MdxContentProps) {
   return (
     <MDXRemote
       {...source}
-      components={mdxComponents as Record<string, React.ComponentType>}
+      components={mdxComponents as unknown as Record<string, React.ComponentType>}
     />
   );
 }

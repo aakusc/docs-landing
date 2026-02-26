@@ -1,0 +1,699 @@
+openapi: 3.0.3
+info:
+  title: SGM API
+  description: Sales Governance Manager REST API
+  version: 0.1.0
+  contact:
+    name: SGM Support
+servers:
+  - url: http://localhost:3030/api
+    description: Development server
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+
+  /auth/verify:
+    post:
+      summary: Verify token
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /sgm/policies:
+    get:
+      summary: List policies
+      tags:
+        - Policies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, superseded, retired]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: skip
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of policies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Policy'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+
+  /sgm/policies/{id}:
+    get:
+      summary: Get policy by ID
+      tags:
+        - Policies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Policy details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Policy'
+        '404':
+          description: Policy not found
+
+  /plans:
+    get:
+      summary: List plans
+      tags:
+        - Plans
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: planType
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Plan'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+    post:
+      summary: Create plan
+      tags:
+        - Plans
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - planType
+                - effectiveDate
+                - endDate
+              properties:
+                name:
+                  type: string
+                planType:
+                  type: string
+                  enum: [sales, overlay, management, support]
+                effectiveDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                description:
+                  type: string
+                tenantId:
+                  type: string
+      responses:
+        '201':
+          description: Plan created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Plan'
+
+  /sgm/documents:
+    get:
+      summary: List documents
+      tags:
+        - Documents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+
+  /client/{tenantSlug}/documents/upload:
+    post:
+      summary: Upload document
+      tags:
+        - Documents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  documentId:
+                    type: string
+                  status:
+                    type: string
+                  fileName:
+                    type: string
+                  fileSize:
+                    type: integer
+
+  /ai/asksgm:
+    post:
+      summary: Query governance assistant
+      tags:
+        - AI
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messages
+              properties:
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant]
+                      content:
+                        type: string
+                department:
+                  type: string
+                jurisdiction:
+                  type: string
+                cycleState:
+                  type: string
+                userRole:
+                  type: string
+                context:
+                  type: object
+      responses:
+        '200':
+          description: AI response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+                    properties:
+                      content:
+                        type: string
+                      authorityBasis:
+                        type: string
+                      evidenceBasis:
+                        type: array
+                        items:
+                          type: string
+                  citations:
+                    type: array
+                    items:
+                      type: object
+                  tokenUsage:
+                    type: object
+                    properties:
+                      input:
+                        type: integer
+                      output:
+                        type: integer
+
+  /admin/users:
+    get:
+      summary: List users
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+    post:
+      summary: Create user
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - role
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum: [SUPER_ADMIN, ADMIN, MANAGER, USER, VIEWER]
+                tenantId:
+                  type: string
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /admin/tenants:
+    get:
+      summary: List tenants
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of tenants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+    post:
+      summary: Create tenant
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - slug
+                - tier
+              properties:
+                name:
+                  type: string
+                slug:
+                  type: string
+                tier:
+                  type: string
+                  enum: [DEMO, BETA, PRODUCTION]
+                features:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Tenant created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+
+  /audit:
+    get:
+      summary: List audit events
+      tags:
+        - Audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: eventType
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of audit events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditEvent'
+                  meta:
+                    $ref: '#/components/schemas/ListMeta'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [SUPER_ADMIN, ADMIN, MANAGER, USER, VIEWER]
+        tenantId:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        tier:
+          type: string
+          enum: [DEMO, BETA, PRODUCTION]
+        status:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        userCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    Policy:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        version:
+          type: string
+        wordCount:
+          type: integer
+        content:
+          type: object
+        lastUpdated:
+          type: string
+          format: date-time
+
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        planType:
+          type: string
+        status:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        version:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        version:
+          type: string
+        owner:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        eventType:
+          type: string
+        severity:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        actor:
+          $ref: '#/components/schemas/User'
+        entity:
+          type: object
+          properties:
+            type:
+              type: string
+            id:
+              type: string
+            name:
+              type: string
+        details:
+          type: object
+
+    ListMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        skip:
+          type: integer
+        limit:
+          type: integer
+        hasMore:
+          type: boolean

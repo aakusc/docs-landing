@@ -1,0 +1,211 @@
+---
+title: Policy Library
+description: Browse, search, and manage governance policies for sales compensation programs.
+---
+
+# Policy Library
+
+The Policy Library is the central repository for all governance policies in SGM. It contains 17 Sales Compensation Policies (SCPs) plus custom policies, covering all aspects of compensation governance.
+
+## Accessing the Policy Library
+
+**Path:** `/policies`
+
+Navigate via: Design Mode → Policies, or directly to `/policies`
+
+## Policy Overview
+
+SGM includes 17 pre-built Sales Compensation Policies:
+
+| Code | Policy Name | Category |
+|------|-------------|----------|
+| SCP-001 | Clawback and Recovery | Financial Controls |
+| SCP-002 | Quota Management | Performance Management |
+| SCP-003 | Windfall and Large Deal | Deal Governance |
+| SCP-004 | SPIF Governance | Incentive Programs |
+| SCP-005 | Section 409A Compliance | Legal Compliance |
+| SCP-006 | State Wage Law Compliance | Legal Compliance |
+| SCP-007 | Sales Crediting | Commission Rules |
+| SCP-008 | Draws and Guarantees | Financial Controls |
+| SCP-009 | Leave of Absence | HR Policies |
+| SCP-010 | Mid-Period Change | Plan Administration |
+| SCP-011 | Payment Timing | Payroll |
+| SCP-012 | Termination and Final Pay | HR Policies |
+| SCP-013 | Data and Systems Controls | IT Governance |
+| SCP-014 | Territory Management | Territory Rules |
+| SCP-015 | Exception and Dispute Resolution | Governance |
+| SCP-016 | New Hire and Onboarding | HR Policies |
+| SCP-017 | International Requirements | Legal Compliance |
+
+## Policy Categories
+
+Policies are organized into categories:
+
+| Category | Description | Policies |
+|----------|-------------|----------|
+| **Financial Controls** | Clawbacks, draws, payment rules | SCP-001, SCP-008, SCP-011 |
+| **Legal Compliance** | 409A, wage laws, international | SCP-005, SCP-006, SCP-017 |
+| **HR Policies** | Leave, termination, onboarding | SCP-009, SCP-012, SCP-016 |
+| **Performance Management** | Quotas, territory, crediting | SCP-002, SCP-007, SCP-014 |
+| **Deal Governance** | Windfalls, large deals | SCP-003 |
+| **Incentive Programs** | SPIFs, special incentives | SCP-004 |
+| **Plan Administration** | Mid-period changes | SCP-010 |
+| **IT Governance** | Data and systems | SCP-013 |
+| **Governance** | Exceptions, disputes | SCP-015 |
+
+## Browsing Policies
+
+### List View
+
+The policy list shows:
+- Policy code and name
+- Category
+- Status (Draft, Template, Approved)
+- Word count
+- Last updated date
+
+### Filtering
+
+Filter policies by:
+- **Status**: Draft, Template, Approved
+- **Category**: Any of the 9 categories
+- **Search**: Policy name, code, or content
+
+### Sorting
+
+Sort by:
+- Code (A-Z or Z-A)
+- Name
+- Category
+- Last updated
+- Word count
+
+## Viewing a Policy
+
+Click any policy to see its full content:
+
+### Policy Header
+
+- Policy code and name
+- Status badge
+- Category
+- Word count
+- Version number
+- Last updated date
+
+### Policy Content
+
+Each policy includes:
+
+| Section | Description |
+|---------|-------------|
+| **Purpose** | Why this policy exists |
+| **Scope** | Who and what it applies to |
+| **Policy Statement** | The core policy rules |
+| **Procedures** | How to implement the policy |
+| **Exceptions** | When exceptions apply |
+| **Definitions** | Key terms explained |
+| **Related Policies** | Links to related governance |
+
+### Actions
+
+From the policy detail view:
+- **Download**: Export as Markdown
+- **Copy Link**: Share the policy URL
+- **View History**: See version changes
+- **Edit** (if permitted): Modify the policy
+
+## Policy Statuses
+
+| Status | Meaning | Who Can Edit |
+|--------|---------|--------------|
+| **Draft** | Work in progress | Authors |
+| **Template** | Standard template for reuse | Admins |
+| **Approved** | Official, in effect | Requires workflow |
+
+## Creating a Policy
+
+<Note>
+Policy creation requires ADMIN or SUPER_ADMIN role.
+</Note>
+
+<Steps>
+  <Step title="Click Create Policy">
+    Use the + button in the policy list toolbar
+  </Step>
+  <Step title="Select a template">
+    Choose a base template or start blank
+  </Step>
+  <Step title="Fill in details">
+    Add policy name, category, and content
+  </Step>
+  <Step title="Save as draft">
+    Save to continue editing later
+  </Step>
+  <Step title="Submit for approval">
+    When ready, submit to the approval workflow
+  </Step>
+</Steps>
+
+## Policy Versioning
+
+SGM tracks all policy changes:
+
+- Each edit creates a new version
+- Compare any two versions side-by-side
+- Revert to previous versions if needed
+- Audit trail shows who changed what and when
+
+## Using Policies
+
+### In Governance Analysis
+
+When you run a [gap analysis](/user-guide/governance-analysis), results reference specific policies. Click any policy reference to see the full policy text.
+
+### In Plan Templates
+
+[Plan templates](/user-guide/plan-management) can incorporate policy references, ensuring plans comply with governance requirements.
+
+### In Approvals
+
+[Approval workflows](/user-guide/approvals) often reference policies to provide context for decisions.
+
+## Search Tips
+
+<AccordionGroup>
+  <Accordion title="Find policies by topic">
+    Search for keywords like "clawback", "termination", or "quota" to find relevant policies.
+  </Accordion>
+  <Accordion title="Find policies by regulation">
+    Search "409A" or "wage law" to find compliance-related policies.
+  </Accordion>
+  <Accordion title="Find policies by scenario">
+    Search "leave of absence" or "windfall" to find policies for specific situations.
+  </Accordion>
+</AccordionGroup>
+
+## Policy Statistics
+
+The Policy Library tracks:
+- Total policies (17 SCPs + custom)
+- Policies by status
+- Policies by category
+- Total word count (36,000+ words across all SCPs)
+- Average policy length
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Governance Analysis" icon="magnifying-glass" href="/user-guide/governance-analysis">
+    Check documents against policies
+  </Card>
+  <Card title="Governance Framework" icon="sitemap" href="/reference/governance-framework">
+    See how policies map to pillars
+  </Card>
+  <Card title="Plan Management" icon="clipboard-list" href="/user-guide/plan-management">
+    Apply policies to plans
+  </Card>
+  <Card title="Policy Reference" icon="book-open" href="/reference/policy-library">
+    Full policy details
+  </Card>
+</CardGroup>

@@ -1,0 +1,62 @@
+---
+title: "Capability Mapping"
+description: "Understanding and managing capabilities across the AICR ecosystem."
+---
+
+# Capability Mapping
+
+Capability mapping gives platform admins a complete picture of what every tenant can do — which packs are active, which surfaces are enabled, and how capabilities relate to each other.
+
+## What is a Capability Map?
+
+A capability map is a tenant's full resolved capability set:
+
+```json
+{
+  "tenantId": "tenant-abc",
+  "tier": "edge",
+  "resolvedAt": "2026-02-26T10:00:00Z",
+  "capabilities": {
+    "core": { "version": "1.5.0", "surfaces": ["navigation", "settings", "profile"] },
+    "identity-management": { "version": "2.1.0", "surfaces": ["users", "roles", "permissions"] },
+    "approval-workflows": { "version": "1.2.0", "surfaces": ["approvals-dashboard", "approval-form"] }
+  },
+  "featureFlagOverrides": {
+    "new-dashboard-v2": false
+  }
+}
+```
+
+## Cross-Tenant View
+
+Summit admins can view capability maps across all tenants:
+
+```bash
+# Which tenants have approval-workflows active?
+pnpm capabilities:query --pack approval-workflows
+
+# What capabilities does tenant-abc have?
+pnpm capabilities:map --tenant tenant-abc
+
+# Which tenants are on outdated pack versions?
+pnpm capabilities:audit --outdated
+```
+
+## Capability Dependencies
+
+The dependency graph shows how packs relate to each other across the ecosystem. This helps identify:
+- Which packs would break if a core pack changes
+- Tenants that need migration when a pack is deprecated
+- Capability gaps — tenants that should have a pack but don't
+
+## Gap Analysis
+
+The MarketplaceAgent can run a gap analysis to identify tenants that are eligible for additional packs based on their tier and usage patterns:
+
+```bash
+pnpm capabilities:gap-analysis --tier edge
+# → 23 Edge tenants are eligible for "approval-workflows" but haven't activated it
+# → 8 Edge tenants would benefit from "analytics-suite" based on their API usage
+```
+
+This surfaces upsell opportunities and helps platform admins proactively improve tenant outcomes.

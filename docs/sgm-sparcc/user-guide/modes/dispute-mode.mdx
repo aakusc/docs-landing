@@ -1,0 +1,191 @@
+---
+title: Dispute Mode
+description: Handle exceptions, disputes, and case resolution with SLA monitoring.
+---
+
+# Dispute Mode
+
+Dispute Mode is the case management environment for handling compensation exceptions, disputes, and special requests. Use it to submit, investigate, and resolve cases with full timeline tracking and SLA monitoring.
+
+## When to Use Dispute Mode
+
+- **Submitting cases**: File exception requests, commission disputes, or territory changes
+- **Triaging work**: Review and prioritize the case queue by status, type, or priority
+- **Investigating issues**: Deep-dive into case details, timeline, and supporting documents
+- **Resolving cases**: Document decisions, rationale, and close cases
+
+## Access Requirements
+
+| Role | Access Level |
+|------|--------------|
+| SUPER_ADMIN | Full access |
+| ADMIN | Full access |
+| MANAGER | Full access (submit and resolve team cases) |
+| USER | Limited (submit and track own cases) |
+
+## Key Metrics
+
+The Cases view displays real-time statistics:
+
+| Metric | Description |
+|--------|-------------|
+| **Active** | NEW + UNDER_REVIEW + PENDING_INFO + ESCALATED |
+| **Resolved** | Cases with decisions made |
+| **Closed** | Fully completed cases |
+| **Avg Days** | Average resolution time |
+
+## Case Lifecycle
+
+Cases progress through these statuses:
+
+| Status | Description | Next Steps |
+|--------|-------------|------------|
+| **NEW** | Just submitted, awaiting review | Assign reviewer |
+| **UNDER_REVIEW** | Being investigated | Request info, escalate, or resolve |
+| **PENDING_INFO** | Waiting for additional information | Submitter provides details |
+| **ESCALATED** | Elevated to committee | Committee decision |
+| **RESOLVED** | Decision made | Pending closure |
+| **CLOSED** | Fully completed | Archived |
+
+## Case Types
+
+| Type | Description | Examples |
+|------|-------------|----------|
+| **Exception** | Policy exception requests | Override clawback, special eligibility |
+| **Dispute** | Commission calculation disputes | Incorrect credit, missing commission |
+| **Territory Change** | Territory reassignment requests | Account realignment, quota relief |
+| **Quota Adjustment** | Quota modification requests | Market changes, account loss |
+| **Plan Modification** | Compensation plan changes | Rate changes, metric updates |
+
+## Priority Levels and SLAs
+
+| Priority | Target SLA | When to Use |
+|----------|------------|-------------|
+| **Urgent** | Same day | Legal, regulatory, or significant financial impact |
+| **High** | 2 business days | Time-sensitive or high-value cases |
+| **Medium** | 5 business days | Standard cases |
+| **Low** | 10 business days | Non-urgent informational requests |
+
+## The Cases Interface
+
+The Cases page uses a three-pane layout:
+
+| Panel | Content |
+|-------|---------|
+| **Left** | Quick stats and status filters |
+| **Center** | Case list with search and sorting |
+| **Right** | Selected case details and timeline |
+
+### Filtering Cases
+
+Filter the case list by:
+- **Status**: NEW, UNDER_REVIEW, PENDING_INFO, ESCALATED, RESOLVED, CLOSED
+- **Type**: Exception, Dispute, Territory Change, Quota Adjustment, Plan Modification
+- **Priority**: Urgent, High, Medium, Low
+- **Search**: Case ID, title, or description
+
+### Case Details
+
+When you select a case, the detail panel shows:
+
+- Case number and type
+- Description and context
+- Submitter and affected rep
+- Financial impact
+- Related deals and documents
+- Full timeline of events
+
+## Submitting a New Case
+
+<Steps>
+  <Step title="Click New Case">
+    Use the New Case button in the toolbar
+  </Step>
+  <Step title="Select case type">
+    Choose the appropriate type (Exception, Dispute, etc.)
+  </Step>
+  <Step title="Fill in details">
+    Provide title, description, affected rep, and financial impact
+  </Step>
+  <Step title="Attach documents">
+    Upload supporting documentation
+  </Step>
+  <Step title="Set priority">
+    Select appropriate priority based on urgency
+  </Step>
+  <Step title="Submit">
+    Submit for review
+  </Step>
+</Steps>
+
+## Resolving a Case
+
+<Steps>
+  <Step title="Review case details">
+    Read the full case description and timeline
+  </Step>
+  <Step title="Gather information">
+    Request additional info if needed (status changes to PENDING_INFO)
+  </Step>
+  <Step title="Escalate if needed">
+    Escalate to committee for complex decisions
+  </Step>
+  <Step title="Make decision">
+    Document the decision and rationale
+  </Step>
+  <Step title="Close case">
+    Mark as RESOLVED, then CLOSED after implementation
+  </Step>
+</Steps>
+
+## SLA Monitoring
+
+**Path:** `/cases/sla`
+
+The SLA view helps you track time-sensitive cases:
+
+- Cases approaching SLA deadline (highlighted yellow)
+- Cases past SLA deadline (highlighted red)
+- SLA compliance metrics
+- Trend analysis
+
+## Case Analytics
+
+**Path:** `/cases/analytics`
+
+Analyze case patterns and trends:
+
+- Case volume by type and status
+- Resolution time trends
+- Escalation patterns
+- Workload distribution
+
+## Escalation Path
+
+When cases need committee review:
+
+1. Case reviewer selects **Escalate**
+2. Case status changes to **ESCALATED**
+3. Case appears in committee queue
+4. Committee reviews and decides
+5. Decision recorded with rationale
+6. Case marked **RESOLVED**
+
+## Related Pages
+
+- [Approvals](/user-guide/approvals) - Related approval workflows
+- [Oversee Mode](/user-guide/modes/oversee-mode) - Committee management
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Approvals" icon="clipboard-check" href="/user-guide/approvals">
+    Process pending approvals
+  </Card>
+  <Card title="Oversee Mode" icon="eye" href="/user-guide/modes/oversee-mode">
+    Monitor committees and compliance
+  </Card>
+  <Card title="Search & Reports" icon="magnifying-glass" href="/user-guide/search-reports">
+    Search cases and generate reports
+  </Card>
+</CardGroup>

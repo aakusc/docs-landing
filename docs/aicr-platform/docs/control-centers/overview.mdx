@@ -1,0 +1,53 @@
+---
+title: "Control Centers Overview"
+description: "The 19 control centers that manage every domain of the AICR platform."
+---
+
+# Control Centers Overview
+
+AICR is organized into **19 Control Centers** — each a specialized dashboard that owns a specific operational domain. Control centers are themselves packs, meaning they can be extended without modifying the core platform.
+
+## The Control Centers
+
+| Code | Name | Domain |
+|------|------|--------|
+| **AICC** | AI Control Center | AI agent management, work item routing, model configuration |
+| **KBCC** | Knowledge Base CC | Canonical docs, semantic search, agent memory |
+| **GOCC** | Governance CC | Compliance, audit trails, policy management |
+| **DOCC** | Document CC | Document workflows, version control, templates |
+| **INCC** | Integration CC | External APIs, webhooks, data pipelines |
+| **QACC** | QA Control Center | Test runs, quality gates, pack certification |
+| **IDCC** | Identity CC | Users, roles, permissions, auth configuration |
+| **OPCC** | Operations CC | Incidents, deployments, health monitoring, telemetry |
+| **TECC** | Tenant CC | Tenant onboarding, configuration, billing |
+| **PKCC** | Pack CC | Pack lifecycle, resolver configuration, version management |
+| **ANCC** | Analytics CC | Usage analytics, cost tracking, business intelligence |
+| **SCCC** | Security CC | Vulnerability scanning, access auditing, compliance |
+| **WFCC** | Workflow CC | Cross-pack workflow orchestration |
+| **NTCC** | Notification CC | Alerts, email workflows, Slack/webhook routing |
+| **MRCC** | Marketplace CC | Pack catalog, partner submissions, pricing |
+| **PRCC** | Partner CC | Partner accounts, revenue share, SLA tracking |
+| **PLCC** | Policy CC | Business rules engine, approval policies |
+| **RTCC** | Reporting CC | Scheduled reports, exports, dashboards |
+| **STCC** | Settings CC | Platform configuration, feature flags, environment |
+
+## How Control Centers Work
+
+Each control center:
+- Is a **pack** — it has a manifest, surfaces, and optional agents
+- **Owns a database domain** — AICC owns AI-related tables, KBCC owns knowledge tables, etc.
+- **Communicates via work items** — cross-center operations go through the work item queue
+- **Has a dedicated agent** — most centers have a specialized AI agent with domain expertise
+
+## Navigation
+
+From the Edge sidebar, navigate between control centers using the control center menu. The sidebar displays only the centers your tenant has activated. Summit-tier tenants have access to all 19; Studio-tier tenants see only the core set.
+
+## Extending Control Centers
+
+Because control centers are packs, you can extend them:
+- Add a new surface (tab or panel) to an existing center
+- Register a new agent that works within a center's domain
+- Override an existing surface with a custom implementation
+
+Extensions are created in Studio and follow the standard pack promotion workflow.

@@ -1,0 +1,82 @@
+---
+title: "Pack System"
+description: "Versioned capability bundles with deterministic resolution."
+---
+
+# Pack System
+
+Packs are the core unit of capability in AICR. A pack is a versioned, self-describing bundle that adds functionality to a tenant without modifying the core platform.
+
+## What is a Pack?
+
+A pack bundles together:
+- **Schema extensions** — new Prisma models or fields scoped to the pack
+- **UI surfaces** — React components and pages
+- **API routes** — Next.js API handlers
+- **Agent prompts** — instructions for AI agents operating in this domain
+- **Manifest** — typed declaration of everything the pack provides and requires
+
+## Pack Manifest
+
+Every pack has a `manifest.json` that declares its contract:
+
+```json
+{
+  "id": "approval-workflows",
+  "version": "1.2.0",
+  "name": "Approval Workflows",
+  "description": "Multi-step approval chains with SLA tracking",
+  "requires": {
+    "platform": ">=2.0.0",
+    "packs": ["identity-management"]
+  },
+  "provides": {
+    "models": ["ApprovalRequest", "ApprovalChain", "ApprovalStep"],
+    "surfaces": ["approvals-dashboard", "approval-form"],
+    "agents": ["approval-coordinator"]
+  },
+  "tier": "edge"
+}
+```
+
+## Deterministic Resolution
+
+The pack resolver guarantees **same inputs → same outputs**. Given a tenant's enabled packs and platform version, resolution always produces the same active capability set. This eliminates environment-specific bugs caused by capability drift.
+
+Resolution order:
+1. Platform core capabilities (always active)
+2. Tenant-enabled packs (ordered by dependency graph)
+3. Feature flag overrides (per-tenant)
+
+## Pack Lifecycle
+
+```
+Author (Studio) → Validate → Test → Promote → Deploy (Edge) → Marketplace (Summit)
+```
+
+| Stage | Where | What happens |
+|-------|-------|-------------|
+| **Author** | Studio | Write schema, surfaces, and manifest |
+| **Validate** | Studio | Manifest schema check, dependency resolution |
+| **Test** | Studio | Surface tests, contract tests |
+| **Promote** | Summit | Review, approve, version bump |
+| **Deploy** | Edge | Activate for specific tenants |
+| **Marketplace** | Summit | Publish for partner discovery |
+
+## Versioning
+
+Packs follow semantic versioning:
+- **Major** — breaking manifest changes (new required models, removed surfaces)
+- **Minor** — additive changes (new optional surfaces, new agent prompts)
+- **Patch** — bug fixes and content updates
+
+Rollback is always available: disable the pack version, the previous version activates immediately.
+
+## Pack Tiers
+
+| Tier | Purpose |
+|------|---------|
+| `studio` | Development-only, not deployable to tenants |
+| `edge` | Tenant runtime packs (most packs live here) |
+| `summit` | Platform-level governance packs |
+| `core` | Locked platform packs, cannot be disabled |

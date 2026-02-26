@@ -1,0 +1,56 @@
+---
+title: "QA Control Center"
+description: "Test runs, quality gates, and pack certification from the QACC."
+---
+
+# QA Control Center (QACC)
+
+The QACC is the quality assurance hub. It tracks all test runs, manages quality gates for pack promotions, and maintains the certification status of every pack in the ecosystem.
+
+## What QACC Manages
+
+- **Test runs** — history and results of all surface, contract, and integration tests
+- **Quality gates** — pass/fail status for each promotion checkpoint
+- **Pack certification** — which pack versions are certified for each tier
+- **Regression tracking** — catch regressions introduced by pack or platform updates
+- **Coverage reporting** — test coverage trends over time
+
+## Quality Gate Dashboard
+
+The QACC main view shows the current gate status for all packs in the promotion queue:
+
+| Pack | Version | Gate | Status | Blocker |
+|------|---------|------|--------|---------|
+| approval-workflows | 1.3.0 | Studio → Edge | ✓ Passed | — |
+| analytics-suite | 2.0.0 | Edge → Summit | ✗ Blocked | Security audit pending |
+| notification-engine | 1.5.1 | Studio → Edge | ⏳ Running | Surface tests in progress |
+
+## Test Run History
+
+Every test run is stored with full output:
+- Which tests ran
+- Pass/fail status per test
+- Failure output and stack traces
+- Duration and resource usage
+- Which agent (or human) triggered the run
+
+## Pack Certification
+
+A certified pack version is one that has passed all required gates for its target tier. Certification is tracked separately from promotion — a pack can be certified for Edge but not yet listed in the Summit marketplace.
+
+Certification is revoked automatically if:
+- A critical security vulnerability is discovered
+- A Three Laws violation is found in the pack's code
+- The pack's dependencies are revoked
+
+## Running Tests via QACC
+
+QA agent work items can be triggered from the QACC:
+
+```bash
+# Trigger a full test run for a pack
+pnpm qacc:run --pack approval-workflows --version 1.3.0
+
+# Re-run only failed tests
+pnpm qacc:rerun --run-id <runId> --failed-only
+```

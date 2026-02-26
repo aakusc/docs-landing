@@ -1,0 +1,118 @@
+---
+title: "Pack Authoring"
+description: "How to create and structure packs in the Studio environment."
+---
+
+# Pack Authoring
+
+Packs are the core unit of capability in AICR. This guide covers how to create, structure, and author packs in Studio.
+
+## Creating a Pack
+
+Use the CLI to scaffold a new pack:
+
+```bash
+pnpm pack:create --name "approval-workflows" --tier edge
+```
+
+This generates:
+
+```
+packages/packs/approval-workflows/
+├── manifest.json          # Pack contract
+├── schema.prisma          # Schema extensions (merged on build)
+├── surfaces/              # React components and pages
+│   ├── dashboard.tsx
+│   └── form.tsx
+├── api/                   # API route handlers
+│   └── approvals.ts
+├── agents/                # Agent prompt files
+│   └── approval-coordinator.md
+└── tests/                 # Surface and contract tests
+    ├── surfaces.test.tsx
+    └── contracts.test.ts
+```
+
+## Writing the Manifest
+
+The manifest is the pack's contract with the platform:
+
+```json
+{
+  "id": "approval-workflows",
+  "version": "1.0.0",
+  "name": "Approval Workflows",
+  "description": "Multi-step approval chains with SLA tracking",
+  "tier": "edge",
+  "requires": {
+    "platform": ">=2.0.0",
+    "packs": ["identity-management"]
+  },
+  "provides": {
+    "models": ["ApprovalRequest", "ApprovalChain", "ApprovalStep"],
+    "surfaces": ["approvals-dashboard", "approval-form"],
+    "routes": ["/approvals", "/api/approvals"],
+    "agents": ["approval-coordinator"]
+  },
+  "tenantScoped": true,
+  "gates": {
+    "promotion": ["qa-review", "security-audit"]
+  }
+}
+```
+
+## Schema Extensions
+
+Pack schema files are merged into the main Prisma schema at build time. Keep models focused on the pack's domain:
+
+```prisma
+model ApprovalRequest {
+  id         String         @id @default(cuid())
+  tenantId   String         @map("tenant_id")
+  title      String
+  status     ApprovalStatus @default(PENDING)
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  chain      ApprovalChain  @relation(fields: [chainId], references: [id])
+  chainId    String         @map("chain_id")
+
+  @@map("approval_requests")
+}
+```
+
+<Note>
+All tenant-scoped models must include `tenantId String @map("tenant_id")`. The Database Guard enforces this at runtime.
+</Note>
+
+## Surface Development
+
+Surfaces are React components that the Edge layer renders within the control center shell. They receive tenant context automatically:
+
+```typescript
+// surfaces/dashboard.tsx
+import { useTenantContext } from '@aicr/core'
+
+export function ApprovalsDashboard() {
+  const { tenantId } = useTenantContext()
+  // tenantId is always available — never undefined in a surface
+  ...
+}
+```
+
+## Agent Prompts
+
+If your pack introduces a new agent role, define its system prompt in `agents/`:
+
+```markdown
+# Approval Coordinator Agent
+
+You are the Approval Coordinator for {tenantName}. Your role is to:
+- Route incoming approval requests to the correct chain
+- Monitor SLA timers and escalate when needed
+- Notify stakeholders of status changes
+
+## Constraints
+- Never approve your own requests
+- Always reference the canonical approval policy doc
+- Escalate P0 items to OpsChief immediately
+```

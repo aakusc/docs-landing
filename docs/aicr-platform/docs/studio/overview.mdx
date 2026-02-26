@@ -1,0 +1,65 @@
+---
+title: "Studio Overview"
+description: "The Studio layer — where packs are authored, validated, and tested."
+---
+
+# Studio Overview
+
+Studio is the **development and authoring layer** of AICR. It's where developers create capability packs, validate their manifests, and run surface tests before promoting to Edge.
+
+## What Studio Provides
+
+<CardGroup cols={2}>
+  <Card title="Pack Authoring" icon="code" href="/docs/studio/pack-authoring">
+    Create versioned capability bundles with typed manifests, schema extensions, and UI surfaces
+  </Card>
+  <Card title="Manifest Validation" icon="shield-check" href="/docs/studio/manifest-validation">
+    Validate pack manifests against the schema contract before deployment
+  </Card>
+  <Card title="Surface Testing" icon="flask" href="/docs/studio/surface-testing">
+    Test UI surfaces and API routes in isolation before promoting to tenant environments
+  </Card>
+  <Card title="Development Tools" icon="wrench" href="/docs/studio/development-tools">
+    CLI tools, hot reload, Neon branch management, and local debugging utilities
+  </Card>
+</CardGroup>
+
+## Studio Principles
+
+**Studio is for authors, not tenants.** Tenants never see Studio. It's a developer workspace where packs are built and validated in isolation.
+
+**Studio packs don't run in production.** A pack with tier `studio` cannot be deployed to Edge. It must be promoted and its tier upgraded as part of the promotion workflow.
+
+**Every pack starts in Studio.** Whether it's a small UI customization or a major workflow pack, all capability development starts here.
+
+## Typical Studio Workflow
+
+<Steps>
+  <Step title="Create a pack scaffold">
+    Use the CLI to generate a pack directory with manifest template, empty surfaces, and test fixtures.
+  </Step>
+  <Step title="Define the manifest">
+    Declare what models, surfaces, and agents the pack provides and what it requires from the platform or other packs.
+  </Step>
+  <Step title="Build surfaces and schema">
+    Implement the React surfaces, Prisma schema extensions, and API routes within the pack boundary.
+  </Step>
+  <Step title="Run validation">
+    Run `pnpm pack:validate` to check the manifest against the schema contract and dependency graph.
+  </Step>
+  <Step title="Run surface tests">
+    Execute the surface test suite to verify UI behavior, API contracts, and tenant isolation.
+  </Step>
+  <Step title="Submit for promotion">
+    Create a promotion request in the Summit layer. QA agent reviews and approves or returns with feedback.
+  </Step>
+</Steps>
+
+## Studio vs Edge vs Summit
+
+| | Studio | Edge | Summit |
+|--|--------|------|--------|
+| Who uses it | Developers | Tenant operators | Platform admins |
+| Pack state | In development | Deployed to tenants | In marketplace |
+| Data | Branch database | Tenant-scoped prod | Platform-wide |
+| Gate enforcement | Manifest + tests | Runtime contracts | Promotion approval |

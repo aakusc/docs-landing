@@ -1,0 +1,342 @@
+---
+title: Audit API
+description: API endpoints for event logging and audit trails.
+---
+
+# Audit API
+
+The Audit API provides access to event logs and audit trails for compliance and governance tracking.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/audit` | List audit events |
+| GET | `/api/audit/[id]` | Get event details |
+| GET | `/api/audit/export` | Export audit logs |
+
+## List Audit Events
+
+Retrieve audit events with optional filtering.
+
+### Request
+
+```bash
+GET /api/audit?tenantId=acme-corp&eventType=document.approved&startDate=2026-01-01
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="tenantId" type="string">
+  Filter by tenant (ADMIN restricted to own tenant)
+</ParamField>
+
+<ParamField query="eventType" type="string">
+  Filter by event type (see Event Types below)
+</ParamField>
+
+<ParamField query="entityType" type="string">
+  Filter by entity: `policy`, `document`, `plan`, `case`, `user`, `approval`
+</ParamField>
+
+<ParamField query="entityId" type="string">
+  Filter by specific entity ID
+</ParamField>
+
+<ParamField query="actorId" type="string">
+  Filter by user who performed action
+</ParamField>
+
+<ParamField query="severity" type="string">
+  Filter by severity: `info`, `warning`, `error`, `critical`
+</ParamField>
+
+<ParamField query="startDate" type="string">
+  Start of date range (ISO 8601)
+</ParamField>
+
+<ParamField query="endDate" type="string">
+  End of date range (ISO 8601)
+</ParamField>
+
+<ParamField query="skip" type="number">
+  Pagination offset
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Page size (default: 50, max: 500)
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "evt-123",
+      "eventType": "document.approved",
+      "severity": "info",
+      "timestamp": "2026-01-28T10:30:00Z",
+      "actor": {
+        "id": "user-123",
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "role": "ADMIN"
+      },
+      "entity": {
+        "type": "document",
+        "id": "doc-456",
+        "name": "Clawback Policy"
+      },
+      "details": {
+        "previousStatus": "pending_approval",
+        "newStatus": "approved",
+        "comment": "Approved after legal review"
+      },
+      "tenantId": "acme-corp",
+      "ipAddress": "192.168.1.100",
+      "userAgent": "Mozilla/5.0..."
+    }
+  ],
+  "meta": {
+    "total": 1250,
+    "skip": 0,
+    "limit": 50,
+    "dateRange": {
+      "start": "2026-01-01T00:00:00Z",
+      "end": "2026-01-28T23:59:59Z"
+    }
+  },
+  "statistics": {
+    "byEventType": {
+      "document.approved": 45,
+      "document.created": 30,
+      "user.login": 500
+    },
+    "bySeverity": {
+      "info": 1200,
+      "warning": 40,
+      "error": 10
+    }
+  }
+}
+```
+
+## Get Event Details
+
+Retrieve full details for a single audit event.
+
+### Request
+
+```bash
+GET /api/audit/evt-123
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "evt-123",
+    "eventType": "document.approved",
+    "severity": "info",
+    "timestamp": "2026-01-28T10:30:00Z",
+    "actor": {
+      "id": "user-123",
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "role": "ADMIN"
+    },
+    "entity": {
+      "type": "document",
+      "id": "doc-456",
+      "name": "Clawback Policy",
+      "snapshot": {
+        "version": "2.0",
+        "status": "approved"
+      }
+    },
+    "details": {
+      "previousStatus": "pending_approval",
+      "newStatus": "approved",
+      "comment": "Approved after legal review",
+      "approvalChain": [
+        {
+          "step": 1,
+          "approver": "user-789",
+          "decision": "approved",
+          "date": "2026-01-27T15:00:00Z"
+        },
+        {
+          "step": 2,
+          "approver": "user-123",
+          "decision": "approved",
+          "date": "2026-01-28T10:30:00Z"
+        }
+      ]
+    },
+    "context": {
+      "tenantId": "acme-corp",
+      "sessionId": "sess-abc",
+      "requestId": "req-xyz"
+    },
+    "metadata": {
+      "ipAddress": "192.168.1.100",
+      "userAgent": "Mozilla/5.0...",
+      "location": "San Francisco, CA"
+    }
+  }
+}
+```
+
+## Export Audit Logs
+
+Export audit logs for external analysis or compliance.
+
+### Request
+
+```bash
+GET /api/audit/export?tenantId=acme-corp&format=csv&startDate=2026-01-01&endDate=2026-01-31
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="format" type="string" required>
+  Export format: `csv`, `json`, `xlsx`
+</ParamField>
+
+<ParamField query="tenantId" type="string">
+  Filter by tenant
+</ParamField>
+
+<ParamField query="startDate" type="string">
+  Start of date range
+</ParamField>
+
+<ParamField query="endDate" type="string">
+  End of date range
+</ParamField>
+
+<ParamField query="eventTypes" type="string">
+  Comma-separated event types to include
+</ParamField>
+
+### Response
+
+Binary file download with appropriate content-type.
+
+## Event Types
+
+### Document Events
+
+| Event | Description |
+|-------|-------------|
+| `document.created` | New document created |
+| `document.updated` | Document content or metadata changed |
+| `document.approved` | Document approved |
+| `document.rejected` | Document approval rejected |
+| `document.archived` | Document archived |
+| `document.downloaded` | Document file downloaded |
+
+### Plan Events
+
+| Event | Description |
+|-------|-------------|
+| `plan.created` | New plan created |
+| `plan.updated` | Plan content changed |
+| `plan.submitted` | Plan submitted for review |
+| `plan.approved` | Plan approved |
+| `plan.activated` | Plan set to active |
+| `plan.archived` | Plan archived |
+
+### Case Events
+
+| Event | Description |
+|-------|-------------|
+| `case.created` | New case submitted |
+| `case.assigned` | Case assigned to reviewer |
+| `case.escalated` | Case escalated to committee |
+| `case.resolved` | Case resolution decision made |
+| `case.closed` | Case closed |
+
+### User Events
+
+| Event | Description |
+|-------|-------------|
+| `user.login` | User logged in |
+| `user.logout` | User logged out |
+| `user.created` | New user account created |
+| `user.updated` | User profile or role changed |
+| `user.deactivated` | User account deactivated |
+| `user.password_reset` | Password reset completed |
+
+### Approval Events
+
+| Event | Description |
+|-------|-------------|
+| `approval.requested` | Approval workflow started |
+| `approval.approved` | Item approved |
+| `approval.rejected` | Item rejected |
+| `approval.delegated` | Approval delegated |
+
+### System Events
+
+| Event | Description |
+|-------|-------------|
+| `system.config_changed` | System configuration changed |
+| `system.tenant_created` | New tenant created |
+| `system.ai_query` | AI assistant query made |
+
+## Severity Levels
+
+| Level | Description | Examples |
+|-------|-------------|----------|
+| `info` | Normal operations | Login, view, create |
+| `warning` | Notable actions | Failed login, SLA warning |
+| `error` | Errors or failures | API errors, validation failures |
+| `critical` | Security or compliance | Permission violations, data breach attempts |
+
+## Retention
+
+| Tier | Retention Period |
+|------|------------------|
+| DEMO | 30 days |
+| BETA | 90 days |
+| PRODUCTION | 7 years |
+
+## Compliance
+
+Audit logs support compliance requirements:
+
+| Requirement | Support |
+|-------------|---------|
+| **SOX** | Financial action tracking |
+| **SOC 2** | Security event logging |
+| **GDPR** | User data access tracking |
+| **HIPAA** | Access audit trails |
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Regular export">
+    Export audit logs regularly to external storage for long-term retention.
+  </Accordion>
+  <Accordion title="Monitor critical events">
+    Set up alerts for critical severity events.
+  </Accordion>
+  <Accordion title="Review periodically">
+    Conduct periodic reviews of user activity patterns.
+  </Accordion>
+</AccordionGroup>
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `EVENT_NOT_FOUND` | Event ID doesn't exist |
+| `INVALID_DATE_RANGE` | Date range is invalid |
+| `EXPORT_TOO_LARGE` | Export exceeds size limit |
+| `ACCESS_DENIED` | User cannot access tenant logs |

@@ -1,0 +1,90 @@
+---
+title: "Database Architecture"
+description: "AICR's 240-table Neon PostgreSQL database and multi-tenant data model."
+---
+
+# Database Architecture
+
+AICR operates a single **Neon PostgreSQL** database with 240 tables, enforced through Prisma ORM. All access is governed by three inviolable laws.
+
+## The Three Laws
+
+<Note>
+These laws are locked. No exceptions, no workarounds.
+</Note>
+
+| Law | Rule |
+|-----|------|
+| **Neon Everywhere** | Every environment (dev, staging, prod) uses Neon PostgreSQL |
+| **Neon Branches** | Feature branches get a Neon database branch — never a separate cluster or Docker container |
+| **Prisma Only** | All database access through Prisma ORM. No raw SQL, no other ORMs, no direct queries |
+
+## Scale
+
+| Metric | Value |
+|--------|-------|
+| Total tables | 240 |
+| Tenant-scoped models | 48 |
+| Global models | 192 |
+| Enums | 41 |
+| Active migrations | 18 |
+| Schema file size | 286,668 lines |
+
+## Multi-Tenancy Model
+
+**48 models are tenant-scoped**, meaning every row is automatically associated with a `tenantId`. The Database Guard middleware enforces this at the ORM level — queries without a `tenantId` are rejected before they reach the database.
+
+```typescript
+// Every tenant-scoped query must include tenantId
+const requests = await prisma.approvalRequest.findMany({
+  where: { tenantId: session.tenantId }  // enforced by guard.ts
+})
+```
+
+The remaining 192 models are global — platform configuration, pack definitions, control center state, and audit logs that span all tenants.
+
+## Naming Convention (Pattern A)
+
+All models follow **Pattern A**:
+- Field names in `camelCase`
+- Database column names mapped with `@map("snake_case")`
+- Table names mapped with `@@map("snake_case")`
+
+```prisma
+model ApprovalRequest {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("approval_requests")
+}
+```
+
+## Neon Branching Strategy
+
+Each feature branch automatically gets a **Neon database branch** — a near-instant copy-on-write fork of the main database. This means:
+- No shared dev database conflicts
+- Full production-like data for testing
+- Branch deleted when PR merges — zero cleanup needed
+
+```bash
+# Create a branch (automated in CI)
+neon branches create --name feature/my-feature --parent main
+
+# Use in .env.local
+DATABASE_URL="postgresql://...@...neon.tech/aicr?branch=feature/my-feature"
+```
+
+## pgvector for Embeddings
+
+The database includes **pgvector** for storing and querying embeddings. The KBCC (Knowledge Base Control Center) uses this to enable semantic search across canonical documents and pack manifests.
+
+```prisma
+model CanonicalDocument {
+  id        String                   @id
+  content   String
+  embedding Unsupported("vector(1536)")?
+
+  @@map("canonical_documents")
+}
+```

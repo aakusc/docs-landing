@@ -1,0 +1,113 @@
+---
+title: "Quickstart"
+description: "Get the AICR Platform running locally in minutes."
+---
+
+# Quickstart
+
+Get up and running with the AICR Platform in under 10 minutes.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- **Node.js** 18+ installed
+- **pnpm** package manager (`npm install -g pnpm`)
+- **Git** for version control
+- Access to the **AICodeRally GitHub organization**
+- A **Neon PostgreSQL** database (AICR uses Neon exclusively — no Docker)
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/AICodeRally/AICR.git
+cd AICR
+```
+
+## 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+This installs dependencies across all apps, packages, and services in the monorepo.
+
+## 3. Configure Environment Variables
+
+Create a `.env.local` file in `apps/aicr/`:
+
+```bash
+# Database (Neon PostgreSQL — required)
+DATABASE_URL="postgresql://...@...neon.tech/aicr?sslmode=require"
+DIRECT_URL="postgresql://...@...neon.tech/aicr?sslmode=require"
+
+# Auth (NextAuth v5)
+NEXTAUTH_SECRET="your-secret-min-32-chars"
+NEXTAUTH_URL="http://localhost:3000"
+
+# AI — Claude is the primary model
+ANTHROPIC_API_KEY="sk-ant-..."
+
+# Optional: additional AI providers
+OPENAI_API_KEY="sk-..."
+GOOGLE_AI_API_KEY="..."
+```
+
+<Note>
+AICR enforces **Three Laws**: Neon Everywhere, Neon Branches, Prisma Only. Do not use Docker, SQLite, or direct SQL queries. All database access must go through Prisma.
+</Note>
+
+## 4. Set Up the Database
+
+```bash
+cd apps/aicr
+
+# Generate Prisma client from the 240-table schema
+npx prisma generate
+
+# Push schema to your Neon database
+npx prisma db push
+
+# Seed initial data (control centers, roles, default packs)
+npx prisma db seed
+```
+
+## 5. Start the Development Server
+
+```bash
+# From monorepo root
+pnpm --filter aicr dev
+
+# Or from the app directory
+cd apps/aicr
+pnpm dev
+```
+
+The platform runs at `http://localhost:3000`.
+
+## What You'll See
+
+On first load, AICR boots into the **Edge layer** — the tenant runtime. From here you can:
+
+- Navigate the **19 Control Centers** from the sidebar
+- Open the **AICC** (AI Control Center) to interact with the 14 AI agents
+- Browse the **KBCC** (Knowledge Base Control Center) to explore canonical docs
+- Access the **Studio** for pack authoring at `/studio`
+- Access the **Summit** for marketplace management at `/summit`
+
+## Next Steps
+
+<Steps>
+  <Step title="Understand the Architecture">
+    Read the [Architecture overview](/docs/architecture) to understand the three-layer system and how Studio, Edge, and Summit relate.
+  </Step>
+  <Step title="Explore Control Centers">
+    Visit the [Control Centers overview](/docs/control-centers/overview) to learn how the 19 centers coordinate platform operations.
+  </Step>
+  <Step title="Learn the Pack System">
+    Read [Pack System concepts](/docs/concepts/pack-system) to understand how capability bundles are authored, resolved, and deployed.
+  </Step>
+  <Step title="Build Your First Pack">
+    Follow the [Pack Authoring guide](/docs/studio/pack-authoring) to create and deploy your first capability pack.
+  </Step>
+</Steps>

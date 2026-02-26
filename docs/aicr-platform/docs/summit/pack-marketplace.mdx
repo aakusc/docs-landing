@@ -1,0 +1,57 @@
+---
+title: "Pack Marketplace"
+description: "Discover, evaluate, and distribute capability packs in the AICR marketplace."
+---
+
+# Pack Marketplace
+
+The Pack Marketplace is where approved packs are listed for discovery and distribution. Platform admins, enterprise tenants, and partners can browse, evaluate, and activate packs from here.
+
+## Marketplace Catalog
+
+Each pack listing includes:
+- Name, description, and version history
+- Required platform version and dependencies
+- Surfaces and capabilities provided
+- Promotion history and stability record
+- Author (BHG first-party or verified partner)
+- Usage statistics (number of active tenants)
+
+## Pack Categories
+
+| Category | Examples |
+|----------|---------|
+| **Workflow** | Approval chains, document review, onboarding |
+| **Analytics** | Dashboards, reports, cost tracking |
+| **Communication** | Notifications, email workflows, Slack integration |
+| **Compliance** | Audit trails, GDPR tooling, SOC2 controls |
+| **AI** | Specialized agent prompts, knowledge base extensions |
+| **Integration** | CRM connectors, payment gateways, data imports |
+
+## Activating a Pack
+
+Platform admins can activate marketplace packs for specific tenants or all tenants from the Summit dashboard:
+
+```bash
+# Activate from CLI
+pnpm marketplace:activate --pack approval-workflows@1.2.0 --tenant <tenantId>
+
+# Activate for all tenants on Edge tier
+pnpm marketplace:activate --pack approval-workflows@1.2.0 --tier edge
+```
+
+## Publishing to the Marketplace
+
+Packs promoted from Studio → Edge are eligible for marketplace listing once they meet:
+- 30 days of runtime stability on at least 3 tenants
+- SecurityAuditor sign-off
+- Complete documentation (all surfaces and agents documented)
+- ComplianceAgent audit for data handling
+
+The MarketplaceAgent manages the review queue and notifies authors of approval or required changes.
+
+## Partner Packs
+
+Verified partners can publish packs to the marketplace. Partner packs are reviewed by the MarketplaceAgent and must meet the same stability and documentation requirements as first-party packs.
+
+Partner packs are labeled clearly in the catalog and include the partner's verified status badge.

@@ -1,0 +1,436 @@
+---
+title: Plans API
+description: API endpoints for managing compensation plans.
+---
+
+# Plans API
+
+The Plans API provides endpoints for creating, managing, and tracking compensation plans through their lifecycle.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/plans` | List all plans |
+| POST | `/api/plans` | Create a new plan |
+| GET | `/api/plans/[id]` | Get plan by ID |
+| PATCH | `/api/plans/[id]` | Update a plan |
+| DELETE | `/api/plans/[id]` | Delete a plan |
+| POST | `/api/plans/[id]/sections` | Add plan sections |
+| PATCH | `/api/plans/[id]/sections/[sectionId]` | Update a section |
+| POST | `/api/plans/[id]/lifecycle` | Change plan status |
+| POST | `/api/plans/[id]/generate-document` | Generate document |
+| POST | `/api/plans/from-template` | Create from template |
+
+## List Plans
+
+Retrieve a list of plans with optional filtering.
+
+### Request
+
+```bash
+GET /api/plans?tenantId=acme-corp&status=active&planType=sales
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="tenantId" type="string">
+  Filter by tenant ID
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `draft`, `under_review`, `pending_approval`, `approved`, `active`, `archived`
+</ParamField>
+
+<ParamField query="planType" type="string">
+  Filter by type: `sales`, `overlay`, `management`, `support`
+</ParamField>
+
+<ParamField query="owner" type="string">
+  Filter by owner user ID
+</ParamField>
+
+<ParamField query="createdFromTemplateId" type="string">
+  Filter by source template
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "plan-2026-sales",
+      "name": "FY2026 Sales Compensation Plan",
+      "planType": "sales",
+      "status": "active",
+      "effectiveDate": "2026-01-01",
+      "endDate": "2026-12-31",
+      "owner": "user-123",
+      "version": "2.0",
+      "sectionCount": 12,
+      "createdAt": "2025-11-01T00:00:00Z",
+      "updatedAt": "2026-01-15T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 15,
+    "statistics": {
+      "byStatus": {
+        "draft": 3,
+        "active": 8,
+        "archived": 4
+      },
+      "byType": {
+        "sales": 10,
+        "overlay": 3,
+        "management": 2
+      }
+    }
+  }
+}
+```
+
+## Get Plan
+
+Retrieve a single plan with full content.
+
+### Request
+
+```bash
+GET /api/plans/plan-2026-sales
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "plan-2026-sales",
+    "name": "FY2026 Sales Compensation Plan",
+    "planType": "sales",
+    "status": "active",
+    "effectiveDate": "2026-01-01",
+    "endDate": "2026-12-31",
+    "description": "Annual compensation plan for field sales team",
+    "owner": {
+      "id": "user-123",
+      "name": "Jane Doe"
+    },
+    "sections": [
+      {
+        "id": "section-1",
+        "title": "Eligibility",
+        "order": 1,
+        "content": "This plan applies to..."
+      },
+      {
+        "id": "section-2",
+        "title": "Compensation Structure",
+        "order": 2,
+        "content": "Base salary plus variable..."
+      }
+    ],
+    "metadata": {
+      "templateId": "template-sales-standard",
+      "complianceChecked": true,
+      "lastComplianceDate": "2026-01-10T00:00:00Z"
+    },
+    "version": "2.0",
+    "versionHistory": [
+      {
+        "version": "1.0",
+        "date": "2025-11-01",
+        "changes": "Initial draft"
+      },
+      {
+        "version": "2.0",
+        "date": "2026-01-15",
+        "changes": "Updated quota structure"
+      }
+    ]
+  }
+}
+```
+
+## Create Plan
+
+Create a new compensation plan.
+
+### Request
+
+```bash
+POST /api/plans
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "FY2026 Overlay Plan",
+  "planType": "overlay",
+  "effectiveDate": "2026-01-01",
+  "endDate": "2026-12-31",
+  "description": "Solutions overlay compensation plan",
+  "tenantId": "acme-corp"
+}
+```
+
+### Parameters
+
+<ParamField path="name" type="string" required>
+  Plan display name
+</ParamField>
+
+<ParamField path="planType" type="string" required>
+  Plan type: `sales`, `overlay`, `management`, `support`
+</ParamField>
+
+<ParamField path="effectiveDate" type="string" required>
+  Start date (ISO 8601)
+</ParamField>
+
+<ParamField path="endDate" type="string" required>
+  End date (ISO 8601)
+</ParamField>
+
+<ParamField path="description" type="string">
+  Plan description
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "plan-123",
+    "name": "FY2026 Overlay Plan",
+    "status": "draft",
+    "createdAt": "2026-01-28T10:00:00Z"
+  }
+}
+```
+
+## Create from Template
+
+Create a plan based on a template.
+
+### Request
+
+```bash
+POST /api/plans/from-template
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "templateId": "template-sales-standard",
+  "name": "FY2026 Enterprise Sales Plan",
+  "effectiveDate": "2026-01-01",
+  "endDate": "2026-12-31",
+  "customizations": {
+    "{{company_name}}": "Acme Corp",
+    "{{quota_period}}": "Quarterly"
+  }
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "plan-456",
+    "name": "FY2026 Enterprise Sales Plan",
+    "status": "draft",
+    "sectionCount": 12,
+    "templateId": "template-sales-standard"
+  }
+}
+```
+
+## Update Plan
+
+Update plan details or content.
+
+### Request
+
+```bash
+PATCH /api/plans/plan-123
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Updated Plan Name",
+  "description": "Updated description"
+}
+```
+
+## Add Sections
+
+Add sections to a plan.
+
+### Request
+
+```bash
+POST /api/plans/plan-123/sections
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "sections": [
+    {
+      "title": "Commission Structure",
+      "order": 3,
+      "content": "Commission rates are as follows..."
+    }
+  ]
+}
+```
+
+## Update Section
+
+Update a specific section.
+
+### Request
+
+```bash
+PATCH /api/plans/plan-123/sections/section-1
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Updated Eligibility",
+  "content": "Updated eligibility requirements..."
+}
+```
+
+## Change Status
+
+Transition plan through workflow stages.
+
+### Request
+
+```bash
+POST /api/plans/plan-123/lifecycle
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "action": "submit_for_review",
+  "comment": "Ready for stakeholder review"
+}
+```
+
+### Actions
+
+| Action | From | To |
+|--------|------|-----|
+| `submit_for_review` | draft | under_review |
+| `request_changes` | under_review | draft |
+| `submit_for_approval` | under_review | pending_approval |
+| `approve` | pending_approval | approved |
+| `reject` | pending_approval | draft |
+| `activate` | approved | active |
+| `archive` | active | archived |
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "plan-123",
+    "status": "under_review",
+    "previousStatus": "draft",
+    "transitionedAt": "2026-01-28T10:00:00Z",
+    "transitionedBy": "user-123"
+  }
+}
+```
+
+## Generate Document
+
+Generate a formatted document from the plan.
+
+### Request
+
+```bash
+POST /api/plans/plan-123/generate-document
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "format": "pdf",
+  "options": {
+    "includeCoverPage": true,
+    "includeNotes": false
+  }
+}
+```
+
+### Parameters
+
+<ParamField path="format" type="string" required>
+  Output format: `pdf`, `docx`, `markdown`
+</ParamField>
+
+<ParamField path="options.includeCoverPage" type="boolean">
+  Include cover page (default: true)
+</ParamField>
+
+<ParamField path="options.includeNotes" type="boolean">
+  Include internal notes (default: false)
+</ParamField>
+
+### Response
+
+```json
+{
+  "documentId": "doc-789",
+  "downloadUrl": "/api/documents/doc-789/download",
+  "expiresAt": "2026-01-28T11:00:00Z"
+}
+```
+
+## Delete Plan
+
+Delete a draft plan.
+
+### Request
+
+```bash
+DELETE /api/plans/plan-123
+Authorization: Bearer <token>
+```
+
+<Warning>
+Only draft plans can be deleted. Active or archived plans cannot be deleted.
+</Warning>
+
+## Plan Types
+
+| Type | Description |
+|------|-------------|
+| `sales` | Field sales compensation |
+| `overlay` | Solutions/overlay teams |
+| `management` | Sales management compensation |
+| `support` | Support/service teams |
+
+## Plan Statuses
+
+| Status | Description |
+|--------|-------------|
+| `draft` | Work in progress |
+| `under_review` | Stakeholder review |
+| `pending_approval` | In approval workflow |
+| `approved` | Approved, ready to activate |
+| `active` | Currently in effect |
+| `archived` | No longer active |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `PLAN_NOT_FOUND` | Plan ID doesn't exist |
+| `INVALID_TRANSITION` | Status transition not allowed |
+| `PLAN_NOT_DRAFT` | Action requires draft status |
+| `SECTION_NOT_FOUND` | Section ID doesn't exist |

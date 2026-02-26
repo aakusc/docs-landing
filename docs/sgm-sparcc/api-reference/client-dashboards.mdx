@@ -1,0 +1,392 @@
+---
+title: Client Dashboards API
+description: API endpoints for tenant-specific analytics and dashboards.
+---
+
+# Client Dashboards API
+
+The Client Dashboards API provides tenant-specific analytics, coverage metrics, gap analysis, and roadmap tracking.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/client/[tenantSlug]` | Dashboard overview |
+| GET | `/api/client/[tenantSlug]/plans` | Client plans |
+| GET | `/api/client/[tenantSlug]/gaps` | Policy gaps |
+| GET | `/api/client/[tenantSlug]/roadmap` | Implementation roadmap |
+| GET | `/api/client/[tenantSlug]/policies` | Tenant policies |
+| GET | `/api/client/[tenantSlug]/engagement` | Engagement status |
+
+## Dashboard Overview
+
+Get summary metrics for a tenant.
+
+### Request
+
+```bash
+GET /api/client/acme-corp
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "tenant": {
+      "id": "acme-corp",
+      "name": "Acme Corporation",
+      "tier": "PRODUCTION"
+    },
+    "metrics": {
+      "coverageScore": 78,
+      "complianceScore": 85,
+      "gapCount": 12,
+      "activePlans": 8,
+      "pendingApprovals": 3,
+      "openCases": 5
+    },
+    "trends": {
+      "coverageChange": 5,
+      "gapsClosed": 3,
+      "periodDays": 30
+    },
+    "riskLevel": "medium"
+  }
+}
+```
+
+## Client Plans
+
+Get compensation plans with coverage analysis.
+
+### Request
+
+```bash
+GET /api/client/acme-corp/plans?status=active
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="status" type="string">
+  Filter by status: `draft`, `active`, `archived`
+</ParamField>
+
+<ParamField query="planType" type="string">
+  Filter by type: `sales`, `overlay`, `management`
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "plan-2026-sales",
+      "name": "FY2026 Sales Plan",
+      "planType": "sales",
+      "status": "active",
+      "effectiveDate": "2026-01-01",
+      "coverage": {
+        "score": 82,
+        "grade": "B",
+        "coveredPolicies": 14,
+        "totalPolicies": 17
+      },
+      "risk": {
+        "level": "low",
+        "openGaps": 3,
+        "criticalGaps": 0
+      },
+      "lastAnalyzed": "2026-01-15T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 8,
+    "averageCoverage": 78,
+    "byStatus": {
+      "active": 5,
+      "draft": 2,
+      "archived": 1
+    }
+  }
+}
+```
+
+## Policy Gaps
+
+Get gap analysis results for the tenant.
+
+### Request
+
+```bash
+GET /api/client/acme-corp/gaps?severity=high&policyId=scp-001
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="severity" type="string">
+  Filter by severity: `critical`, `high`, `medium`, `low`
+</ParamField>
+
+<ParamField query="policyId" type="string">
+  Filter by policy ID
+</ParamField>
+
+<ParamField query="planId" type="string">
+  Filter by plan ID
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `open`, `in_progress`, `resolved`
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "gap-001",
+      "policyId": "scp-001",
+      "policyName": "Clawback and Recovery",
+      "planId": "plan-2026-sales",
+      "planName": "FY2026 Sales Plan",
+      "severity": "high",
+      "status": "open",
+      "description": "Missing clawback timeline specification",
+      "evidence": "Plan section 4.2 mentions clawback but doesn't specify the recovery period",
+      "recommendation": "Add explicit 90-day clawback window language",
+      "patchAvailable": true,
+      "createdAt": "2026-01-15T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 12,
+    "bySeverity": {
+      "critical": 2,
+      "high": 5,
+      "medium": 3,
+      "low": 2
+    },
+    "byStatus": {
+      "open": 8,
+      "in_progress": 3,
+      "resolved": 1
+    }
+  }
+}
+```
+
+## Implementation Roadmap
+
+Get the engagement roadmap and milestone tracking.
+
+### Request
+
+```bash
+GET /api/client/acme-corp/roadmap
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "engagement": {
+      "id": "eng-acme-2026",
+      "startDate": "2025-11-01",
+      "targetDate": "2026-03-01",
+      "status": "in_progress"
+    },
+    "phases": [
+      {
+        "id": "phase-1",
+        "name": "Assessment",
+        "status": "completed",
+        "startDate": "2025-11-01",
+        "endDate": "2025-12-01",
+        "progress": 100,
+        "milestones": [
+          {
+            "name": "Document collection",
+            "status": "completed",
+            "date": "2025-11-15"
+          },
+          {
+            "name": "Gap analysis",
+            "status": "completed",
+            "date": "2025-11-30"
+          }
+        ]
+      },
+      {
+        "id": "phase-2",
+        "name": "Remediation",
+        "status": "in_progress",
+        "startDate": "2025-12-01",
+        "endDate": "2026-02-01",
+        "progress": 45,
+        "milestones": [
+          {
+            "name": "Critical gaps addressed",
+            "status": "completed",
+            "date": "2026-01-15"
+          },
+          {
+            "name": "High gaps addressed",
+            "status": "in_progress",
+            "targetDate": "2026-01-31"
+          }
+        ]
+      },
+      {
+        "id": "phase-3",
+        "name": "Validation",
+        "status": "pending",
+        "startDate": "2026-02-01",
+        "endDate": "2026-03-01",
+        "progress": 0
+      }
+    ],
+    "overallProgress": 55
+  }
+}
+```
+
+## Tenant Policies
+
+Get policies available to the tenant.
+
+### Request
+
+```bash
+GET /api/client/acme-corp/policies?category=financial
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "scp-001",
+      "code": "SCP-001",
+      "name": "Clawback and Recovery",
+      "category": "Financial Controls",
+      "status": "published",
+      "source": "standard",
+      "coverage": {
+        "plansWithCoverage": 6,
+        "totalPlans": 8,
+        "percentage": 75
+      }
+    },
+    {
+      "id": "custom-001",
+      "code": "ACME-001",
+      "name": "Custom Territory Rules",
+      "category": "Territory Rules",
+      "status": "published",
+      "source": "tenant",
+      "coverage": {
+        "plansWithCoverage": 8,
+        "totalPlans": 8,
+        "percentage": 100
+      }
+    }
+  ],
+  "meta": {
+    "standardPolicies": 17,
+    "customPolicies": 3,
+    "averageCoverage": 78
+  }
+}
+```
+
+## Engagement Status
+
+Get engagement and onboarding status.
+
+### Request
+
+```bash
+GET /api/client/acme-corp/engagement
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "eng-acme-2026",
+    "status": "active",
+    "type": "implementation",
+    "startDate": "2025-11-01",
+    "targetCompletionDate": "2026-03-01",
+    "currentPhase": {
+      "id": "phase-2",
+      "name": "Remediation",
+      "progress": 45
+    },
+    "contacts": {
+      "primary": {
+        "name": "Jane Doe",
+        "email": "jane@acme.com",
+        "role": "Project Lead"
+      },
+      "sponsor": {
+        "name": "John Smith",
+        "email": "john@acme.com",
+        "role": "VP Sales Operations"
+      }
+    },
+    "metrics": {
+      "daysRemaining": 32,
+      "tasksCompleted": 24,
+      "tasksTotal": 45,
+      "gapsResolved": 8,
+      "gapsTotal": 12
+    },
+    "nextMilestone": {
+      "name": "High gaps addressed",
+      "targetDate": "2026-01-31",
+      "daysRemaining": 3
+    }
+  }
+}
+```
+
+## Coverage Metrics
+
+Coverage scores are calculated as:
+
+| Metric | Calculation |
+|--------|-------------|
+| **Coverage Score** | (Covered policies / Total policies) × 100 |
+| **Compliance Score** | Coverage weighted by policy criticality |
+| **Risk Level** | Based on critical/high gap count |
+
+### Risk Levels
+
+| Level | Criteria |
+|-------|----------|
+| `low` | 0 critical, ≤2 high gaps |
+| `medium` | 0 critical, 3-5 high gaps |
+| `high` | 1+ critical or 6+ high gaps |
+| `critical` | 2+ critical gaps |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `TENANT_NOT_FOUND` | Tenant slug doesn't exist |
+| `ACCESS_DENIED` | User doesn't have tenant access |
+| `PLAN_NOT_FOUND` | Plan ID doesn't exist |
+| `ENGAGEMENT_NOT_FOUND` | No active engagement |

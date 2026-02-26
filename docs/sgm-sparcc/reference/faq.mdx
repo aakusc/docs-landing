@@ -1,0 +1,225 @@
+---
+title: FAQ
+description: Frequently asked questions about SGM.
+---
+
+# Frequently Asked Questions
+
+Common questions about using SGM for sales compensation governance.
+
+## General
+
+<AccordionGroup>
+  <Accordion title="What is SGM?">
+    SGM (Sales Governance Manager) is an enterprise platform for managing sales compensation program governance. It provides tools for policy management, gap analysis, approval workflows, and compliance monitoring.
+  </Accordion>
+  <Accordion title="Who uses SGM?">
+    SGM is used by:
+    - **Sales Operations** - Managing compensation plans and policies
+    - **Finance** - Overseeing commission payments and controls
+    - **Legal** - Ensuring compliance with regulations
+    - **HR** - Managing employee compensation lifecycle
+    - **Executives** - Monitoring governance health
+  </Accordion>
+  <Accordion title="What are the operational modes?">
+    SGM has four modes:
+    - **Design** - Create policies and frameworks
+    - **Operate** - Daily operations and approvals
+    - **Dispute** - Handle cases and exceptions
+    - **Oversee** - Executive oversight and compliance
+  </Accordion>
+</AccordionGroup>
+
+## Gap Analysis
+
+<AccordionGroup>
+  <Accordion title="What file types can I upload?">
+    SGM accepts:
+    - PDF (.pdf)
+    - Microsoft Word (.docx, .doc)
+    - Plain Text (.txt)
+    - Microsoft Excel (.xlsx, .xls)
+
+    Maximum file size is 50MB.
+  </Accordion>
+  <Accordion title="How long does analysis take?">
+    Typical analysis takes 6-9 seconds per document. Larger or more complex documents may take longer.
+  </Accordion>
+  <Accordion title="What do the coverage grades mean?">
+    - **Grade A**: Strong coverage, minor gaps only
+    - **Grade B**: Good coverage, some gaps to address
+    - **Grade C**: Significant gaps requiring attention
+  </Accordion>
+  <Accordion title="What is a liability score?">
+    The liability score (1-5) indicates compliance risk:
+    - **1-2**: Low risk
+    - **3**: Medium risk
+    - **4-5**: High risk requiring immediate attention
+  </Accordion>
+</AccordionGroup>
+
+## Policies
+
+<AccordionGroup>
+  <Accordion title="Can I modify the SCP policies?">
+    No, the 17 Sales Compensation Policies (SCPs) are read-only standards. However, you can:
+    - Create custom policies based on SCPs
+    - Add tenant-specific policies
+    - Extend SCP requirements for your organization
+  </Accordion>
+  <Accordion title="How often are policies updated?">
+    SCP policies are reviewed annually and updated for regulatory changes or industry best practices. Update notifications are provided in the release notes.
+  </Accordion>
+  <Accordion title="Which policies require legal review?">
+    Policies requiring legal review:
+    - SCP-001: Clawback and Recovery
+    - SCP-002: Quota Management
+    - SCP-003: Windfall and Large Deal
+    - SCP-004: SPIF Governance
+    - SCP-005: Section 409A Compliance
+    - SCP-006: State Wage Law Compliance
+  </Accordion>
+</AccordionGroup>
+
+## Approvals
+
+<AccordionGroup>
+  <Accordion title="What are the default SLAs?">
+    **SGCC**:
+    - Urgent: 1 day
+    - High: 3 days
+    - Medium: 5 days
+    - Low: 10 days
+
+    **CRB**:
+    - Urgent: Same day
+    - High: 2 days
+    - Medium: 3 days
+    - Low: 5 days
+  </Accordion>
+  <Accordion title="What happens when an SLA is exceeded?">
+    Items approaching SLA deadline are highlighted. Overdue items are automatically escalated based on configuration. Notifications are sent to the assignee and their manager.
+  </Accordion>
+  <Accordion title="Can I delegate approvals?">
+    Yes, users can set up delegation for periods when they're unavailable. Go to Settings → Profile → Delegation to configure.
+  </Accordion>
+</AccordionGroup>
+
+## AI Assistant
+
+<AccordionGroup>
+  <Accordion title="What can AskSGM answer?">
+    AskSGM can answer questions about:
+    - Policy content and requirements
+    - Procedures and workflows
+    - Compliance questions
+    - Definitions and terminology
+
+    It cannot provide legal advice or make decisions.
+  </Accordion>
+  <Accordion title="Is my data used to train the AI?">
+    No. Your queries and documents are not used to train AI models. Data is processed only to generate responses and is handled according to privacy policies.
+  </Accordion>
+  <Accordion title="What are the rate limits?">
+    Default limits:
+    - 30 requests per minute per user
+    - 1,000 requests per day per tenant
+  </Accordion>
+</AccordionGroup>
+
+## Administration
+
+<AccordionGroup>
+  <Accordion title="What are the user roles?">
+    - **SUPER_ADMIN**: Full system access across all tenants
+    - **ADMIN**: Full access within assigned tenant
+    - **MANAGER**: Management features, limited admin
+    - **USER**: Standard features
+    - **VIEWER**: Read-only access
+  </Accordion>
+  <Accordion title="How do I add users?">
+    1. Go to Settings → Admin → Users
+    2. Click Add User
+    3. Enter name, email, role, and tenant
+    4. User receives invitation email
+  </Accordion>
+  <Accordion title="What are tenant tiers?">
+    - **DEMO**: Limited features, synthetic data
+    - **BETA**: Full features, limited support
+    - **PRODUCTION**: Full features, full support
+  </Accordion>
+</AccordionGroup>
+
+## Technical
+
+<AccordionGroup>
+  <Accordion title="What are the system requirements?">
+    - Node.js 18.x or later
+    - npm 9.x or later
+    - Modern browser (Chrome, Firefox, Safari, Edge)
+  </Accordion>
+  <Accordion title="What database does SGM use?">
+    SGM uses SQLite by default with Prisma ORM. The database file is stored at `prisma/data/sgm.db`.
+  </Accordion>
+  <Accordion title="What is binding mode?">
+    Binding mode determines the data source:
+    - **synthetic**: In-memory demo data
+    - **mapped**: External API adapters
+    - **live**: Prisma database
+
+    Set via `BINDING_MODE` environment variable.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I can't log in">
+    - Verify your email address
+    - Try resetting your password
+    - Clear browser cookies
+    - Contact your administrator
+  </Accordion>
+  <Accordion title="Analysis is stuck">
+    - Check file size (max 50MB)
+    - Verify file type is supported
+    - Try uploading again
+    - Contact support if persists
+  </Accordion>
+  <Accordion title="AI isn't responding">
+    - Check AI health at /__ai/health
+    - Verify rate limits haven't been exceeded
+    - Check ANTHROPIC_API_KEY is configured
+    - Contact administrator
+  </Accordion>
+  <Accordion title="Data looks different than expected">
+    Check the binding mode:
+    - `synthetic` mode shows demo data
+    - `live` mode shows database data
+
+    Also check the data type filter (Demo, Template, Client).
+  </Accordion>
+</AccordionGroup>
+
+## Getting Help
+
+<AccordionGroup>
+  <Accordion title="How do I get support?">
+    - **Documentation**: You're reading it!
+    - **Knowledge Base**: 929 cards covering SPM concepts
+    - **AskSGM**: AI assistant for governance questions
+    - **Support**: Contact your system administrator
+  </Accordion>
+  <Accordion title="How do I report a bug?">
+    Gather:
+    - Steps to reproduce
+    - Expected vs actual behavior
+    - Error messages
+    - Browser and version
+
+    Contact your administrator with this information.
+  </Accordion>
+  <Accordion title="Where can I find release notes?">
+    Release notes are available in the documentation under the admin section or from your administrator.
+  </Accordion>
+</AccordionGroup>

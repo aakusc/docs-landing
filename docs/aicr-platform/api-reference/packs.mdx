@@ -1,0 +1,90 @@
+---
+title: "Packs API"
+description: "List, activate, and manage pack versions via the API."
+---
+
+# Packs API
+
+Manage pack lifecycle programmatically — list available packs, activate them for tenants, and monitor version status.
+
+## List Available Packs
+
+```http
+GET /api/packs
+```
+
+Returns all packs available in the marketplace.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "packs": [
+      {
+        "id": "approval-workflows",
+        "name": "Approval Workflows",
+        "latestVersion": "1.2.0",
+        "tier": "edge",
+        "status": "certified"
+      }
+    ],
+    "total": 47
+  }
+}
+```
+
+## Get Pack Details
+
+```http
+GET /api/packs/:packId
+```
+
+Returns manifest, version history, and certification status.
+
+## List Tenant Packs
+
+```http
+GET /api/tenants/:tenantId/packs
+```
+
+Returns all packs currently active for a tenant, including resolved versions.
+
+## Activate a Pack
+
+```http
+POST /api/tenants/:tenantId/packs
+```
+
+**Body:**
+```json
+{
+  "packId": "approval-workflows",
+  "version": "1.2.0"
+}
+```
+
+Activates the pack for the specified tenant. Dependencies are resolved and activated automatically.
+
+## Deactivate a Pack
+
+```http
+DELETE /api/tenants/:tenantId/packs/:packId
+```
+
+Deactivates the pack. Dependent packs are also deactivated unless `force: false` is specified.
+
+**Body:**
+```json
+{
+  "force": true
+}
+```
+
+## Rollback a Pack
+
+```http
+POST /api/tenants/:tenantId/packs/:packId/rollback
+```
+
+Reverts to the previous active version.

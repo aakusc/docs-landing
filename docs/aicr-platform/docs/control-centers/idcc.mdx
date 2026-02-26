@@ -1,0 +1,72 @@
+---
+title: "Identity Control Center"
+description: "Users, roles, permissions, and authentication configuration."
+---
+
+# Identity Control Center (IDCC)
+
+The IDCC manages all identity and access management for AICR. It controls users, roles, permissions, and authentication configuration across all tenants.
+
+## What IDCC Manages
+
+- **Users** — create, invite, suspend, and manage user accounts
+- **Roles** — define role templates and assign roles to users
+- **Permissions** — fine-grained permission policies per role
+- **Auth configuration** — SSO, MFA, session policies
+- **API keys** — manage machine-to-machine authentication
+- **Audit** — who accessed what, when (feeds into GOCC)
+
+## Role System
+
+Roles are defined per tenant and composed of permission sets:
+
+| Default Role | Default Permissions |
+|-------------|---------------------|
+| **Owner** | Full access including billing and user management |
+| **Admin** | Full platform access, no billing |
+| **Operator** | Access to operational control centers |
+| **Viewer** | Read-only access to dashboards and reports |
+| **Agent** | Machine role for AI agent API access |
+
+Custom roles can be created by combining permission sets from the role editor.
+
+## Permission Scoping
+
+Permissions follow a resource:action pattern:
+
+```
+packs:read          — view pack listings
+packs:activate      — enable packs for tenants
+tenants:manage      — create and configure tenants
+agents:invoke       — trigger agent work items
+reports:export      — download compliance reports
+```
+
+## SSO Configuration
+
+Enterprise tenants can configure SSO via SAML 2.0 or OIDC:
+
+<Steps>
+  <Step title="Navigate to IDCC → Auth Configuration">
+    Open authentication settings from the Identity Control Center.
+  </Step>
+  <Step title="Choose SSO protocol">
+    Select SAML 2.0 or OIDC. Download the service provider metadata or callback URL.
+  </Step>
+  <Step title="Configure your identity provider">
+    Set up AICR as a service provider in your IdP (Okta, Azure AD, etc.).
+  </Step>
+  <Step title="Map attributes">
+    Map IdP user attributes to AICR fields (email, name, role claims).
+  </Step>
+  <Step title="Test and enforce">
+    Run an SSO test login, then optionally enforce SSO-only access.
+  </Step>
+</Steps>
+
+## MFA
+
+MFA can be required at the tenant level:
+- **TOTP** — authenticator apps (Google Authenticator, Authy)
+- **WebAuthn** — hardware keys and passkeys
+- **Email OTP** — one-time codes via email (fallback only)

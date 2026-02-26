@@ -1,0 +1,67 @@
+---
+title: "Manifest Validation"
+description: "How pack manifests are validated before promotion."
+---
+
+# Manifest Validation
+
+Every pack manifest is validated against the platform's schema contract before it can be promoted. Validation catches errors early — before they reach tenant environments.
+
+## Running Validation
+
+```bash
+# Validate a single pack
+pnpm pack:validate --pack approval-workflows
+
+# Validate all packs
+pnpm pack:validate --all
+```
+
+## What Gets Validated
+
+### Schema Contract
+
+The manifest must conform to the platform's JSON schema. Required fields, enum values, and nested structures are all checked.
+
+### Dependency Resolution
+
+The platform resolves the full dependency graph and checks:
+- All required packs exist and are at compatible versions
+- No circular dependencies
+- Required platform version is met
+
+### Model Ownership
+
+Each model declared in `provides.models` must:
+- Exist in the pack's `schema.prisma`
+- Include `tenantId` if `tenantScoped: true`
+- Follow Pattern A naming conventions
+
+### Surface Registration
+
+Each surface in `provides.surfaces` must:
+- Have a corresponding component file in `surfaces/`
+- Export a default React component
+- Accept the standard tenant context props
+
+## Validation Output
+
+```
+✓ Schema contract valid
+✓ Dependencies resolved: identity-management@2.1.0
+✓ Models validated: ApprovalRequest, ApprovalChain, ApprovalStep
+✗ Surface "approval-form" missing default export
+  → surfaces/form.tsx must export a default React component
+
+1 error found. Fix before promoting.
+```
+
+## Common Errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `missing tenantId` | Tenant-scoped model without tenantId field | Add `tenantId String @map("tenant_id")` |
+| `circular dependency` | Pack A requires Pack B which requires Pack A | Restructure dependencies |
+| `version incompatible` | Required pack version not satisfied | Update required version range |
+| `unknown model` | Model in manifest not in schema.prisma | Add model to pack schema |
+| `pattern-a violation` | camelCase field without @map | Add `@map("snake_case")` to field |

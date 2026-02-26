@@ -1,0 +1,44 @@
+---
+title: "Document Control Center"
+description: "Document workflows, version control, and template management."
+---
+
+# Document Control Center (DOCC)
+
+The DOCC manages structured documents within the platform — policies, contracts, reports, and any other content that requires versioning, approval, and lifecycle management.
+
+## What DOCC Manages
+
+- **Document library** — all tenant documents with version history
+- **Templates** — reusable document structures for common document types
+- **Workflows** — review, approval, and publishing workflows for documents
+- **Version control** — full history of every document change with diff view
+- **Access control** — who can view, edit, approve, and publish each document
+
+## Document Types
+
+| Type | Examples |
+|------|---------|
+| Policy | Compensation policies, HR policies, usage policies |
+| Contract | Partner agreements, SLAs, vendor contracts |
+| Report | Compliance reports, analytics exports, audit summaries |
+| Template | Standard document structures for repeated use |
+| Knowledge | Internal guides, SOPs, runbooks |
+
+## Document Lifecycle
+
+```
+Draft → Review → Approved → Published → Archived
+```
+
+Each transition is governed by a configurable workflow. The GOCC integration means all transitions are automatically recorded in the audit trail.
+
+## Version Control
+
+Every save creates a new version. The DOCC stores:
+- Full document content at each version
+- Who made the change
+- What changed (diff view)
+- Why it changed (required change reason for published docs)
+
+Documents can be rolled back to any previous version with a single action.

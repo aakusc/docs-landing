@@ -1,0 +1,137 @@
+---
+title: Admin Guide Overview
+description: Configure, deploy, and manage SGM for your organization.
+---
+
+# Admin Guide Overview
+
+This guide covers system administration tasks for SGM, including setup, user management, tenant configuration, and integrations.
+
+## Who This Guide Is For
+
+This guide is for:
+- **System administrators** deploying and maintaining SGM
+- **IT teams** managing integrations and infrastructure
+- **Operations leads** configuring workflows and tenants
+
+## Admin Capabilities
+
+| Capability | SUPER_ADMIN | ADMIN |
+|------------|-------------|-------|
+| System setup | ✅ | - |
+| User management | ✅ | Own tenant only |
+| Tenant configuration | ✅ | Own tenant only |
+| Workflow configuration | ✅ | ✅ |
+| Integrations | ✅ | View only |
+| Audit access | ✅ | ✅ |
+
+## Getting Started
+
+<CardGroup cols={2}>
+  <Card title="System Setup" icon="server" href="/admin-guide/system-setup">
+    Initial deployment and configuration
+  </Card>
+  <Card title="User Management" icon="users" href="/admin-guide/user-management">
+    Manage users, roles, and permissions
+  </Card>
+  <Card title="Tenant Configuration" icon="building" href="/admin-guide/tenant-configuration">
+    Configure multi-tenant settings
+  </Card>
+  <Card title="Workflow Configuration" icon="diagram-project" href="/admin-guide/workflow-configuration">
+    Set up approval workflows
+  </Card>
+</CardGroup>
+
+## Key Admin Tasks
+
+### Initial Setup
+
+1. [Deploy the application](/admin-guide/system-setup#deployment)
+2. [Configure environment variables](/admin-guide/system-setup#environment-configuration)
+3. [Set up the database](/admin-guide/system-setup#database-setup)
+4. [Create initial admin user](/admin-guide/user-management#first-user)
+
+### Ongoing Administration
+
+- Add and manage users
+- Configure tenant settings
+- Monitor system health
+- Review audit logs
+- Manage integrations
+
+## Architecture Overview
+
+SGM uses a **Contracts + Ports + Bindings** architecture:
+
+| Layer | Purpose |
+|-------|---------|
+| **Contracts** | Zod schemas defining data structures |
+| **Ports** | Service interfaces |
+| **Bindings** | Provider implementations |
+
+### Binding Modes
+
+| Mode | Data Source | Use Case |
+|------|-------------|----------|
+| **Synthetic** | In-memory demo data | Development, demos |
+| **Mapped** | External API adapters | Integrations |
+| **Live** | Prisma database | Production |
+
+Set via `BINDING_MODE` environment variable.
+
+## Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Framework | Next.js 14+ (App Router) |
+| Language | TypeScript |
+| Database | SQLite (local) via Prisma |
+| Authentication | NextAuth |
+| Styling | Tailwind CSS |
+| Validation | Zod |
+
+## Key Directories
+
+```
+app/
+├── api/              # API routes
+├── (app)/            # Application pages
+└── auth/             # Authentication pages
+
+lib/
+├── contracts/        # Zod schemas
+├── ports/            # Service interfaces
+├── bindings/         # Provider implementations
+├── config/           # Configuration
+└── services/         # Business logic
+
+prisma/
+├── schema.prisma     # Database schema
+└── data/sgm.db       # SQLite database
+```
+
+## Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `.env` | Environment variables |
+| `prisma/schema.prisma` | Database schema |
+| `lib/config/` | Application configuration |
+
+## Default Ports
+
+| Service | Port | Notes |
+|---------|------|-------|
+| SGM App | 3030 | Main application |
+| Prisma Studio | 5555 | Database admin (dev) |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="System Setup" icon="server" href="/admin-guide/system-setup">
+    Deploy and configure SGM
+  </Card>
+  <Card title="User Management" icon="users" href="/admin-guide/user-management">
+    Set up users and roles
+  </Card>
+</CardGroup>

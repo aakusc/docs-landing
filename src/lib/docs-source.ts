@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-const DOCS_ROOT = path.join(process.cwd(), "..", "docs-main", "docs");
+const DOCS_ROOT = path.join(process.cwd(), "docs");
 
 export const PRODUCTS: Record<string, { dir: string; name: string; appUrl?: string }> = {
   sgm: { dir: "sgm-sparcc", name: "SGM SPARCC", appUrl: "https://sgm.aicoderally.com" },

@@ -1,0 +1,61 @@
+---
+title: "Operations Control Center"
+description: "Incidents, deployments, health monitoring, and platform telemetry."
+---
+
+# Operations Control Center (OPCC)
+
+The OPCC is the operational backbone of AICR. It provides real-time health monitoring, incident management, deployment tracking, and the telemetry dashboard for the platform.
+
+## What OPCC Manages
+
+- **Platform health** — real-time status of all services and control centers
+- **Incident management** — P0-P3 incident lifecycle with OpsChief agent
+- **Deployment history** — record of all pack promotions and platform updates
+- **Telemetry** — usage metrics, error rates, latency, cost per operation
+- **Alerts** — configuration and history of all active alert rules
+- **On-call** — rotation schedules and escalation paths
+
+## Health Dashboard
+
+The OPCC health dashboard shows real-time status:
+
+| Service | Status | Latency (p99) | Error Rate |
+|---------|--------|---------------|------------|
+| API Gateway | ✅ Healthy | 142ms | 0.01% |
+| Pack Resolver | ✅ Healthy | 28ms | 0.00% |
+| Agent Conductor | ✅ Healthy | — | 0.00% |
+| Database (Neon) | ✅ Healthy | 18ms | 0.00% |
+| KBCC Search | ✅ Healthy | 210ms | 0.02% |
+
+## Incident Management
+
+Incidents are classified by priority:
+
+| Priority | Response Time | Example |
+|----------|-------------|---------|
+| **P0** | Immediate | Platform down, data loss risk, security breach |
+| **P1** | < 1 hour | Major feature unavailable, significant performance degradation |
+| **P2** | < 4 hours | Minor feature degraded, elevated error rate |
+| **P3** | Next business day | Cosmetic issues, non-critical bugs |
+
+P0 and P1 incidents automatically create an OpsChief agent work item and trigger the on-call alert via the INCC.
+
+## OpsChief Agent
+
+The OpsChief agent handles incident response:
+1. Analyzes telemetry to identify the root cause
+2. Checks deployment history for recent changes
+3. Proposes remediation steps
+4. Executes safe automated remediations (restarts, rollbacks)
+5. Escalates to human operator when manual intervention is needed
+
+## Deployment Tracking
+
+Every platform change is recorded:
+- Pack promotions and rollbacks
+- Platform version updates
+- Infrastructure changes
+- Neon migration runs
+
+The deployment timeline view correlates deployments with telemetry spikes, making root cause analysis faster.

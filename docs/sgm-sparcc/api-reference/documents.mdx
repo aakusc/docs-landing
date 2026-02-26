@@ -1,0 +1,393 @@
+---
+title: Documents API
+description: API endpoints for document upload, processing, and management.
+---
+
+# Documents API
+
+The Documents API provides endpoints for uploading, processing, and managing governance documents including compensation plans, policies, and procedures.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/sgm/documents` | List all documents |
+| POST | `/api/sgm/documents` | Create document metadata |
+| GET | `/api/sgm/documents/[id]` | Get document by ID |
+| PATCH | `/api/sgm/documents/[id]` | Update document |
+| DELETE | `/api/sgm/documents/[id]` | Delete document |
+| POST | `/api/sgm/documents/[id]/lifecycle` | Change status |
+| GET | `/api/sgm/documents/[id]/versions` | Get version history |
+| GET | `/api/sgm/documents/[id]/download` | Download document |
+| POST | `/api/client/[tenant]/documents/upload` | Upload file |
+| GET | `/api/client/[tenant]/documents/[id]/status` | Processing status |
+
+## Upload Document
+
+Upload a compensation plan or governance document for processing.
+
+### Request
+
+```bash
+POST /api/client/acme-corp/documents/upload
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+file: <binary data>
+```
+
+### Supported File Types
+
+| Type | Extensions | Max Size |
+|------|------------|----------|
+| PDF | `.pdf` | 50 MB |
+| Word | `.docx`, `.doc` | 50 MB |
+| Text | `.txt` | 50 MB |
+| Excel | `.xlsx`, `.xls` | 50 MB |
+
+### Response
+
+```json
+{
+  "success": true,
+  "documentId": "doc-abc123",
+  "status": "UPLOADED",
+  "fileName": "Compensation Plan 2026.pdf",
+  "fileSize": 12582912
+}
+```
+
+## Processing Status
+
+Check the processing status of an uploaded document.
+
+### Request
+
+```bash
+GET /api/client/acme-corp/documents/doc-abc123/status
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "id": "doc-abc123",
+  "status": "ANALYZED",
+  "progress": 100,
+  "stages": {
+    "upload": "complete",
+    "parsing": "complete",
+    "mapping": "complete",
+    "analyzing": "complete"
+  },
+  "sections": [
+    {
+      "id": "section-1",
+      "title": "Eligibility",
+      "wordCount": 450
+    }
+  ],
+  "analysisResult": {
+    "coverageGrade": "B",
+    "liabilityScore": 2,
+    "gapCount": 8,
+    "riskTriggers": 2
+  }
+}
+```
+
+### Processing Statuses
+
+| Status | Description |
+|--------|-------------|
+| `UPLOADED` | File received |
+| `PARSING` | Extracting text |
+| `PARSED` | Text extracted |
+| `MAPPING` | Mapping sections |
+| `MAPPED` | Sections identified |
+| `ANALYZING` | Running gap analysis |
+| `ANALYZED` | Analysis complete |
+| `READY` | Ready for review |
+| `COMPLETED` | Fully processed |
+
+## List Documents
+
+Retrieve a list of documents with optional filtering.
+
+### Request
+
+```bash
+GET /api/sgm/documents?tenantId=acme-corp&status=APPROVED&type=POLICY
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="tenantId" type="string">
+  Filter by tenant ID
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status
+</ParamField>
+
+<ParamField query="type" type="string">
+  Filter by type: `FRAMEWORK`, `POLICY`, `PROCEDURE`, `TEMPLATE`, `CHECKLIST`, `GUIDE`
+</ParamField>
+
+<ParamField query="search" type="string">
+  Full-text search
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "doc-123",
+      "code": "POL-001",
+      "title": "Clawback Policy",
+      "type": "POLICY",
+      "status": "APPROVED",
+      "version": "2.0",
+      "owner": "user-123",
+      "lastUpdated": "2026-01-15T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 70,
+    "statistics": {
+      "byStatus": {
+        "DRAFT": 5,
+        "APPROVED": 45,
+        "ACTIVE": 15,
+        "ARCHIVED": 5
+      },
+      "byType": {
+        "POLICY": 20,
+        "PROCEDURE": 15,
+        "TEMPLATE": 25,
+        "GUIDE": 10
+      }
+    }
+  }
+}
+```
+
+## Get Document
+
+Retrieve a single document with full details.
+
+### Request
+
+```bash
+GET /api/sgm/documents/doc-123
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "doc-123",
+    "code": "POL-001",
+    "title": "Clawback Policy",
+    "type": "POLICY",
+    "status": "APPROVED",
+    "version": "2.0",
+    "content": "Full document content...",
+    "owner": {
+      "id": "user-123",
+      "name": "Jane Doe"
+    },
+    "metadata": {
+      "wordCount": 2500,
+      "pageCount": 8,
+      "legalReview": true,
+      "expirationDate": "2027-01-15"
+    },
+    "relationships": {
+      "policies": ["scp-001"],
+      "relatedDocuments": ["doc-456"]
+    },
+    "analysisResult": {
+      "coverageGrade": "A",
+      "gaps": []
+    }
+  }
+}
+```
+
+## Create Document Metadata
+
+Create document metadata (file upload separate).
+
+### Request
+
+```bash
+POST /api/sgm/documents
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "code": "PROC-001",
+  "title": "Commission Calculation Procedure",
+  "type": "PROCEDURE",
+  "description": "Step-by-step commission calculation process",
+  "tenantId": "acme-corp"
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "doc-789",
+    "code": "PROC-001",
+    "status": "DRAFT",
+    "createdAt": "2026-01-28T10:00:00Z"
+  }
+}
+```
+
+## Update Document
+
+Update document metadata or content.
+
+### Request
+
+```bash
+PATCH /api/sgm/documents/doc-123
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Updated Title",
+  "content": "Updated content..."
+}
+```
+
+## Change Status
+
+Transition document through workflow stages.
+
+### Request
+
+```bash
+POST /api/sgm/documents/doc-123/lifecycle
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "action": "submit_for_approval",
+  "comment": "Ready for legal review"
+}
+```
+
+### Actions
+
+| Action | From | To |
+|--------|------|-----|
+| `submit_for_review` | DRAFT | UNDER_REVIEW |
+| `request_changes` | UNDER_REVIEW | DRAFT |
+| `submit_for_approval` | UNDER_REVIEW | PENDING_APPROVAL |
+| `approve` | PENDING_APPROVAL | APPROVED |
+| `activate` | APPROVED | ACTIVE |
+| `archive` | ACTIVE | ARCHIVED |
+| `expire` | ACTIVE | EXPIRED |
+
+## Get Version History
+
+Retrieve all versions of a document.
+
+### Request
+
+```bash
+GET /api/sgm/documents/doc-123/versions
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "version": "2.0",
+      "date": "2026-01-15T00:00:00Z",
+      "author": "Jane Doe",
+      "changes": "Updated commission rates"
+    },
+    {
+      "version": "1.0",
+      "date": "2025-06-01T00:00:00Z",
+      "author": "John Smith",
+      "changes": "Initial version"
+    }
+  ]
+}
+```
+
+## Download Document
+
+Download the original document file.
+
+### Request
+
+```bash
+GET /api/sgm/documents/doc-123/download
+Authorization: Bearer <token>
+```
+
+### Response
+
+Binary file download with appropriate content-type header.
+
+## Document Types
+
+| Type | Description |
+|------|-------------|
+| `FRAMEWORK` | High-level governance structure |
+| `POLICY` | Formal policy document |
+| `PROCEDURE` | Step-by-step process |
+| `TEMPLATE` | Reusable template |
+| `CHECKLIST` | Compliance checklist |
+| `GUIDE` | How-to documentation |
+
+## Document Statuses
+
+| Status | Description |
+|--------|-------------|
+| `DRAFT` | Work in progress |
+| `UNDER_REVIEW` | Stakeholder review |
+| `PENDING_APPROVAL` | In approval workflow |
+| `APPROVED` | Approved |
+| `ACTIVE` | Currently in effect |
+| `ARCHIVED` | No longer active |
+| `EXPIRED` | Past expiration date |
+
+## Gap Analysis Results
+
+When documents are analyzed, results include:
+
+| Field | Description |
+|-------|-------------|
+| `coverageGrade` | A, B, or C |
+| `liabilityScore` | 1-5 (lower is better) |
+| `gapCount` | Number of gaps found |
+| `riskTriggers` | High-risk patterns detected |
+| `gaps` | Array of identified gaps |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `DOCUMENT_NOT_FOUND` | Document ID doesn't exist |
+| `UNSUPPORTED_FILE_TYPE` | File type not allowed |
+| `FILE_TOO_LARGE` | Exceeds 50MB limit |
+| `PROCESSING_FAILED` | Document processing error |
+| `INVALID_TRANSITION` | Status transition not allowed |

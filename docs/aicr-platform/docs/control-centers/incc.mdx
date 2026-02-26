@@ -1,0 +1,56 @@
+---
+title: "Integration Control Center"
+description: "Manage external API connections, webhooks, and data pipelines."
+---
+
+# Integration Control Center (INCC)
+
+The INCC is the bridge between AICR and the external world. It manages all outbound API connections, inbound webhooks, and data pipeline configurations.
+
+## What INCC Manages
+
+- **API connections** — authenticated connections to external services
+- **Webhooks** — inbound event receivers from external platforms
+- **Data pipelines** — scheduled or event-driven data import/export flows
+- **Alert routing** — routing OpsChief alerts to Slack, email, PagerDuty
+- **OAuth apps** — OAuth 2.0 integrations for user-facing external services
+
+## Supported Integrations
+
+| Category | Examples |
+|----------|---------|
+| Communication | Slack, Microsoft Teams, email (SendGrid, Postmark) |
+| CRM | Salesforce, HubSpot |
+| Payments | Stripe |
+| Monitoring | PagerDuty, Datadog |
+| Storage | AWS S3, Google Cloud Storage |
+| AI | Anthropic, OpenAI, Google AI |
+| Data | Segment, Fivetran, dbt |
+
+## Adding an Integration
+
+<Steps>
+  <Step title="Navigate to INCC">
+    Open the Integration Control Center from the Edge sidebar.
+  </Step>
+  <Step title="Select integration type">
+    Choose from the integration catalog or configure a custom webhook/API connection.
+  </Step>
+  <Step title="Configure credentials">
+    Enter API keys or complete OAuth flow. Credentials are encrypted at rest and never exposed in logs.
+  </Step>
+  <Step title="Map events">
+    Configure which platform events trigger outbound calls, and which inbound events create work items.
+  </Step>
+  <Step title="Test and activate">
+    Run a test event to verify the connection, then activate for production use.
+  </Step>
+</Steps>
+
+## Webhook Security
+
+All inbound webhooks are validated:
+- HMAC signature verification
+- IP allowlisting (optional)
+- Replay attack protection (timestamp validation)
+- Rate limiting per source

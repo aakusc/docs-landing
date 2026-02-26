@@ -1,0 +1,56 @@
+---
+title: "Feature Flags"
+description: "Per-tenant feature flags for controlled rollouts and capability overrides."
+---
+
+# Feature Flags
+
+Feature flags let you control which tenants have access to specific capabilities without deploying new pack versions. They sit on top of the pack resolver as a fine-grained override layer.
+
+## Types of Flags
+
+| Type | Scope | Purpose |
+|------|-------|---------|
+| **Pack activation** | Tenant | Enable/disable a pack for a specific tenant |
+| **Surface flag** | Tenant + Surface | Show/hide a specific surface within an active pack |
+| **Agent flag** | Tenant | Enable/disable a specific agent for a tenant |
+| **Experiment flag** | Tenant cohort | A/B test different pack configurations |
+
+## Managing Flags
+
+Flags are managed through the GOCC (Governance Control Center) or via the CLI:
+
+```bash
+# Enable a pack for a specific tenant
+pnpm flags:set --tenant <tenantId> --pack approval-workflows --enabled true
+
+# Disable a surface for a tenant
+pnpm flags:set --tenant <tenantId> --surface approval-form --enabled false
+
+# Enable a flag for a percentage of tenants (experiment)
+pnpm flags:experiment --pack new-dashboard --rollout 10
+```
+
+## Reading Flags in Code
+
+```typescript
+import { useFeatureFlag } from '@aicr/core'
+
+// In a React surface
+const showNewDashboard = useFeatureFlag('new-dashboard-v2')
+
+// In an API route (server-side)
+const isEnabled = await getFeatureFlag(tenantId, 'approval-workflows')
+```
+
+## Flag Evaluation Order
+
+1. **Kill switches** — platform-level emergency disables (override everything)
+2. **Tenant overrides** — explicit per-tenant flags
+3. **Experiment cohorts** — percentage-based rollout flags
+4. **Pack defaults** — what the pack manifest declares as default state
+5. **Tier defaults** — what the tenant's tier includes by default
+
+## Audit Trail
+
+Every flag change is recorded with timestamp, actor, and reason. The GOCC surfaces this as an audit log for compliance review.

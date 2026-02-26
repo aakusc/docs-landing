@@ -1,0 +1,54 @@
+---
+title: "Authentication"
+description: "How to authenticate with the AICR Platform API."
+---
+
+# Authentication
+
+The AICR API uses **API keys** for machine-to-machine authentication. API keys are managed through the IDCC (Identity Control Center).
+
+## Creating an API Key
+
+1. Navigate to **IDCC → API Keys**
+2. Click **Create API Key**
+3. Set a name, expiry, and permission scope
+4. Copy the key — it's only shown once
+
+## Using an API Key
+
+Include the key in the `Authorization` header:
+
+```http
+GET /api/tenants
+Authorization: Bearer aicr_live_abc123...
+```
+
+## API Key Scopes
+
+Keys are scoped to specific permissions. Always use the minimum scope needed:
+
+| Scope | Access |
+|-------|--------|
+| `tenants:read` | List and view tenant configurations |
+| `tenants:write` | Create and modify tenants |
+| `packs:read` | List packs and view pack status |
+| `packs:write` | Activate, deactivate, and configure packs |
+| `agents:read` | View agent status and work item results |
+| `agents:write` | Submit work items and invoke agents |
+| `admin` | Full platform access (use with care) |
+
+## Key Rotation
+
+Rotate keys regularly. The IDCC supports zero-downtime rotation:
+
+1. Create a new key with the same scopes
+2. Update your integration to use the new key
+3. Revoke the old key
+
+## Environment Keys
+
+Use separate keys for each environment:
+- `aicr_live_...` — production
+- `aicr_test_...` — staging/testing
+
+Test keys operate against your Neon branch database and cannot affect production data.

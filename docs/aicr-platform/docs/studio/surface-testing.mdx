@@ -1,0 +1,79 @@
+---
+title: "Surface Testing"
+description: "Testing pack surfaces and API contracts before deployment."
+---
+
+# Surface Testing
+
+Surface tests verify that your pack's UI components and API routes behave correctly in isolation before they reach tenant environments.
+
+## Running Tests
+
+```bash
+# Run all tests for a pack
+pnpm pack:test --pack approval-workflows
+
+# Run with coverage
+pnpm pack:test --pack approval-workflows --coverage
+```
+
+## Surface Tests
+
+Surface tests render components with a mock tenant context and verify their behavior:
+
+```typescript
+// tests/surfaces.test.tsx
+import { render, screen } from '@testing-library/react'
+import { MockTenantProvider } from '@aicr/test-utils'
+import { ApprovalsDashboard } from '../surfaces/dashboard'
+
+test('shows empty state when no approvals', async () => {
+  render(
+    <MockTenantProvider tenantId="test-tenant">
+      <ApprovalsDashboard />
+    </MockTenantProvider>
+  )
+  expect(screen.getByText('No pending approvals')).toBeInTheDocument()
+})
+```
+
+## Contract Tests
+
+Contract tests verify that your API routes return the expected shape:
+
+```typescript
+// tests/contracts.test.ts
+import { testApiRoute } from '@aicr/test-utils'
+import { GET } from '../api/approvals'
+
+test('GET /api/approvals returns typed response', async () => {
+  const res = await testApiRoute(GET, {
+    tenantId: 'test-tenant',
+    method: 'GET'
+  })
+  expect(res.status).toBe(200)
+  expect(res.body).toMatchSchema(ApprovalsResponseSchema)
+})
+```
+
+## Tenant Isolation Tests
+
+Every tenant-scoped pack must include isolation tests that verify one tenant cannot access another's data:
+
+```typescript
+test('tenant A cannot access tenant B approvals', async () => {
+  const res = await testApiRoute(GET, {
+    tenantId: 'tenant-a',
+    query: { tenantId: 'tenant-b' }  // attempting cross-tenant access
+  })
+  expect(res.status).toBe(403)
+})
+```
+
+## Gate Requirements
+
+Promotion to Edge requires:
+- All surface tests pass
+- All contract tests pass
+- Tenant isolation tests pass
+- Code coverage ≥ 80% on surface components

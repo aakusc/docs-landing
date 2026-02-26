@@ -1,0 +1,63 @@
+---
+title: "Telemetry"
+description: "Usage metrics, error tracking, and cost monitoring in the Edge layer."
+---
+
+# Telemetry
+
+Every operation in the Edge layer emits telemetry. There are no black boxes — platform operators and tenant admins have full visibility into what's happening and what it costs.
+
+## What's Tracked
+
+| Category | Examples |
+|----------|---------|
+| **Usage** | API calls per route, surface renders, agent work items |
+| **Performance** | Response times, database query latency, pack resolution time |
+| **Errors** | Runtime exceptions, guard violations, agent failures |
+| **Cost** | AI token usage per operation, database query cost, per-tenant totals |
+| **Security** | Auth failures, tenant isolation violations (should be zero) |
+
+## Accessing Telemetry
+
+Telemetry is surfaced through the **OPCC** (Operations Control Center). Tenant admins see their own tenant's metrics; platform admins see cross-tenant aggregates.
+
+```bash
+# CLI access for operators
+pnpm telemetry:query --tenant <tenantId> --last 24h --metric api-calls
+
+# Export for external analysis
+pnpm telemetry:export --tenant <tenantId> --format csv --range 2026-01-01,2026-01-31
+```
+
+## Cost Tracking
+
+Every AI operation records token usage and estimated cost against the tenant:
+
+```typescript
+// Automatically tracked by the agent conductor
+{
+  tenantId: "tenant-abc",
+  agentId: "approval-coordinator",
+  model: "claude-sonnet-4-5",
+  inputTokens: 1240,
+  outputTokens: 380,
+  estimatedCost: 0.0042,
+  workItemId: "wi-xyz"
+}
+```
+
+Monthly cost reports are generated automatically and available in the OPCC.
+
+## Alerts
+
+Configure alerts for anomalous conditions:
+
+```bash
+# Alert when a tenant's error rate exceeds 5%
+pnpm alerts:create --metric error-rate --threshold 0.05 --tenant <tenantId>
+
+# Alert when AI cost exceeds $50/day for any tenant
+pnpm alerts:create --metric daily-ai-cost --threshold 50 --scope all-tenants
+```
+
+Alerts route to OpsChief agent and can escalate to Slack, email, or PagerDuty via the INCC.

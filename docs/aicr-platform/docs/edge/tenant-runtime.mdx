@@ -1,0 +1,83 @@
+---
+title: "Tenant Runtime"
+description: "How AICR's multi-tenant runtime isolates and serves tenant workloads."
+---
+
+# Tenant Runtime
+
+The tenant runtime is AICR's multi-tenancy layer. It ensures every operation is scoped to the correct tenant, enforced at the database and API level.
+
+## Tenant Isolation
+
+**48 Prisma models** are tenant-scoped. Every query against these models must include a `tenantId`. The Database Guard middleware enforces this before queries reach the database:
+
+```typescript
+// guard.ts — runs on every Prisma operation
+prisma.$use(async (params, next) => {
+  if (isTenantScoped(params.model)) {
+    if (!params.args.where?.tenantId) {
+      throw new TenantIsolationError(`Missing tenantId on ${params.model}`)
+    }
+  }
+  return next(params)
+})
+```
+
+## Tenant Context
+
+The tenant context is injected at the request level through NextAuth session data. Every server component, API route, and agent operation receives it automatically:
+
+```typescript
+// In a server component or API route
+import { getTenantContext } from '@aicr/core'
+
+const { tenantId, tenantSlug, capabilities } = await getTenantContext()
+```
+
+## Capability Scoping
+
+What a tenant can do is determined by their active packs. The capability resolver runs on session start and caches the tenant's full capability set:
+
+```typescript
+const capabilities = await resolveCapabilities(tenantId)
+// capabilities.has('approval-workflows') → true/false
+// capabilities.version('approval-workflows') → '1.2.0'
+```
+
+Components and API routes check capabilities before rendering or executing:
+
+```typescript
+if (!capabilities.has('approval-workflows')) {
+  return <UpgradeBanner feature="Approval Workflows" />
+}
+```
+
+## Tenant Provisioning
+
+When a new tenant is onboarded:
+
+<Steps>
+  <Step title="Create tenant record">
+    Tenant record created in the global `tenants` table with slug, tier, and billing info.
+  </Step>
+  <Step title="Activate core packs">
+    Core packs (identity, navigation, settings) are automatically activated for all tenants.
+  </Step>
+  <Step title="Activate tier packs">
+    Packs matching the tenant's purchased tier are activated by the TenantAgent.
+  </Step>
+  <Step title="Seed initial data">
+    Control center defaults, role templates, and onboarding checklists are seeded.
+  </Step>
+  <Step title="Notify tenant">
+    Welcome email sent, onboarding work item created for the TenantAgent.
+  </Step>
+</Steps>
+
+## Tenant Tiers
+
+| Tier | Capabilities | Typical Use |
+|------|-------------|------------|
+| **Studio** | Core packs only | Learners, developers |
+| **Edge** | Core + Edge packs | SMBs, growing teams |
+| **Summit** | All packs + custom | Enterprises, partners |

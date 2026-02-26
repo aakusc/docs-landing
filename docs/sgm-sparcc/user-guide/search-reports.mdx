@@ -1,0 +1,272 @@
+---
+title: Search & Reports
+description: Find information across SGM and generate governance reports.
+---
+
+# Search & Reports
+
+SGM provides powerful search capabilities across all content and comprehensive reporting for governance tracking and compliance.
+
+## Global Search
+
+Access global search from anywhere using:
+- **Keyboard shortcut**: `Cmd+K` (Mac) or `Ctrl+K` (Windows)
+- **Search icon**: In the navigation bar
+
+### What You Can Search
+
+| Content Type | Examples |
+|--------------|----------|
+| **Policies** | Policy names, codes, content |
+| **Documents** | Document titles, codes, body text |
+| **Plans** | Plan names, descriptions |
+| **Cases** | Case IDs, titles, descriptions |
+| **Knowledge Base** | KB card titles and content |
+
+### Search Tips
+
+<AccordionGroup>
+  <Accordion title="Exact match">
+    Put phrases in quotes: `"clawback policy"`
+  </Accordion>
+  <Accordion title="Code search">
+    Search by code directly: `SCP-001` or `CASE-2025`
+  </Accordion>
+  <Accordion title="Filter by type">
+    Add type prefix: `policy:clawback` or `case:territory`
+  </Accordion>
+  <Accordion title="Recent items">
+    Start typing to see your recent items first
+  </Accordion>
+</AccordionGroup>
+
+### Search Results
+
+Results show:
+- Item type icon
+- Title and code
+- Snippet with matched text highlighted
+- Status badge
+- Last updated date
+
+Click any result to navigate directly to that item.
+
+## Compare Feature
+
+**Path:** `/compare`
+
+Compare documents or plans side-by-side:
+
+<Steps>
+  <Step title="Open Compare">
+    Navigate to Operate Mode → Compare
+  </Step>
+  <Step title="Select first item">
+    Choose a document or plan
+  </Step>
+  <Step title="Select second item">
+    Choose another item to compare
+  </Step>
+  <Step title="View differences">
+    See side-by-side view with differences highlighted
+  </Step>
+</Steps>
+
+### Compare Use Cases
+
+| Comparison | Purpose |
+|------------|---------|
+| **Two versions** | See what changed between versions |
+| **Two plans** | Compare structure and content |
+| **Template vs. plan** | Check customizations |
+| **Policy versions** | Review policy updates |
+
+## Reports
+
+**Path:** `/reports`
+
+Generate reports for governance tracking and compliance.
+
+### Available Reports
+
+| Report | Description | Use Case |
+|--------|-------------|----------|
+| **Compliance Summary** | Overall compliance scores | Executive review |
+| **Activity Report** | Actions taken in time period | Audit support |
+| **SLA Report** | Approval SLA performance | Operations review |
+| **Policy Coverage** | Policies by status and category | Design review |
+| **Case Report** | Cases by type, status, resolution | Dispute analysis |
+| **Document Report** | Documents by type and status | Document management |
+
+### Generating a Report
+
+<Steps>
+  <Step title="Select report type">
+    Choose from available report templates
+  </Step>
+  <Step title="Set parameters">
+    - Date range
+    - Filters (status, type, etc.)
+    - Grouping options
+  </Step>
+  <Step title="Preview report">
+    Review the report before downloading
+  </Step>
+  <Step title="Export">
+    Download as PDF, Excel, or CSV
+  </Step>
+</Steps>
+
+### Report Scheduling
+
+Set up automated reports:
+1. Configure report parameters
+2. Set schedule (daily, weekly, monthly)
+3. Add recipients
+4. Enable notifications
+
+<Note>
+Report scheduling requires ADMIN or SUPER_ADMIN role.
+</Note>
+
+## Compliance Summary Report
+
+Key metrics included:
+
+| Metric | Description |
+|--------|-------------|
+| **Overall Score** | Weighted compliance percentage |
+| **Policy Coverage** | % of required policies in place |
+| **Control Effectiveness** | Validation of controls |
+| **Open Findings** | Audit findings to remediate |
+| **Risk Score** | Aggregate risk level |
+
+### Compliance Breakdown
+
+The report shows compliance by:
+- Governance pillar
+- Policy category
+- Control type
+- Time period
+
+## Activity Report
+
+Track governance actions over time:
+
+### Included Activities
+
+- Document creates, updates, approvals
+- Plan status changes
+- Case submissions and resolutions
+- Approval decisions
+- User actions
+
+### Activity Filters
+
+- By user
+- By action type
+- By item type
+- By date range
+
+## SLA Report
+
+Monitor approval performance:
+
+| Metric | What It Shows |
+|--------|---------------|
+| **On-time %** | Approvals completed within SLA |
+| **Average time** | Mean time to approval |
+| **Overdue count** | Items past SLA deadline |
+| **By committee** | Breakdown by SGCC vs CRB |
+| **By priority** | Performance by priority level |
+
+### SLA Trends
+
+The report includes trend charts showing:
+- SLA performance over time
+- Volume by priority
+- Committee workload
+
+## Case Report
+
+Analyze dispute and exception patterns:
+
+| Metric | Description |
+|--------|-------------|
+| **Volume** | Cases by type and status |
+| **Resolution time** | Average time to close |
+| **Escalation rate** | % elevated to committee |
+| **Outcomes** | Approved vs denied breakdown |
+
+### Case Insights
+
+Identify:
+- Most common case types
+- Longest-running cases
+- Escalation patterns
+- Seasonal trends
+
+## Custom Reports
+
+Build reports tailored to your needs:
+
+<Steps>
+  <Step title="Start new report">
+    Click **+ Custom Report**
+  </Step>
+  <Step title="Select data source">
+    Choose policies, documents, cases, etc.
+  </Step>
+  <Step title="Add columns">
+    Select fields to include
+  </Step>
+  <Step title="Set filters">
+    Define criteria for included data
+  </Step>
+  <Step title="Configure grouping">
+    Group by category, status, date, etc.
+  </Step>
+  <Step title="Add calculations">
+    Include counts, averages, percentages
+  </Step>
+  <Step title="Save template">
+    Save for future use
+  </Step>
+</Steps>
+
+## Export Options
+
+| Format | Best For |
+|--------|----------|
+| **PDF** | Sharing with stakeholders, archival |
+| **Excel** | Further analysis, pivot tables |
+| **CSV** | Data integration, imports |
+
+## Dashboard Analytics
+
+Real-time metrics available on dashboards:
+
+- Compliance scores by area
+- Approval queue status
+- Case backlog
+- Document status distribution
+- SLA health indicators
+
+Access via Operate Mode or Oversee Mode dashboards.
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Documents" icon="file" href="/user-guide/documents">
+    Search documents
+  </Card>
+  <Card title="Policy Library" icon="book" href="/user-guide/policy-library">
+    Search policies
+  </Card>
+  <Card title="Dispute Mode" icon="scale-balanced" href="/user-guide/modes/dispute-mode">
+    Search cases
+  </Card>
+  <Card title="Oversee Mode" icon="eye" href="/user-guide/modes/oversee-mode">
+    Compliance dashboards
+  </Card>
+</CardGroup>

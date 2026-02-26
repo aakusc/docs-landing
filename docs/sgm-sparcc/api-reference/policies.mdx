@@ -1,0 +1,343 @@
+---
+title: Policies API
+description: API endpoints for managing governance policies.
+---
+
+# Policies API
+
+The Policies API provides access to the governance policy library, including the 17 Sales Compensation Policies (SCPs) and custom policies.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/sgm/policies` | List all policies |
+| POST | `/api/sgm/policies` | Create a new policy |
+| GET | `/api/sgm/policies/[id]` | Get policy by ID |
+| PATCH | `/api/sgm/policies/[id]` | Update a policy |
+| DELETE | `/api/sgm/policies/[id]` | Delete a policy |
+| GET | `/api/policies/library` | Browse policy library |
+
+## List Policies
+
+Retrieve a list of policies with optional filtering.
+
+### Request
+
+```bash
+GET /api/sgm/policies?tenantId=acme-corp&status=published&category=financial
+Authorization: Bearer <token>
+```
+
+### Query Parameters
+
+<ParamField query="tenantId" type="string">
+  Filter by tenant ID
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `draft`, `published`, `superseded`, `retired`
+</ParamField>
+
+<ParamField query="category" type="string">
+  Filter by category: `financial`, `legal`, `hr`, `governance`, etc.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Full-text search in policy name and content
+</ParamField>
+
+<ParamField query="skip" type="number">
+  Pagination offset (default: 0)
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Page size (default: 20, max: 100)
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "scp-001",
+      "code": "SCP-001",
+      "name": "Clawback and Recovery",
+      "category": "Financial Controls",
+      "status": "published",
+      "version": "2.1",
+      "wordCount": 2450,
+      "lastUpdated": "2026-01-15T00:00:00Z",
+      "summary": "Defines clawback provisions for commission recovery..."
+    }
+  ],
+  "meta": {
+    "total": 17,
+    "skip": 0,
+    "limit": 20,
+    "statistics": {
+      "byStatus": {
+        "draft": 2,
+        "published": 15
+      },
+      "byCategory": {
+        "Financial Controls": 3,
+        "Legal Compliance": 4,
+        "HR Policies": 4
+      }
+    }
+  },
+  "dataType": "demo"
+}
+```
+
+## Get Policy
+
+Retrieve a single policy by ID with full content.
+
+### Request
+
+```bash
+GET /api/sgm/policies/scp-001
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "scp-001",
+    "code": "SCP-001",
+    "name": "Clawback and Recovery",
+    "category": "Financial Controls",
+    "status": "published",
+    "version": "2.1",
+    "wordCount": 2450,
+    "lastUpdated": "2026-01-15T00:00:00Z",
+    "content": {
+      "purpose": "This policy establishes guidelines for the recovery of commission payments...",
+      "scope": "This policy applies to all sales personnel eligible for commission...",
+      "policyStatement": "The Company reserves the right to recover commission payments...",
+      "procedures": "1. Clawback Triggers\n   a. Deal cancellation within 90 days...",
+      "exceptions": "Exceptions may be granted by the CRB for...",
+      "definitions": {
+        "Clawback": "Recovery of previously paid commission...",
+        "Grace Period": "Time allowed before clawback is initiated..."
+      }
+    },
+    "relatedPolicies": ["scp-012", "scp-008"],
+    "frameworks": ["governance-001"],
+    "metadata": {
+      "owner": "Legal",
+      "reviewCycle": "Annual",
+      "nextReview": "2026-06-01",
+      "legalReview": true
+    }
+  }
+}
+```
+
+## Create Policy
+
+Create a new policy (requires ADMIN role).
+
+### Request
+
+```bash
+POST /api/sgm/policies
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "code": "CUSTOM-001",
+  "name": "Custom Territory Policy",
+  "category": "Territory Rules",
+  "content": {
+    "purpose": "Define custom territory rules...",
+    "scope": "Applies to enterprise sales team...",
+    "policyStatement": "Territory assignments shall..."
+  },
+  "tenantId": "acme-corp"
+}
+```
+
+### Parameters
+
+<ParamField path="code" type="string" required>
+  Unique policy code (uppercase with dashes)
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Policy display name
+</ParamField>
+
+<ParamField path="category" type="string" required>
+  Policy category
+</ParamField>
+
+<ParamField path="content" type="object" required>
+  Policy content sections
+</ParamField>
+
+<ParamField path="tenantId" type="string">
+  Tenant ID (SUPER_ADMIN can specify any)
+</ParamField>
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "custom-001",
+    "code": "CUSTOM-001",
+    "name": "Custom Territory Policy",
+    "status": "draft",
+    "version": "1.0",
+    "createdAt": "2026-01-28T10:00:00Z"
+  }
+}
+```
+
+## Update Policy
+
+Update an existing policy.
+
+### Request
+
+```bash
+PATCH /api/sgm/policies/custom-001
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Updated Territory Policy",
+  "content": {
+    "purpose": "Updated purpose text..."
+  }
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "custom-001",
+    "version": "1.1",
+    "updatedAt": "2026-01-28T11:00:00Z"
+  }
+}
+```
+
+## Delete Policy
+
+Delete a custom policy (SCPs cannot be deleted).
+
+### Request
+
+```bash
+DELETE /api/sgm/policies/custom-001
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "message": "Policy deleted"
+}
+```
+
+## Policy Library Browse
+
+Read-only access to the policy library for browsing.
+
+### Request
+
+```bash
+GET /api/policies/library
+```
+
+### Response
+
+```json
+{
+  "policies": [
+    {
+      "code": "SCP-001",
+      "name": "Clawback and Recovery",
+      "category": "Financial Controls",
+      "summary": "Commission recovery guidelines..."
+    }
+  ],
+  "categories": [
+    "Financial Controls",
+    "Legal Compliance",
+    "HR Policies",
+    "Performance Management"
+  ],
+  "statistics": {
+    "totalPolicies": 26,
+    "totalWords": 36000
+  }
+}
+```
+
+## Policy Categories
+
+| Category | Description |
+|----------|-------------|
+| Financial Controls | Clawbacks, draws, payment rules |
+| Legal Compliance | 409A, wage laws, international |
+| HR Policies | Leave, termination, onboarding |
+| Performance Management | Quotas, territory, crediting |
+| Deal Governance | Windfalls, large deals |
+| Incentive Programs | SPIFs, special incentives |
+| Plan Administration | Mid-period changes |
+| IT Governance | Data and systems |
+| Governance | Exceptions, disputes |
+
+## Policy Statuses
+
+| Status | Description |
+|--------|-------------|
+| `draft` | Work in progress |
+| `published` | Active and in effect |
+| `superseded` | Replaced by newer version |
+| `retired` | No longer in use |
+
+## SCP Policies (Read-Only)
+
+The 17 standard SCPs are read-only and cannot be modified or deleted:
+
+| Code | Name |
+|------|------|
+| SCP-001 | Clawback and Recovery |
+| SCP-002 | Quota Management |
+| SCP-003 | Windfall and Large Deal |
+| SCP-004 | SPIF Governance |
+| SCP-005 | Section 409A Compliance |
+| SCP-006 | State Wage Law Compliance |
+| SCP-007 | Sales Crediting |
+| SCP-008 | Draws and Guarantees |
+| SCP-009 | Leave of Absence |
+| SCP-010 | Mid-Period Change |
+| SCP-011 | Payment Timing |
+| SCP-012 | Termination and Final Pay |
+| SCP-013 | Data and Systems Controls |
+| SCP-014 | Territory Management |
+| SCP-015 | Exception and Dispute Resolution |
+| SCP-016 | New Hire and Onboarding |
+| SCP-017 | International Requirements |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `POLICY_NOT_FOUND` | Policy ID doesn't exist |
+| `DUPLICATE_CODE` | Policy code already exists |
+| `SCP_READ_ONLY` | Cannot modify/delete SCP policies |
+| `INVALID_STATUS` | Invalid status transition |

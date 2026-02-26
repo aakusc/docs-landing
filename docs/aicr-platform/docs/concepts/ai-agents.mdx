@@ -1,0 +1,74 @@
+---
+title: "AI Agents"
+description: "AICR's 14 specialized AI agents and how they coordinate."
+---
+
+# AI Agents
+
+AICR operates **14 specialized AI agents**, each with a defined role, persistent memory, and access to the platform's canonical documentation. Agents work collaboratively through the Agent Conductor service.
+
+## Agent Roster
+
+| Agent | Role | Primary Responsibility |
+|-------|------|----------------------|
+| **Builder** | Development | Write code, implement features, follow architectural contracts |
+| **Designer** | UI/UX | Design surfaces, enforce design system, review component quality |
+| **OpsChief** | Operations | Monitor telemetry, manage deployments, respond to incidents |
+| **QA** | Quality | Write and run tests, validate contracts, approve promotions |
+| **Architect** | Architecture | Own canonical docs, approve pattern changes, enforce Three Laws |
+| **ProductManager** | Product | Prioritize work items, define acceptance criteria, manage roadmap |
+| **SecurityAuditor** | Security | Audit permissions, validate auth flows, flag vulnerabilities |
+| **DataEngineer** | Database | Review Prisma migrations, validate tenant isolation, optimize queries |
+| **DevExAgent** | Developer Experience | Improve tooling, maintain documentation, onboard new developers |
+| **MarketplaceAgent** | Summit | Review pack submissions, manage marketplace catalog |
+| **TenantAgent** | Edge | Handle tenant onboarding, configuration, and support escalations |
+| **IntegrationAgent** | Integrations | Manage external API connections and webhook configurations |
+| **ComplianceAgent** | Governance | Monitor compliance rules, generate audit reports |
+| **KnowledgeAgent** | Knowledge | Index canonical docs, answer architecture questions, maintain KBCC |
+
+## How Agents Work
+
+Every agent:
+1. **Has a system prompt** grounded in current canonical documentation
+2. **Has persistent memory** across sessions via the KBCC
+3. **Queries the platform's own docs** before making architectural decisions
+4. **Writes evidence** — every claim is backed by a reference to canonical docs
+
+Agents communicate through structured work items, not free-form messages. The **Agent Conductor** service routes work items to the appropriate agent based on type and priority.
+
+## Agent Protocol
+
+Work items follow a strict format:
+
+```typescript
+interface WorkItem {
+  id: string
+  type: 'build' | 'review' | 'test' | 'deploy' | 'audit'
+  assignedAgent: AgentRole
+  context: {
+    canonicalRefs: string[]   // which canonical docs are relevant
+    tenantId?: string         // if tenant-scoped
+    packId?: string           // if pack-scoped
+  }
+  status: 'pending' | 'in-progress' | 'blocked' | 'complete'
+  evidence?: string           // required for completion
+}
+```
+
+## Self-Aware Agent Design
+
+Agents don't rely on training knowledge alone — they query the platform's own documentation at runtime. Before implementing a feature, the Builder agent asks:
+
+> "What does the canonical architecture say about this pattern?"
+
+The KnowledgeAgent retrieves the relevant canonical doc and provides it as grounding context. This ensures agents never drift from the approved architecture.
+
+## Persistent Memory
+
+Each agent maintains memory in the KBCC across sessions:
+- Decisions made and rationale
+- Patterns approved or rejected
+- Open work items and blockers
+- Architecture evolution notes
+
+This eliminates the "starting from scratch" problem common with stateless AI assistants.

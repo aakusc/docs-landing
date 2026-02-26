@@ -1,0 +1,86 @@
+---
+title: "Tenants API"
+description: "Create and configure tenants via the AICR API."
+---
+
+# Tenants API
+
+Programmatically manage tenant environments — useful for automated onboarding, infrastructure scripts, and partner integrations.
+
+## List Tenants
+
+```http
+GET /api/tenants
+```
+
+Requires `tenants:read` scope. Returns all tenants accessible to the API key.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "tenants": [
+      {
+        "id": "tenant-abc",
+        "slug": "acme-corp",
+        "tier": "edge",
+        "status": "active",
+        "createdAt": "2026-01-15T00:00:00Z"
+      }
+    ],
+    "total": 12
+  }
+}
+```
+
+## Get Tenant
+
+```http
+GET /api/tenants/:tenantId
+```
+
+Returns tenant details including active packs and capability map.
+
+## Create Tenant
+
+```http
+POST /api/tenants
+```
+
+**Body:**
+```json
+{
+  "slug": "acme-corp",
+  "name": "Acme Corporation",
+  "tier": "edge",
+  "adminEmail": "admin@acme.com",
+  "packs": ["approval-workflows", "analytics-suite"]
+}
+```
+
+Creates the tenant, activates core packs for the tier, and sends an onboarding email to `adminEmail`.
+
+## Update Tenant
+
+```http
+PATCH /api/tenants/:tenantId
+```
+
+Update tenant name, tier, or configuration. Tier upgrades activate additional packs automatically.
+
+## Suspend Tenant
+
+```http
+POST /api/tenants/:tenantId/suspend
+```
+
+Suspends a tenant. All API access for that tenant is blocked. Data is retained.
+
+## Delete Tenant
+
+```http
+DELETE /api/tenants/:tenantId
+```
+
+Permanently deletes a tenant and all associated data. This action is irreversible and requires `admin` scope. A 24-hour delay is enforced before deletion executes.

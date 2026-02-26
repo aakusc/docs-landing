@@ -1,0 +1,368 @@
+---
+title: AskSGM API
+description: AI-powered governance assistant API endpoints.
+---
+
+# AskSGM API
+
+The AskSGM API provides AI-powered governance assistance, allowing natural language queries about policies, procedures, and compliance.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/ai/asksgm` | Query the governance assistant |
+| POST | `/api/ai/asksgm/stream` | Streaming response endpoint |
+| POST | `/api/ai/asksgm/session` | Manage conversation sessions |
+| POST | `/api/ai/asksgm/feedback` | Submit feedback on responses |
+| GET | `/api/ai/kb` | Get knowledge base metadata |
+
+## Query AskSGM
+
+Submit a governance question and receive an AI-generated response with policy citations.
+
+### Request
+
+```bash
+POST /api/ai/asksgm
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is the clawback policy for terminated reps?"
+    }
+  ],
+  "department": "sales",
+  "jurisdiction": "CA",
+  "cycleState": "mid-period",
+  "userRole": "MANAGER",
+  "context": {
+    "currentPage": "/plans/2025-sales",
+    "planYear": 2026
+  }
+}
+```
+
+### Parameters
+
+<ParamField path="messages" type="array" required>
+  Conversation history as array of message objects with `role` and `content`
+</ParamField>
+
+<ParamField path="department" type="string">
+  User's department: `sales`, `legal`, `compliance`, `hr`, `finance`
+</ParamField>
+
+<ParamField path="jurisdiction" type="string">
+  State or country code for compliance context
+</ParamField>
+
+<ParamField path="cycleState" type="string">
+  Compensation cycle state: `planning`, `mid-period`, `close`, `audit`
+</ParamField>
+
+<ParamField path="userRole" type="string">
+  User's role for response tailoring
+</ParamField>
+
+<ParamField path="context" type="object">
+  Additional context (current page, transaction ID, etc.)
+</ParamField>
+
+### Response
+
+```json
+{
+  "response": {
+    "content": "Based on SCP-001 (Clawback and Recovery Policy), when a sales representative is terminated, the following clawback provisions apply:\n\n1. **Voluntary Termination**: Commissions paid on deals that cancel within 90 days are subject to clawback.\n\n2. **Involuntary Termination**: Pro-rated clawback based on tenure...",
+    "authorityBasis": "SCP-001 Clawback and Recovery Policy, Section 4.2",
+    "evidenceBasis": ["SCP-001:4.2", "SCP-012:3.1"],
+    "decisionLogic": "Applied standard clawback provisions for termination scenario",
+    "approvalsRouting": "No approval required for policy clarification",
+    "nextSteps": ["Review specific termination details", "Calculate pro-rata amount"],
+    "auditNotes": "Query relates to terminated rep clawback scenario"
+  },
+  "citations": [
+    {
+      "policyId": "scp-001",
+      "policyName": "Clawback and Recovery",
+      "section": "4.2",
+      "relevance": 0.95
+    },
+    {
+      "policyId": "scp-012",
+      "policyName": "Termination and Final Pay",
+      "section": "3.1",
+      "relevance": 0.82
+    }
+  ],
+  "tokenUsage": {
+    "input": 450,
+    "output": 380,
+    "total": 830
+  },
+  "sessionId": "session-abc123"
+}
+```
+
+## Streaming Response
+
+For real-time token-by-token responses, use the streaming endpoint.
+
+### Request
+
+```bash
+POST /api/ai/asksgm/stream
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "messages": [...],
+  "department": "sales"
+}
+```
+
+### Response (Server-Sent Events)
+
+```
+event: start
+data: {"sessionId": "session-abc123"}
+
+event: context
+data: {"citations": [...]}
+
+event: chunk
+data: {"text": "Based on "}
+
+event: chunk
+data: {"text": "SCP-001 "}
+
+event: chunk
+data: {"text": "(Clawback and Recovery Policy)..."}
+
+event: done
+data: {"tokenUsage": {"input": 450, "output": 380}}
+```
+
+### Handling SSE in JavaScript
+
+```javascript
+const response = await fetch('/api/ai/asksgm/stream', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ messages, department })
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+
+  const chunk = decoder.decode(value);
+  // Parse SSE events from chunk
+  console.log(chunk);
+}
+```
+
+## Session Management
+
+Manage conversation sessions for context continuity.
+
+### Create/Get Session
+
+```bash
+POST /api/ai/asksgm/session
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "action": "create",
+  "metadata": {
+    "topic": "Clawback questions",
+    "tenantId": "acme-corp"
+  }
+}
+```
+
+### Response
+
+```json
+{
+  "sessionId": "session-abc123",
+  "created": "2026-01-28T10:00:00Z",
+  "messageCount": 0,
+  "metadata": {
+    "topic": "Clawback questions"
+  }
+}
+```
+
+### End Session
+
+```bash
+POST /api/ai/asksgm/session
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "action": "end",
+  "sessionId": "session-abc123"
+}
+```
+
+## Feedback
+
+Submit feedback on AI responses for quality improvement.
+
+### Request
+
+```bash
+POST /api/ai/asksgm/feedback
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "sessionId": "session-abc123",
+  "messageIndex": 1,
+  "rating": "helpful",
+  "comment": "Accurate policy citation"
+}
+```
+
+### Parameters
+
+<ParamField path="sessionId" type="string" required>
+  Session ID from the response
+</ParamField>
+
+<ParamField path="messageIndex" type="number" required>
+  Index of the message being rated
+</ParamField>
+
+<ParamField path="rating" type="string" required>
+  Rating: `helpful`, `not_helpful`, `incorrect`
+</ParamField>
+
+<ParamField path="comment" type="string">
+  Optional feedback comment
+</ParamField>
+
+### Response
+
+```json
+{
+  "success": true,
+  "feedbackId": "feedback-xyz789"
+}
+```
+
+## Knowledge Base Metadata
+
+Get metadata about the knowledge base used by AskSGM.
+
+### Request
+
+```bash
+GET /api/ai/kb
+Authorization: Bearer <token>
+```
+
+### Response
+
+```json
+{
+  "policyCount": 17,
+  "kbCardCount": 929,
+  "lastUpdated": "2026-01-28T00:00:00Z",
+  "pillars": [
+    {"name": "ICM", "cardCount": 150},
+    {"name": "Governance", "cardCount": 120},
+    {"name": "Operations", "cardCount": 180}
+  ]
+}
+```
+
+## Rate Limits
+
+| Limit | Default | Scope |
+|-------|---------|-------|
+| Per minute | 30 | Per user |
+| Per day | 1000 | Per tenant:user |
+
+Configure via environment:
+```bash
+AI_RATE_LIMIT_PER_MINUTE=30
+AI_RATE_LIMIT_PER_DAY=1000
+```
+
+## LLM Provider Fallback
+
+AskSGM uses a fallback chain for reliability:
+
+1. **AICR Platform** (if configured) - Expert routing hierarchy
+2. **Claude Direct** (Anthropic API) - Primary LLM
+3. **Local fallback** - Limited functionality
+
+## Response Components
+
+| Component | Description |
+|-----------|-------------|
+| `authorityBasis` | Primary policy/source for the answer |
+| `evidenceBasis` | All policy sections referenced |
+| `decisionLogic` | How the answer was derived |
+| `approvalsRouting` | Whether approval is needed |
+| `nextSteps` | Recommended follow-up actions |
+| `auditNotes` | Notes for audit trail |
+
+## Example Queries
+
+<AccordionGroup>
+  <Accordion title="Policy clarification">
+    ```json
+    {
+      "messages": [{
+        "role": "user",
+        "content": "What is the clawback policy for terminated reps?"
+      }]
+    }
+    ```
+  </Accordion>
+  <Accordion title="Procedure question">
+    ```json
+    {
+      "messages": [{
+        "role": "user",
+        "content": "How do I submit an exception request?"
+      }]
+    }
+    ```
+  </Accordion>
+  <Accordion title="Compliance question">
+    ```json
+    {
+      "messages": [{
+        "role": "user",
+        "content": "Is our commission structure 409A compliant?"
+      }],
+      "jurisdiction": "US"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `RATE_LIMITED` | Request rate exceeded |
+| `AI_UNAVAILABLE` | AI service not responding |
+| `INVALID_CONTEXT` | Invalid context parameters |
+| `SESSION_NOT_FOUND` | Session ID doesn't exist |

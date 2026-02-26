@@ -1,0 +1,53 @@
+---
+title: "Edge Overview"
+description: "The Edge layer — tenant runtime, operations, and the 19 Control Centers."
+---
+
+# Edge Overview
+
+Edge is the **tenant runtime layer** — where packs run, tenants operate, and business happens. It's the operational heart of AICR.
+
+## What Edge Provides
+
+<CardGroup cols={2}>
+  <Card title="Tenant Runtime" icon="server" href="/docs/edge/tenant-runtime">
+    Isolated multi-tenant environment with automatic tenantId enforcement and capability scoping
+  </Card>
+  <Card title="Pack Resolver" icon="cube" href="/docs/edge/pack-resolver">
+    Deterministic resolution of which packs are active for each tenant
+  </Card>
+  <Card title="Feature Flags" icon="toggle-on" href="/docs/edge/feature-flags">
+    Per-tenant capability overrides and controlled rollouts
+  </Card>
+  <Card title="Telemetry" icon="chart-line" href="/docs/edge/telemetry">
+    Usage metrics, error tracking, and cost monitoring per operation
+  </Card>
+</CardGroup>
+
+## 19 Control Centers
+
+The Edge layer exposes **19 Control Centers** — specialized dashboards that each own a specific operational domain:
+
+| Control Center | Code | Responsibility |
+|---------------|------|---------------|
+| AI Control Center | AICC | AI agent management and work item routing |
+| Knowledge Base CC | KBCC | Canonical docs, search, agent memory |
+| Governance CC | GOCC | Compliance, audit trails, policy management |
+| Document CC | DOCC | Document workflows and version control |
+| Integration CC | INCC | External API connections and webhooks |
+| QA Control Center | QACC | Test runs, quality gates, pack certification |
+| Identity CC | IDCC | Users, roles, permissions, auth flows |
+| Operations CC | OPCC | Incidents, deployments, health monitoring |
+| + 11 more | — | Domain-specific operations |
+
+## Edge Principles
+
+**Tenants are the unit of operation.** Every action in Edge is scoped to a tenant. The platform guarantees that no tenant can see or affect another's data.
+
+**Packs, not code changes.** Tenants gain new capabilities by activating packs — not by deploying code. The pack resolver handles capability activation without a deployment.
+
+**Observable by default.** All operations emit telemetry. There are no black boxes in Edge.
+
+## Accessing Edge
+
+The Edge layer is the default view when you open the AICR platform. Navigate between control centers using the sidebar. Each control center is itself a pack — they can be extended and customized without modifying the core platform.
