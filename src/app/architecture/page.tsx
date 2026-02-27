@@ -100,7 +100,6 @@ function ProductWorkflow({
             <h3 className="text-base font-semibold text-[var(--text-primary)]">{name}</h3>
             <p className="text-xs text-[var(--text-secondary)]">{tagline}</p>
           </div>
-          <div className="text-xs text-[var(--text-secondary)]">Click for details</div>
         </div>
 
         {/* Mini flow */}
@@ -113,13 +112,7 @@ function ProductWorkflow({
           ))}
         </div>
 
-        {/* Quick stats */}
-        <div className="flex flex-wrap gap-3 text-xs text-[var(--text-secondary)]">
-          <span>{integrations.length} integrations</span>
-          <span>{dataIn.length} inputs</span>
-          <span>{dataOut.length} outputs</span>
-          {aiFeatures.length > 0 && <span className="text-[var(--accent)]">{aiFeatures.length} AI features</span>}
-        </div>
+        {aiFeatures.length > 0 && <div className="mt-1 text-xs font-medium text-[var(--accent)]">AI-native</div>}
       </div>
     </ClickableCard>
   );
@@ -136,6 +129,8 @@ export default function Architecture() {
   const towedgeModal = useModal();
   const psedgeModal = useModal();
   const sfpModal = useModal();
+  const commCalcModal = useModal();
+  const spotModal = useModal();
 
   return (
     <div className="min-h-screen bg-[var(--background)] font-[family-name:var(--font-geist-sans)] transition-colors duration-200">
@@ -162,9 +157,10 @@ export default function Architecture() {
               { label: "Product Workflows", href: "#workflows" },
               { label: "Cross-Product Integration", href: "#integration" },
               { label: "Platform Tiers", href: "#tiers" },
-              { label: "AI Agents", href: "#agents" },
               { label: "Control Centers", href: "#control-centers" },
               { label: "Database", href: "#database" },
+              { label: "Key Terms", href: "#glossary" },
+              { label: "Acronyms", href: "#acronyms" },
             ].map((item) => (
               <a key={item.href} href={item.href} className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-hover)] hover:text-[var(--text-primary)]">
                 {item.label}
@@ -178,6 +174,12 @@ export default function Architecture() {
         {/* ══════════════════════════════════════════════════════════════ */}
         <Section id="ecosystem" title="Ecosystem Data Flow" subtitle="How data moves across the entire product suite. Each arrow represents a real integration — shared modules, API calls, or data pipelines.">
           <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 overflow-x-auto">
+            {/* BHG Edge product callout */}
+            <div className="mb-4 rounded-lg border border-[var(--bhg-blue)]/30 bg-[var(--bhg-blue)]/5 p-3 text-sm">
+              <span className="font-semibold text-[var(--bhg-blue)]">BHG Edge</span>
+              <span className="ml-2 text-[var(--text-secondary)]">— BHG&apos;s own internal business operations app, built on the AICR platform and deployed at edge.bluehorizonsgroup.com. Not to be confused with the Edge <em>tier</em> below.</span>
+            </div>
+
             {/* Layer 1: Platform Core */}
             <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Platform Foundation</div>
             <div className="mb-4 grid gap-3 sm:grid-cols-2">
@@ -228,7 +230,7 @@ export default function Architecture() {
             <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Sales &amp; Compensation Governance</div>
             <div className="mb-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-3">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">SCM / SGM SPARCC</div>
+                <div className="text-sm font-semibold text-[var(--text-primary)]">SGM SPARCC</div>
                 <p className="text-xs text-[var(--text-secondary)]">Policies &rarr; Approval Workflows &rarr; Compliance</p>
               </div>
               <div className="rounded-lg border border-cyan-400/30 bg-cyan-400/5 p-3">
@@ -332,10 +334,10 @@ export default function Architecture() {
 
             {/* Sales & Governance */}
             <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Sales &amp; Compensation Governance</div>
-            <div className="mb-6 grid gap-4 sm:grid-cols-3">
+            <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StaggerItem>
                 <ProductWorkflow
-                  name="SCM / SGM SPARCC"
+                  name="SGM SPARCC"
                   tagline="Sales compensation governance"
                   color="amber"
                   steps={[
@@ -387,6 +389,43 @@ export default function Architecture() {
                   dataOut={["Commission payouts", "Performance scores", "Predictive analytics"]}
                   aiFeatures={["Predictive analytics (planned)", "AI recommendations (planned)"]}
                   onClick={ispmModal.open}
+                />
+              </StaggerItem>
+              <StaggerItem>
+                <ProductWorkflow
+                  name="Commission Calculator"
+                  tagline="Real-time commission computation"
+                  color="amber"
+                  steps={[
+                    { label: "Connect", desc: "Pull ICM rules" },
+                    { label: "Configure", desc: "Rate structures" },
+                    { label: "Calculate", desc: "Real-time" },
+                    { label: "Simulate", desc: "What-if / Monte Carlo" },
+                    { label: "History", desc: "Audit trail" },
+                  ]}
+                  integrations={["Verisent", "Exactly", "CapIQ", "SPOT connector", "SGM SPARCC"]}
+                  dataIn={["ICM rules", "Sales data", "Rep hierarchy", "Quota targets"]}
+                  dataOut={["Commission payouts", "What-if scenarios", "Monte Carlo projections", "Pay history"]}
+                  aiFeatures={["AI rule extraction", "Monte Carlo simulation"]}
+                  onClick={commCalcModal.open}
+                />
+              </StaggerItem>
+              <StaggerItem>
+                <ProductWorkflow
+                  name="SPOT — ICM Connector"
+                  tagline="Universal rule extractor for ICM systems"
+                  color="cyan"
+                  steps={[
+                    { label: "Connect", desc: "Target ICM system" },
+                    { label: "Extract", desc: "Rule concepts" },
+                    { label: "Normalize", desc: "Generic format" },
+                    { label: "Feed", desc: "Commission Calc" },
+                  ]}
+                  integrations={["Verisent", "Exactly", "CapIQ", "Commission Calculator"]}
+                  dataIn={["ICM system credentials", "Rule definitions"]}
+                  dataOut={["Normalized rule objects", "Commission Calculator feed"]}
+                  aiFeatures={["AI rule interpretation", "Cross-system normalization"]}
+                  onClick={spotModal.open}
                 />
               </StaggerItem>
             </div>
@@ -525,7 +564,7 @@ export default function Architecture() {
                   <li className="flex items-center gap-1.5"><Check /> Isolated sandbox test harness</li>
                   <li className="flex items-center gap-1.5"><Check /> GOCC gate enforcement before promotion</li>
                 </ul>
-                <div className="mt-3 text-xs text-[var(--text-secondary)]"><strong>Target:</strong> Creators, learners, developers</div>
+                <div className="mt-3 text-xs text-[var(--text-secondary)]"><strong>Target:</strong> BHG developers, domain experts building point solutions</div>
               </div>
               <div className="rounded-lg border-2 border-cyan-400/30 bg-cyan-400/5 p-4">
                 <div className="mb-2 text-sm font-semibold text-[var(--bhg-blue)]">Edge — Operate</div>
@@ -536,7 +575,7 @@ export default function Architecture() {
                   <li className="flex items-center gap-1.5"><Check /> Real-time telemetry &amp; cost tracking</li>
                   <li className="flex items-center gap-1.5"><Check /> Runtime compliance enforcement via GOCC</li>
                 </ul>
-                <div className="mt-3 text-xs text-[var(--text-secondary)]"><strong>Target:</strong> SMBs, growing startups</div>
+                <div className="mt-3 text-xs text-[var(--text-secondary)]"><strong>Target:</strong> Mid-market clients, industry verticals, conference demos</div>
               </div>
               <div className="rounded-lg border-2 border-amber-400/30 bg-amber-400/5 p-4">
                 <div className="mb-2 text-sm font-semibold text-amber-600">Summit — Productize</div>
@@ -547,7 +586,7 @@ export default function Architecture() {
                   <li className="flex items-center gap-1.5"><Check /> Executive dashboards &amp; insights</li>
                   <li className="flex items-center gap-1.5"><Check /> Canary deployments with auto-revert</li>
                 </ul>
-                <div className="mt-3 text-xs text-[var(--text-secondary)]"><strong>Target:</strong> Enterprises (1000+ employees)</div>
+                <div className="mt-3 text-xs text-[var(--text-secondary)]"><strong>Target:</strong> Enterprise clients, partner channels, commercial distribution</div>
               </div>
             </div>
 
@@ -566,65 +605,6 @@ export default function Architecture() {
           </div>
         </Section>
 
-        {/* ══════════════════════════════════════════════════════════════ */}
-        {/* 5. AI AGENTS                                                 */}
-        {/* ══════════════════════════════════════════════════════════════ */}
-        <Section id="agents" title="14 AI Agents" subtitle="Specialized agents that collaborate across the platform. All powered by Claude Sonnet 4.5 with persistent memory and coordinated handoffs.">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { name: "HQ", role: "Strategy & OKRs", desc: "Founder operations, organizational decisions" },
-              { name: "Dev", role: "Implementation", desc: "Feature implementation, debugging, code writing" },
-              { name: "Stack", role: "Infrastructure", desc: "Vercel, Prisma, CI/CD, database migrations" },
-              { name: "Designer", role: "Platform UI/UX", desc: "Design system, UI architecture, components" },
-              { name: "QA", role: "Quality Assurance", desc: "Tests, quality gates, validation strategy" },
-              { name: "Docs", role: "Documentation", desc: "Canonical docs generation, maintenance" },
-              { name: "Research", role: "Market Intel", desc: "Competitive analysis, technology evaluation" },
-              { name: "Brand", role: "Identity", desc: "Brand guidelines, marketing, visual identity" },
-              { name: "Biz", role: "Business Strategy", desc: "Pricing, partnerships, business model" },
-              { name: "Rally", role: "RallyForge Ops", desc: "Dashboard hub management, navigation" },
-              { name: "Delivery", role: "Customer Success", desc: "Onboarding, delivery management, training" },
-              { name: "Knowledge", role: "Knowledge Graph", desc: "Semantic indexing, KBCC operations" },
-              { name: "Builder", role: "Backend Dev", desc: "Database design, API implementation" },
-              { name: "OpsChief", role: "Operations AI", desc: "Anomaly detection, risk scoring, monitoring" },
-            ].map((agent) => (
-              <div key={agent.name} className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="rounded bg-[var(--accent)]/10 px-1.5 py-0.5 text-xs font-mono font-semibold text-[var(--accent)]">{agent.name}</span>
-                  <span className="text-xs font-medium text-[var(--text-primary)]">{agent.role}</span>
-                </div>
-                <p className="text-xs text-[var(--text-secondary)]">{agent.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <ExpandableSection title="Agent Coordination & Memory" defaultOpen={false} className="mt-4">
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Handoff Protocol</h4>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
-                  <span className="rounded bg-[var(--light-gray)] px-2 py-1">1. Document state</span>
-                  <Arrow />
-                  <span className="rounded bg-[var(--light-gray)] px-2 py-1">2. Update CURRENT_TASK</span>
-                  <Arrow />
-                  <span className="rounded bg-[var(--light-gray)] px-2 py-1">3. Log to AGENT_MEMORY</span>
-                  <Arrow />
-                  <span className="rounded bg-[var(--light-gray)] px-2 py-1">4. Create work item</span>
-                  <Arrow />
-                  <span className="rounded bg-[var(--light-gray)] px-2 py-1">5. Announce handoff</span>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Persistent Memory</h4>
-                <div className="grid gap-2 sm:grid-cols-2 text-xs text-[var(--text-secondary)]">
-                  <div className="rounded bg-[var(--light-gray)] p-2"><strong className="text-[var(--text-primary)]">agent_sessions:</strong> Session lifecycle (start, end, context)</div>
-                  <div className="rounded bg-[var(--light-gray)] p-2"><strong className="text-[var(--text-primary)]">session_checkpoints:</strong> Full state snapshots (files, tasks, progress)</div>
-                  <div className="rounded bg-[var(--light-gray)] p-2"><strong className="text-[var(--text-primary)]">session_memories:</strong> Typed memories (preference, pattern, decision)</div>
-                  <div className="rounded bg-[var(--light-gray)] p-2"><strong className="text-[var(--text-primary)]">session_plans:</strong> Named plans with status tracking</div>
-                </div>
-              </div>
-            </div>
-          </ExpandableSection>
-        </Section>
 
         {/* ══════════════════════════════════════════════════════════════ */}
         {/* 6. CONTROL CENTERS                                           */}
@@ -756,19 +736,111 @@ export default function Architecture() {
                   <p className="text-xs">Platform-level data shared across all tenants (control centers, agents, canonical docs)</p>
                 </div>
               </div>
-              <div className="rounded bg-[var(--light-gray)] p-3 font-mono text-xs">
-                <div className="text-[var(--text-primary)] mb-1">Pattern A Standard (LOCKED):</div>
-                <pre className="text-[var(--text-secondary)]">{`model taskComment {
-  id        String   @id @default(cuid())
-  taskId    String   @map("task_id")
-  content   String
-  createdAt DateTime @default(now()) @map("created_at")
-  @@map("task_comments")
-}`}</pre>
-              </div>
             </div>
           </ExpandableSection>
         </Section>
+
+        {/* ── Key Terms ── */}
+        <div id="glossary">
+        <AnimatedSection className="mb-16">
+          <h2 className="mb-6 text-2xl font-bold tracking-tight text-[var(--text-primary)]">Key Terms</h2>
+          <p className="mb-6 text-[var(--text-secondary)]">
+            Essential terminology from the AICR/AICodeRally ecosystem. For complete glossary, see Section 35 of the Master Code Document.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--card-border)]">
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Term</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Definition</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {[
+                    ["AICR", "AICodeRally Platform — Self-aware, AI-native platform for creating, operating, and commercializing software through Studio/Edge/Summit architecture"],
+                    ["Pack", "Versioned capability bundle with validated manifest, surfaces, gates, and dependencies. Smallest shippable unit in AICR"],
+                    ["Tenant", "Isolated customer instance with dedicated data scope. 48 database models are tenant-scoped with automatic tenantId injection"],
+                    ["Module", "Reusable capability bundle in AICodeRally ecosystem. 130+ modules across 10 categories (accounting, CRM, nonprofit, etc.)"],
+                    ["Self-Aware", "Architecture where platform understands itself through indexed canonical documentation queryable by agents in real-time"],
+                    ["Agent", "Specialized AI assistant with clear role separation, persistent memory, and coordinated workflows. 14 agents in AICR ecosystem"],
+                    ["Chiefs", "Specialized AI systems: OpsChief (operations monitoring), CodeReviewChief (code quality), PulseChief (change intelligence)"],
+                    ["Spine", "Cross-platform audit trail system providing evidence preservation, change tracking, and compliance documentation"],
+                    ["Rally", "Collection of packs sharing a common domain or business purpose"],
+                    ["Pattern A", "LOCKED database naming convention: camelCase model names + @map to snake_case table names in Prisma"],
+                    ["The Three Laws", "LOCKED database governance: (1) Neon everywhere, (2) Neon branches, (3) Prisma only"],
+                    ["Rally AI", "Command-line orchestration framework using three ALMs (Creator, Operator, Enterprise) to generate applications"],
+                  ].map(([term, def], i, arr) => (
+                    <tr key={term} className={i < arr.length - 1 ? "border-b border-[var(--card-border)]" : ""}>
+                      <td className="px-5 py-3 font-medium text-[var(--text-primary)] whitespace-nowrap">{term}</td>
+                      <td className="px-5 py-3 text-[var(--text-secondary)]">{def}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+          </div>
+        </AnimatedSection>
+        </div>
+
+        {/* ── Acronym Decoder ── */}
+        <div id="acronyms">
+        <AnimatedSection className="mb-16">
+          <h2 className="mb-6 text-2xl font-bold tracking-tight text-[var(--text-primary)]">Acronym Decoder</h2>
+          <p className="mb-6 text-[var(--text-secondary)]">Quick lookup for control centers, modules, and platform components.</p>
+          <TabContainer
+            tabs={[
+              {
+                label: "Cross-Layer",
+                color: "violet",
+                content: (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-mono text-[var(--accent)]">SPINE</span> <span className="text-[var(--text-secondary)]">— Evidence Trail</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">OPSCHIEF</span> <span className="text-[var(--text-secondary)]">— Operations Intelligence</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">PULSE</span> <span className="text-[var(--text-secondary)]">— Change Intelligence</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">ASK</span> <span className="text-[var(--text-secondary)]">— AI Interaction Hub</span></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-mono text-[var(--accent)]">ORBS</span> <span className="text-[var(--text-secondary)]">— Visualization System</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">PACKS</span> <span className="text-[var(--text-secondary)]">— Pack Management</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">RALLYFORGE</span> <span className="text-[var(--text-secondary)]">— Dashboard Hub</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">FRAMEWORK</span> <span className="text-[var(--text-secondary)]">— 6P Framework</span></div>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                label: "Layers & Vertical",
+                color: "amber",
+                content: (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Layer-Specific</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-mono text-[var(--accent)]">STUDIO</span> <span className="text-[var(--text-secondary)]">— Development Layer</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">EDGE</span> <span className="text-[var(--text-secondary)]">— Operations Layer</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">SUMMIT</span> <span className="text-[var(--text-secondary)]">— Commerce Layer</span></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Vertical Demos</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-mono text-[var(--accent)]">SPARCC</span> <span className="text-[var(--text-secondary)]">— Sales Performance and Revenue Control Center</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">SGM</span> <span className="text-[var(--text-secondary)]">— Sales Governance Manager</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">SDA</span> <span className="text-[var(--text-secondary)]">— Sales Document Analyzer</span></div>
+                        <div><span className="font-mono text-[var(--accent)]">SFP</span> <span className="text-[var(--text-secondary)]">— Startup Financial Planning</span></div>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+            ]}
+          />
+        </AnimatedSection>
+        </div>
       </main>
 
       <Footer />
@@ -874,8 +946,8 @@ export default function Architecture() {
         </div>
       </Modal>
 
-      {/* SCM / SGM SPARCC Modal */}
-      <Modal isOpen={scmModal.isOpen} onClose={scmModal.close} title="SCM / SGM SPARCC — Complete Workflow" size="xlarge">
+      {/* SGM SPARCC Modal */}
+      <Modal isOpen={scmModal.isOpen} onClose={scmModal.close} title="SGM SPARCC — Complete Workflow" size="xlarge">
         <div className="space-y-6">
           <p className="text-[var(--text-secondary)]">Sales compensation governance platform built on the SPARCC pattern — four operational modes where Design, Dispute, and Oversee are shared, while Operate is unique per module.</p>
 
@@ -1110,6 +1182,50 @@ export default function Architecture() {
 
           <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-xs text-[var(--text-secondary)]">
             <strong className="text-amber-600">Current limitations (v0.1):</strong> Browser localStorage only, no authentication, no server-side persistence, no collaborative editing. Server-side Prisma persistence and AI-powered forecasting planned.
+          </div>
+        </div>
+      </Modal>
+
+      {/* Commission Calculator Modal */}
+      <Modal isOpen={commCalcModal.isOpen} onClose={commCalcModal.close} title="Commission Calculator — Complete Workflow" size="large">
+        <div className="space-y-6">
+          <p className="text-[var(--text-secondary)]">Real-time commission calculator built on AICR. Connects to any ICM system via the SPOT universal connector, computes commissions live at point-of-sale, and supports what-if analysis and Monte Carlo simulation. Built in 3 hours from Calladus-based business rules as a proof of concept.</p>
+
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Computation Workflow</h4>
+            <div className="space-y-3">
+              <FlowStep num={1} label="Connect ICM" desc="SPOT connector extracts rule concepts from Verisent, Exactly, CapIQ, or any ICM system. Normalizes to generic format." color="#f59e0b" />
+              <FlowStep num={2} label="Configure Plans" desc="Map extracted rules to rep hierarchies, quota targets, and multi-tier rate structures." color="#f59e0b" />
+              <FlowStep num={3} label="Real-Time Calculate" desc="Live commission computation at point-of-sale. Handles splits, overrides, accelerators, and draw recovery." color="#f59e0b" />
+              <FlowStep num={4} label="What-If & Simulation" desc="Run scenarios and Monte Carlo simulations to model earnings under different attainment levels or plan changes." color="#f59e0b" />
+              <FlowStep num={5} label="History & Audit" desc="Full commission history per rep. Dispute tracking and audit trail via SPINE." color="#f59e0b" />
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Target Clients</h4>
+            <p className="text-sm text-[var(--text-secondary)]">Any company using a point-of-sale workflow where reps need to see their commission in real time. Initial target: Mattress Firm (current tablet solution inadequate). Deployable to any vertical with a sales compensation model.</p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* SPOT Modal */}
+      <Modal isOpen={spotModal.isOpen} onClose={spotModal.close} title="SPOT — Universal ICM Connector" size="large">
+        <div className="space-y-6">
+          <p className="text-[var(--text-secondary)]">Generic connector that extracts compensation rule concepts from any ICM system (Verisent, Exactly, CapIQ, SAP, Salesforce) and normalizes them into a format the Commission Calculator and other SPM tools can consume. Focus is on rule <em>concepts</em>, not raw rule objects.</p>
+
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Extraction Workflow</h4>
+            <div className="space-y-3">
+              <FlowStep num={1} label="Connect" desc="Authenticate against target ICM system via API or credential-based access." color="#06b6d4" />
+              <FlowStep num={2} label="Extract Rules" desc="Pull compensation plan rules — rate tables, accelerators, qualifiers, splits, territories — as raw objects." color="#06b6d4" />
+              <FlowStep num={3} label="Interpret Concepts" desc="AI interprets rule intent (e.g. 'accelerator above 100% quota') rather than copying raw rule objects verbatim." color="#06b6d4" />
+              <FlowStep num={4} label="Normalize" desc="Output to a vendor-agnostic schema consumable by the Commission Calculator or any downstream SPM tool." color="#06b6d4" />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-cyan-400/20 bg-cyan-400/5 p-3 text-xs text-[var(--text-secondary)]">
+            <strong className="text-[var(--bhg-blue)]">In development:</strong> Aaron + Keshav building the universal connector. Supports Verisent, Exactly, and CapIQ as initial targets.
           </div>
         </div>
       </Modal>

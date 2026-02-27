@@ -1,8 +1,95 @@
 ---
 title: "Rally AI Framework"
-description: "the Rally AI Framework for intelligent applications."
+description: "Multi-model AI orchestration with specialized AI Lifecycle Managers (ALMs) for each platform tier."
 ---
 
-# Rally AI Framework
+## Overview
 
-Content coming soon. This page will cover the Rally AI Framework for intelligent applications.
+The Rally AI Framework is the AI orchestration layer inside Rally Stack. It routes tasks to the right AI model, manages context across sessions, and exposes tier-specific **AI Lifecycle Managers (ALMs)** that understand each layer's purpose and constraints.
+
+## AI Lifecycle Managers
+
+ALMs are specialized AI configurations — each one is tuned for a specific platform tier with a defined persona, framework, and target audience.
+
+| ALM | Tier | Target | Framework |
+|-----|------|--------|-----------|
+| **Creator AI** | Studio | BHG developers, domain experts | Ideate → Create → Validate (3 steps) |
+| **Operator AI** | Edge | Mid-market clients, industry verticals | 6 P's: People, Process, Product, Performance, Partners, Platform |
+| **Enterprise AI** | Summit | Enterprise clients, partner channels | ∞ Extensions for unlimited governance scope |
+
+### Creator AI (Studio Tier)
+
+Creator AI focuses on **speed and specificity**. Its job is to turn a single, well-defined idea into a working Studio app.
+
+- Generates the minimal module composition needed for the idea
+- Validates against the module registry before generating code
+- Produces a tested, standalone app — not a platform
+- Best for: point tools, MVPs, vertical demos
+
+### Operator AI (Edge Tier)
+
+Operator AI thinks in systems. It uses the **6 P's framework** to build business operations platforms:
+
+1. **People** — org structure, roles, access control
+2. **Process** — workflows, approvals, automation
+3. **Product** — the apps and tools the business runs
+4. **Performance** — KPIs, dashboards, reporting
+5. **Partners** — integrations, external data, vendor management
+6. **Platform** — infrastructure, configuration, extensibility
+
+### Enterprise AI (Summit Tier)
+
+Enterprise AI orchestrates at scale. It handles multi-tenant governance, pack promotion workflows, and compliance controls across an entire Summit deployment.
+
+## Model Roles
+
+The framework uses multiple AI providers with distinct roles:
+
+| Model | Provider | Primary Role |
+|-------|----------|--------------|
+| **Claude** | Anthropic | Technical analysis, code generation, architectural decisions |
+| **GPT-4** | OpenAI | Sprint planning, design thinking, business logic |
+| **Gemini** | Google | Business validation, testing, quality assurance |
+
+Tasks are routed based on the ALM's current phase. For example, during the "Validate" phase of Creator AI, Gemini is the primary model.
+
+## Context Management
+
+The Rally AI Framework maintains persistent context across sessions using a structured memory system:
+
+```typescript
+interface ALMContext {
+  tier: 'studio' | 'edge' | 'summit';
+  tenantId: string;
+  activeModules: string[];          // modules currently in scope
+  sessionHistory: ContextEntry[];   // prior decisions and rationale
+  architecturalConstraints: string[]; // enforced rules (Three Laws, etc.)
+}
+```
+
+Context is stored in the database (via Prisma → Neon) and loaded at the start of each session. Agents never start cold — they know the project's history.
+
+## Consensus Engine
+
+For high-stakes decisions (architecture choices, major module compositions, production deployments), the framework can invoke a **consensus engine** that runs the same prompt against all three models and synthesizes the results:
+
+1. All three models provide independent answers
+2. The framework compares responses for agreement/divergence
+3. Divergent areas are flagged for human review
+4. Consensus answers are committed to session context
+
+This is used for architectural decisions and conflict resolution between agents.
+
+## Configuration
+
+```env
+# .env.local
+ANTHROPIC_API_KEY="sk-ant-..."    # Claude — required
+OPENAI_API_KEY="sk-..."           # GPT-4 — optional, falls back to Claude
+GOOGLE_AI_API_KEY="..."           # Gemini — optional, falls back to Claude
+
+# ALM tier selection (overrides auto-detection)
+RALLY_DEFAULT_ALM="operator"      # studio | operator | enterprise
+```
+
+The framework auto-detects the appropriate ALM from your deployment configuration if `RALLY_DEFAULT_ALM` is not set.

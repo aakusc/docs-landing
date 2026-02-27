@@ -1,8 +1,217 @@
 ---
 title: "Module Creation"
-description: "creating new modules for Rally Stack."
+description: "Step-by-step guide to creating a new Rally Stack module — from scaffolding to publishing."
 ---
 
-# Module Creation
+## What is a Module?
 
-Content coming soon. This page will cover creating new modules for Rally Stack.
+A module is a **self-contained, reusable capability unit** in Rally Stack. It does one thing well, exposes a typed contract, and can be composed with other modules by the platform's AI or by developers.
+
+Modules are not apps. They don't have routing. They export React components, hooks, server actions, and utility functions that apps pull in.
+
+## Module Anatomy
+
+```
+packages/modules/my-module/
+├── package.json          # package metadata and dependencies
+├── index.ts              # public API — export everything consumers need
+├── contract.ts           # ModuleContract definition (required)
+├── types.ts              # TypeScript types
+├── components/           # React components
+│   └── MyComponent.tsx
+├── hooks/                # React hooks
+│   └── useMyModule.ts
+├── lib/                  # Business logic (pure functions, no React)
+│   └── calculations.ts
+├── actions/              # Next.js server actions
+│   └── my-actions.ts
+└── __tests__/            # Tests live next to the code
+    └── calculations.test.ts
+```
+
+## Step 1: Scaffold the Module
+
+```bash
+# From the repo root
+mkdir -p packages/modules/my-module
+cd packages/modules/my-module
+pnpm init
+```
+
+Set the package name in `package.json`:
+
+```json
+{
+  "name": "@rally/my-module",
+  "version": "0.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  }
+}
+```
+
+## Step 2: Define the Contract
+
+Every module must have a `contract.ts` that exports a `ModuleContract`. This is how the module registry knows what the module does and how to compose it.
+
+```typescript
+// contract.ts
+import { z } from 'zod';
+import type { ModuleContract } from '@rally/core';
+
+export const MyModuleInputSchema = z.object({
+  tenantId: z.string(),
+  // your inputs here
+});
+
+export const MyModuleOutputSchema = z.object({
+  // your outputs here
+});
+
+export const contract: ModuleContract = {
+  id: 'my-module',
+  version: '0.1.0',
+  category: 'business-management', // see module categories
+  inputs: MyModuleInputSchema,
+  outputs: MyModuleOutputSchema,
+  dependencies: [],    // other @rally/* packages this depends on
+  aiCapable: false,    // set true if this module has an ALM
+  description: 'One sentence describing what this module does.',
+};
+```
+
+## Step 3: Implement the Module
+
+### Server Actions (database operations)
+
+All database access must go through Prisma. Never import `pg` or any other DB client.
+
+```typescript
+// actions/my-actions.ts
+'use server';
+
+import { prisma } from '@rally/db';
+import { MyModuleInputSchema } from '../contract';
+
+export async function getMyData(input: unknown) {
+  const { tenantId } = MyModuleInputSchema.parse(input);
+
+  return prisma.myModel.findMany({
+    where: { tenantId },
+  });
+}
+```
+
+### React Components
+
+```typescript
+// components/MyComponent.tsx
+import { getMyData } from '../actions/my-actions';
+
+export async function MyComponent({ tenantId }: { tenantId: string }) {
+  const data = await getMyData({ tenantId });
+
+  return (
+    <div>
+      {data.map(item => (
+        <div key={item.id}>{item.name}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Public Exports
+
+```typescript
+// index.ts
+export { MyComponent } from './components/MyComponent';
+export { useMyModule } from './hooks/useMyModule';
+export { getMyData } from './actions/my-actions';
+export { contract } from './contract';
+export type { MyModuleInput, MyModuleOutput } from './types';
+```
+
+## Step 4: Add to the Registry
+
+Register your module in the platform registry:
+
+```typescript
+// packages/core/src/registry.ts
+import { contract as myModuleContract } from '@rally/my-module';
+
+export const moduleRegistry = [
+  // ... existing modules
+  myModuleContract,
+];
+```
+
+## Step 5: Write Tests
+
+```typescript
+// __tests__/calculations.test.ts
+import { describe, it, expect } from 'vitest';
+import { myCalculation } from '../lib/calculations';
+
+describe('myCalculation', () => {
+  it('returns correct result', () => {
+    expect(myCalculation({ input: 100 })).toBe(110);
+  });
+});
+```
+
+Run tests:
+
+```bash
+pnpm --filter @rally/my-module test
+```
+
+## Step 6: Use the Module
+
+Once registered, any app in the monorepo can use it:
+
+```json
+// apps/web/package.json
+{
+  "dependencies": {
+    "@rally/my-module": "workspace:*"
+  }
+}
+```
+
+```typescript
+// In a Next.js page or component
+import { MyComponent } from '@rally/my-module';
+
+export default function Page({ tenantId }: { tenantId: string }) {
+  return <MyComponent tenantId={tenantId} />;
+}
+```
+
+## Module Categories
+
+When setting `category` in your contract, use one of:
+
+| Category | Examples |
+|----------|---------|
+| `business-management` | CRM, pipeline, commissions, forecasting |
+| `spm` | Territory planning, quota, incentive design, SPARCC |
+| `nonprofit` | Donor management, grants, programs |
+| `operations` | Projects, resources, workflows |
+| `development` | Testing tools, deployment, monitoring |
+| `ui-components` | Design system, forms, tables, dashboards |
+| `integrations` | CRM connectors, finance, email, storage |
+| `ai-tools` | AI orchestration, context management, cost tracking |
+
+## Checklist Before Merging
+
+<Check>Contract defined with valid schemas</Check>
+<Check>All database access through Prisma</Check>
+<Check>Tests written and passing</Check>
+<Check>Public API exported from index.ts</Check>
+<Check>Module registered in core registry</Check>
+<Check>TypeScript passes: `pnpm --filter @rally/my-module typecheck`</Check>

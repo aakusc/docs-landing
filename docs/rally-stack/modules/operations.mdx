@@ -1,8 +1,68 @@
 ---
 title: "Operations"
-description: "operations and workflow modules."
+description: "Project management, resource allocation, workflow automation, and scheduling modules."
 ---
 
-# Operations
+## Overview
 
-Content coming soon. This page will cover operations and workflow modules.
+Operations modules handle the day-to-day running of a business — tracking work, managing resources, automating processes, and keeping teams coordinated.
+
+## Modules
+
+### Project Management
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Project Tracker** | `ops-projects` | Project creation, milestones, tasks, and status tracking |
+| **Task Manager** | `ops-tasks` | Individual task assignment, priority, and completion tracking |
+| **Timeline View** | `ops-timeline` | Gantt-style project timeline visualization |
+| **Budget Tracker** | `ops-budget` | Project budget vs. actuals with burn rate tracking |
+| **Status Reporter** | `ops-status` | Automated status report generation from project data |
+
+### Resource Management
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Resource Planner** | `ops-resources` | Team capacity planning and allocation |
+| **Skills Matrix** | `ops-skills` | Team skill inventory and gap analysis |
+| **Utilization Tracker** | `ops-utilization` | Resource utilization reporting and forecasting |
+
+### Workflow Automation
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Workflow Builder** | `ops-workflow` | Visual workflow design with conditional logic |
+| **Approval Engine** | `ops-approvals` | Multi-step approval routing with escalation |
+| **Notification Manager** | `ops-notifications` | Triggered notifications via email, Slack, or in-app |
+| **Audit Trail** | `ops-audit` | Immutable record of all workflow state changes |
+
+### Scheduling
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Calendar Manager** | `ops-calendar` | Team calendar with availability and booking |
+| **Meeting Scheduler** | `ops-meetings` | Meeting coordination and agenda management |
+| **Recurring Events** | `ops-recurring` | Scheduled recurring tasks and reports |
+
+## AI Features
+
+- **Status Reporter** — generates plain-English project status reports from data
+- **Resource Planner** — suggests optimal resource allocation based on project requirements and team capacity
+- **Workflow Builder** — converts process descriptions into structured workflow definitions
+
+## Example Usage
+
+```typescript
+import { ProjectDashboard, useProjectStatus } from '@rally/ops-projects';
+
+export async function ProjectOverview({ tenantId, projectId }: Props) {
+  return (
+    <ProjectDashboard
+      tenantId={tenantId}
+      projectId={projectId}
+      showBudget
+      showTimeline
+    />
+  );
+}
+```

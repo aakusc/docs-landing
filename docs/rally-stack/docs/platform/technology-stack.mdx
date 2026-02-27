@@ -1,8 +1,112 @@
 ---
 title: "Technology Stack"
-description: "the technologies powering Rally Stack."
+description: "The technologies powering Rally Stack — chosen for performance, type safety, and the Three Laws."
 ---
 
-# Technology Stack
+## Core Stack
 
-Content coming soon. This page will cover the technologies powering Rally Stack.
+| Layer | Technology | Version | Purpose |
+|-------|-----------|---------|---------|
+| **Framework** | Next.js | 14–15 | Full-stack React framework, routing, SSR |
+| **UI** | React | 19 | Component model |
+| **Language** | TypeScript | 5 | Type safety across the monorepo |
+| **Database ORM** | Prisma | Latest | Required by Three Laws — only permitted ORM |
+| **Database** | PostgreSQL via Neon | Latest | Required by Three Laws — serverless Postgres |
+| **Styling** | Tailwind CSS | 3 | Utility-first CSS |
+| **Monorepo** | Turborepo + pnpm | Latest | Workspace management, incremental builds |
+| **Hosting** | Vercel | — | Serverless deployment, edge functions |
+| **AI** | Claude, GPT-4, Gemini | — | Multi-model orchestration via Rally AI |
+
+## Why These Choices
+
+### Next.js 14–15
+
+Next.js provides the foundation for both the platform and every app built on Rally Stack. Server Components, App Router, and server actions eliminate most of the traditional client-server boilerplate.
+
+Every Studio app is a Next.js application. Every Edge deployment is Next.js. The uniformity means modules work across all layers without adaptation.
+
+### Prisma + Neon (Three Laws)
+
+These two are locked — not suggestions:
+
+**Prisma** is the only ORM permitted in Rally Stack. It provides:
+- Generated TypeScript client from the schema (type-safe queries)
+- Automatic migration management
+- Contract enforcement through schema-as-source-of-truth
+
+**Neon** is the only database provider permitted. It provides:
+- Instant database branching (dev/staging/prod without duplication)
+- Serverless connection pooling (scales to zero)
+- Compatible with Vercel's deployment model
+
+Using raw SQL, Drizzle, Knex, or any other database access method will throw at runtime via `guard.ts`.
+
+### Turborepo + pnpm
+
+With 130+ modules in a single repo, build performance matters. Turborepo provides:
+- Incremental builds — only rebuild what changed
+- Parallel task execution across packages
+- Remote caching via Vercel (CI is fast)
+
+pnpm's workspace protocol (`workspace:*`) links packages locally without publishing them.
+
+### TypeScript 5
+
+The entire codebase is TypeScript — no `any`, no escape hatches in module contracts. TypeScript 5 features used:
+- Const type parameters
+- Decorators (for module metadata)
+- `satisfies` operator for contract validation
+
+## AI Stack
+
+| Model | Provider | API |
+|-------|----------|-----|
+| Claude Sonnet / Opus | Anthropic | `@anthropic-ai/sdk` |
+| GPT-4o | OpenAI | `openai` |
+| Gemini 1.5 Pro | Google | `@google/generative-ai` |
+
+The Rally AI Framework abstracts over these — you configure which models are available and the ALMs route appropriately. If a model's API key is missing, it falls back to Claude.
+
+## Testing Stack
+
+| Tool | Purpose |
+|------|---------|
+| **Vitest** | Unit and integration tests |
+| **Playwright** | End-to-end tests |
+| **MSW** | API mocking in tests |
+| **Prisma Test Environment** | Isolated database per test suite |
+
+## Infrastructure
+
+```
+Vercel (hosting)
+├── Production — main branch, auto-deploy
+├── Preview — PR-based preview deployments
+└── Development — local via `vercel dev`
+
+Neon (database)
+├── Production branch — main
+├── Staging branch — staging
+└── Dev branches — one per developer / PR
+```
+
+Neon's branching model means every pull request can have its own database branch with the production schema — no shared staging database contention.
+
+## Adding Dependencies
+
+All dependencies are added at the workspace level using pnpm:
+
+```bash
+# Add to root (shared tooling)
+pnpm add -D -w vitest
+
+# Add to a specific package
+pnpm add --filter @rally/spm zod
+
+# Add to the web app
+pnpm add --filter web @rally/spm
+```
+
+<Warning>
+  Never add alternative database clients (pg, mysql2, drizzle-orm, etc.) — they violate the Three Laws and will be rejected at runtime.
+</Warning>

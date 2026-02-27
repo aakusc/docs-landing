@@ -26,25 +26,11 @@ export default function Header() {
             Architecture
           </Link>
           <Link
-            href="/reference"
-            className="text-sm text-[var(--text-secondary)] transition-colors duration-200 hover:text-[var(--link-hover)]"
-          >
-            Quick Reference
-          </Link>
-          <Link
             href="/api-reference"
             className="text-sm text-[var(--text-secondary)] transition-colors duration-200 hover:text-[var(--link-hover)]"
           >
             API
           </Link>
-          <a
-            href="https://www.aicoderally.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-[var(--text-secondary)] transition-colors duration-200 hover:text-[var(--link-hover)]"
-          >
-            AI Code Rally
-          </a>
           <a
             href="https://github.com/AICodeRally"
             target="_blank"

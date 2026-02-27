@@ -1,8 +1,99 @@
 ---
 title: "API Overview"
-description: "the Rally Stack API."
+description: "The Rally Stack REST API — authentication, modules, and AI framework endpoints."
 ---
 
-# API Overview
+## Overview
 
-Content coming soon. This page will cover the Rally Stack API.
+Rally Stack exposes a REST API for interacting with the platform programmatically. The API covers:
+
+- **Modules** — query the module registry, validate compositions
+- **AI Framework** — invoke ALMs, manage context, call the consensus engine
+- **Authentication** — API key management and tenant authorization
+
+## Base URL
+
+```
+https://rally.aicoderally.com/api/v1
+```
+
+For local development:
+
+```
+http://localhost:3000/api/v1
+```
+
+## Authentication
+
+All API requests must include an `Authorization` header:
+
+```
+Authorization: Bearer <your-api-key>
+```
+
+API keys are scoped to a tenant and an access level (read, write, admin). See [Authentication](/api-reference/authentication) for details.
+
+## Request Format
+
+All POST/PATCH requests use JSON:
+
+```
+Content-Type: application/json
+```
+
+## Response Format
+
+All responses return JSON:
+
+```json
+{
+  "data": { ... },
+  "meta": {
+    "requestId": "req_01abc",
+    "timestamp": "2025-03-01T12:00:00Z"
+  }
+}
+```
+
+Errors:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "tenantId is required",
+    "details": { ... }
+  },
+  "meta": { ... }
+}
+```
+
+## Rate Limits
+
+| Tier | Requests/minute |
+|------|----------------|
+| Studio | 60 |
+| Edge | 300 |
+| Summit | 1000 |
+
+Rate limit headers are included in every response:
+
+```
+X-RateLimit-Limit: 300
+X-RateLimit-Remaining: 287
+X-RateLimit-Reset: 1740830400
+```
+
+## Sections
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api-reference/authentication">
+    API keys, tenant scoping, and authorization
+  </Card>
+  <Card title="Modules API" icon="sitemap" href="/api-reference/modules">
+    Module registry queries and composition validation
+  </Card>
+  <Card title="AI Framework API" icon="brain" href="/api-reference/ai-framework">
+    ALM invocation, context, and consensus engine
+  </Card>
+</CardGroup>

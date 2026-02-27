@@ -1,8 +1,71 @@
 ---
 title: "Platform Overview"
-description: "the Rally Stack platform core."
+description: "The core systems that make Rally Stack work: module registry, AI framework, agent protocol, and monorepo structure."
 ---
 
-# Platform Overview
+## What's in the Platform Core
 
-Content coming soon. This page will cover the Rally Stack platform core.
+The Rally Stack platform core is the set of systems that run underneath every app you build. You don't interact with most of these directly — they handle the infrastructure so your modules and apps don't have to.
+
+<CardGroup cols={2}>
+  <Card title="Monorepo Structure" icon="sitemap" href="/docs/platform/monorepo-structure">
+    Turborepo + pnpm workspace organization
+  </Card>
+  <Card title="Rally AI Framework" icon="brain" href="/docs/platform/rally-ai-framework">
+    Multi-model AI orchestration and ALM tiers
+  </Card>
+  <Card title="Agent Protocol" icon="robot" href="/docs/platform/agent-protocol">
+    Behavioral OS for AI agent coordination
+  </Card>
+  <Card title="Technology Stack" icon="code" href="/docs/platform/technology-stack">
+    Next.js, Prisma, Neon, Vercel, and more
+  </Card>
+</CardGroup>
+
+## Core Responsibilities
+
+| System | Responsibility |
+|--------|---------------|
+| **Module Registry** | Indexes all 130+ modules with contracts and metadata |
+| **Rally AI Framework** | Routes AI tasks to the right model and ALM |
+| **Agent Protocol** | Defines how AI agents communicate, hand off, and remember |
+| **Three Laws Enforcement** | Runtime validation of Neon + Prisma rules |
+| **Pack Compiler** | Bundles modules into versioned AICR packs |
+| **Turborepo** | Orchestrates builds, tests, and deploys across the monorepo |
+
+## Module Registry
+
+The module registry is the central catalog of all capabilities in Rally Stack. When you compose an app, the registry:
+
+1. Validates that requested modules exist and are at compatible versions
+2. Resolves dependencies between modules
+3. Checks that module input/output contracts align
+4. Generates the composition graph for the AI to work from
+
+The registry is queryable at runtime — AI agents can ask "what modules handle commission calculation?" and get back a ranked list.
+
+## Three Laws Enforcement
+
+The platform enforces the three locked laws at startup and at every database operation:
+
+```typescript
+// guard.ts — runs before every DB call
+export function enforceThreeLaws(operation: DBOperation) {
+  assert(operation.client === 'prisma', 'THREE LAWS: Prisma only');
+  assert(operation.provider === 'neon', 'THREE LAWS: Neon only');
+  // Branch enforcement is at CI/CD level
+}
+```
+
+Any attempt to bypass Prisma (raw SQL clients, direct pg connections) will throw at runtime, not just at lint time.
+
+## Pack Compiler
+
+When you're ready to deploy Rally Stack modules to an AICR tenant, the pack compiler:
+
+1. Takes a composition graph (module selections + configuration)
+2. Validates all contracts are satisfied
+3. Generates a versioned pack manifest (compatible with AICR's pack system)
+4. Produces a deployable artifact
+
+This is the bridge between Rally Stack (build) and AICR (run).

@@ -81,20 +81,20 @@ const layers: Layer[] = [
     subtitle: "Core infrastructure and AI framework that powers every product in the ecosystem",
     products: [
       {
-        name: "AICR Platform",
-        tagline: "Enterprise AI Governance & Operations",
-        description: "Self-aware, AI-native platform orchestrating creation, operation, and commercialization through a three-layer architecture.",
+        name: "AICR Platform / BHG Edge",
+        tagline: "Enterprise AI Platform — BHG's own instance runs at edge.bluehorizonsgroup.com",
+        description: "Self-aware, AI-native platform orchestrating creation, operation, and commercialization through a three-layer architecture. AICR is the platform; BHG Edge is BHG's own deployed instance of it — the same product sold to clients.",
         features: [
           "Studio / Edge / Summit tiers",
           "240-table database architecture",
           "19 interconnected control centers",
           "14 specialized AI agents",
           "Pack system for capability management",
-          "Complete self-documentation",
+          "BHG Edge: internal ops + client demo environment",
         ],
         status: "in-development",
         docsUrl: "/docs/aicr",
-        appUrl: "https://aicr.aicoderally.com",
+        appUrl: "https://edge.bluehorizonsgroup.com",
       },
       {
         name: "Rally Stack",
@@ -284,17 +284,105 @@ export default function ProductSuite() {
                 </div>
               </div>
 
-              {/* Connector line between layers */}
-              {layerIdx < layers.length - 1 && (
+              {/* Foundation layer — Rally Stack → AICR/Edge supply chain */}
+              {layerIdx === 0 && (
                 <div className="relative">
-                  {/* Products grid */}
+                  <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
+                    {/* Supply chain header */}
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-0 border-b border-[var(--border-color)] bg-[var(--light-gray)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+                      <span>Rally Stack — Build</span>
+                      <span className="px-4 text-[var(--border-color)]">→</span>
+                      <span>AICR / BHG Edge — Run</span>
+                    </div>
+
+                    {/* Two-column layout */}
+                    <div className="grid grid-cols-[1fr_auto_1fr]">
+                      {/* Rally Stack */}
+                      {(() => {
+                        const rally = layer.products.find(p => p.name === "Rally Stack")!;
+                        return (
+                          <div className="flex flex-col p-5">
+                            <div className="mb-3">
+                              <div className="mb-1 flex items-center justify-between">
+                                <h3 className="font-semibold text-[var(--text-primary)]">{rally.name}</h3>
+                                <Badge status={rally.status} />
+                              </div>
+                              <p className="text-xs font-medium text-violet-500">{rally.tagline}</p>
+                              <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">{rally.description}</p>
+                            </div>
+                            <ul className="flex-1 space-y-1.5">
+                              {rally.features.map((f, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)]">
+                                  <CheckIcon />
+                                  <span>{f}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="mt-4 border-t border-[var(--border-color)] pt-3">
+                              <LinkPair docsUrl={rally.docsUrl} appUrl={rally.appUrl} size="xs" />
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Arrow connector */}
+                      <div className="flex flex-col items-center justify-center gap-1.5 border-x border-[var(--border-color)] px-4 py-6 text-[var(--text-secondary)]">
+                        <div className="rounded bg-violet-400/10 px-2 py-0.5 text-[10px] font-semibold text-violet-500">modules</div>
+                        <svg className="h-4 w-4 text-[var(--border-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                        </svg>
+                        <div className="rounded bg-[var(--bhg-blue)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--bhg-blue)]">packs</div>
+                      </div>
+
+                      {/* AICR / BHG Edge */}
+                      {(() => {
+                        const aicr = layer.products.find(p => p.name === "AICR Platform / BHG Edge")!;
+                        return (
+                          <div className="flex flex-col p-5">
+                            <div className="mb-3">
+                              <div className="mb-1 flex items-center justify-between">
+                                <h3 className="font-semibold text-[var(--text-primary)]">{aicr.name}</h3>
+                                <Badge status={aicr.status} />
+                              </div>
+                              <p className="text-xs font-medium text-[var(--bhg-blue)]">{aicr.tagline}</p>
+                              <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">{aicr.description}</p>
+                            </div>
+                            <ul className="flex-1 space-y-1.5">
+                              {aicr.features.map((f, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)]">
+                                  <CheckIcon />
+                                  <span>{f}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="mt-4 border-t border-[var(--border-color)] pt-3">
+                              <LinkPair docsUrl={aicr.docsUrl} appUrl={aicr.appUrl} size="xs" />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Vertical connector arrow to next layer */}
+                  <div className="flex justify-center py-4">
+                    <div className="flex flex-col items-center text-[var(--border-color)]">
+                      <div className="h-4 w-px bg-[var(--border-color)]" />
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7" />
+                      </svg>
+                      <span className="mt-1 text-[10px] font-medium uppercase tracking-widest text-[var(--text-secondary)]">powers</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* All other non-last layers */}
+              {layerIdx > 0 && layerIdx < layers.length - 1 && (
+                <div className="relative">
                   <div className={`grid gap-4 ${layer.products.length === 2 ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3"}`}>
                     {layer.products.map((product) => (
-                      <div
-                        key={product.name}
-                        className="group flex flex-col overflow-hidden rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] transition-all duration-200 hover:border-[var(--bhg-blue)]/30 hover:shadow-md"
-                      >
-                        {/* Product header */}
+                      <div key={product.name} className="group flex flex-col overflow-hidden rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] transition-all duration-200 hover:border-[var(--bhg-blue)]/30 hover:shadow-md">
                         <div className="border-b border-[var(--border-color)] px-5 py-4">
                           <div className="mb-1 flex items-center justify-between">
                             <h3 className="font-semibold text-[var(--text-primary)]">{product.name}</h3>
@@ -303,8 +391,6 @@ export default function ProductSuite() {
                           <p className="text-xs font-medium text-[var(--bhg-blue)]">{product.tagline}</p>
                           <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">{product.description}</p>
                         </div>
-
-                        {/* Features */}
                         <div className="flex-1 px-5 py-3">
                           <ul className="grid grid-cols-1 gap-1.5">
                             {product.features.map((f, i) => (
@@ -315,16 +401,12 @@ export default function ProductSuite() {
                             ))}
                           </ul>
                         </div>
-
-                        {/* Actions */}
                         <div className="border-t border-[var(--border-color)] px-5 py-3">
                           <LinkPair docsUrl={product.docsUrl} appUrl={product.appUrl} size="xs" />
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  {/* Vertical connector arrow to next layer */}
                   <div className="flex justify-center py-4">
                     <div className="flex flex-col items-center text-[var(--border-color)]">
                       <div className="h-4 w-px bg-[var(--border-color)]" />

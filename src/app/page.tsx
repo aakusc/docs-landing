@@ -11,19 +11,19 @@ const products = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
       </svg>
     ),
-    href: "https://sgm.docs.bluehorizonsgroup.com",
+    href: "/docs/sgm",
     status: "live" as const,
   },
   {
-    name: "AICR Platform",
+    name: "AICR Platform / BHG Edge",
     description:
-      "Self-aware, AI-native platform with Edge, Summit, and Studio tiers. 240-table database, 19 control centers, 14 specialized AI agents.",
+      "Self-aware, AI-native platform with Studio, Edge, and Summit tiers. AICR is the engine — BHG Edge is BHG's own live instance of it, the same product deployed for clients.",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
       </svg>
     ),
-    href: "https://aicr.docs.bluehorizonsgroup.com",
+    href: "/docs/aicr",
     status: "live" as const,
   },
   {
@@ -35,7 +35,7 @@ const products = [
         <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
       </svg>
     ),
-    href: "https://rally.docs.bluehorizonsgroup.com",
+    href: "/docs/rally",
     status: "live" as const,
   },
   {
@@ -75,8 +75,8 @@ export default function Home() {
             <a
               key={product.name}
               href={product.status === "live" ? product.href : undefined}
-              target={product.status === "live" ? "_blank" : undefined}
-              rel={product.status === "live" ? "noopener noreferrer" : undefined}
+              target={product.href?.startsWith("http") ? "_blank" : undefined}
+              rel={product.href?.startsWith("http") ? "noopener noreferrer" : undefined}
               className={`group relative rounded-[var(--border-radius-base)] border border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-sm transition-all duration-300 ${
                 product.status === "live"
                   ? "cursor-pointer hover:border-[var(--bhg-blue)] hover:shadow-lg"

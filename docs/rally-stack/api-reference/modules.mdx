@@ -1,8 +1,136 @@
 ---
 title: "Modules API"
-description: "the Modules API."
+description: "Query the module registry, validate compositions, and get module metadata."
 ---
 
-# Modules API
+## Endpoints
 
-Content coming soon. This page will cover the Modules API.
+### List Modules
+
+```
+GET /api/v1/modules
+```
+
+Returns all modules in the registry.
+
+**Query parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `category` | string | Filter by category (e.g., `spm`, `business-management`) |
+| `aiCapable` | boolean | Filter to AI-capable modules only |
+| `search` | string | Search module IDs and descriptions |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "spm-sparcc",
+      "version": "1.2.0",
+      "category": "spm",
+      "description": "AI-powered sales quota and commission calculator",
+      "aiCapable": true,
+      "dependencies": ["spm-quota", "spm-rules"]
+    }
+  ],
+  "meta": {
+    "total": 132,
+    "requestId": "req_01abc"
+  }
+}
+```
+
+### Get Module
+
+```
+GET /api/v1/modules/:id
+```
+
+Returns a single module by ID.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "spm-sparcc",
+    "version": "1.2.0",
+    "category": "spm",
+    "description": "AI-powered sales quota and commission calculator",
+    "aiCapable": true,
+    "dependencies": ["spm-quota", "spm-rules"],
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "tenantId": { "type": "string" },
+        "territoryId": { "type": "string" }
+      },
+      "required": ["tenantId", "territoryId"]
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "recommendedQuota": { "type": "number" },
+        "rationale": { "type": "string" }
+      }
+    }
+  }
+}
+```
+
+### Validate Composition
+
+```
+POST /api/v1/modules/validate
+```
+
+Validates that a set of modules can be composed together — checks dependency resolution and contract compatibility.
+
+**Request body:**
+
+```json
+{
+  "modules": ["spm-sparcc", "spm-quota", "bm-commission-calc"],
+  "tenantId": "tenant_abc123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "valid": true,
+    "resolvedModules": ["spm-sparcc", "spm-quota", "spm-rules", "bm-commission-calc"],
+    "warnings": []
+  }
+}
+```
+
+If invalid:
+
+```json
+{
+  "data": {
+    "valid": false,
+    "errors": [
+      {
+        "type": "MISSING_DEPENDENCY",
+        "module": "spm-sparcc",
+        "missing": "spm-territory",
+        "message": "spm-sparcc requires spm-territory but it is not in the composition"
+      }
+    ]
+  }
+}
+```
+
+### Get Module Version History
+
+```
+GET /api/v1/modules/:id/versions
+```
+
+Returns all published versions of a module.

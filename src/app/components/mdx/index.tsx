@@ -6,11 +6,29 @@ import {
   Database, Bot, Brain, Shield, ShieldCheck, Users, Wrench,
   FlaskConical, Store, ArrowUp, Handshake, Map, ToggleRight,
   TrendingUp, Terminal, Globe, Lock, Key, Plug, Layers, Cpu,
-  List, Search, Settings, BarChart2, Zap, BookOpen, Package,
+  List, Search, Settings, BarChart2, Zap, BookOpen, Book, Package,
   Network, Activity, Bell, CheckCircle, FileText, MessageSquare,
   Star, Tag, Workflow, Eye, AlertTriangle, Info as InfoIcon,
+  Clipboard, ClipboardCheck, ClipboardList, Compass, File,
+  Play, Scale, User, UserCog,
+  // Vertical solutions icons
+  BookUser, Flag, Landmark, Target, Calculator, Calendar, CalendarCheck,
+  CalendarDays, GanttChart, CheckCheck, Clock, RotateCcw, Cloud,
+  DollarSign, Mail, MailOpen, Smile, FileCheck, FileInput, Receipt,
+  FilePlus, FileLock2, FilePen, Gauge, Gavel, Factory, Heart,
+  HeartPulse, HeartHandshake, Headphones, Laptop, Lightbulb, LightbulbOff,
+  ListChecks, MapPin, Newspaper, Phone, Monitor, Route, RotateCw,
+  Sliders, Trophy, Truck, UserCircle, UserLock, UserCheck, Video,
+  Wand, Sparkles, Award, Briefcase,
   type LucideIcon,
 } from "lucide-react";
+
+/* ─── Product context (for resolving doc-internal links) ───── */
+
+import { resolveHref } from "@/lib/resolve-href";
+export { resolveHref };
+
+export const ProductContext = createContext<string>("");
 
 /* ─── Card & CardGroup ─────────────────────────────────────── */
 
@@ -41,7 +59,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   sitemap: GitBranch,
   github: GitBranch,
   // People
+  user: User,
   users: Users,
+  "users-gear": UserCog,
   handshake: Handshake,
   // AI / intelligence
   robot: Bot,
@@ -54,6 +74,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   // Tools
   wrench: Wrench,
   settings: Settings,
+  gear: Settings,
   cog: Settings,
   // Science
   flask: FlaskConical,
@@ -64,21 +85,34 @@ const ICON_MAP: Record<string, LucideIcon> = {
   // Navigation & maps
   map: Map,
   globe: Globe,
+  compass: Compass,
+  "compass-drafting": Compass,
   search: Search,
   "magnifying-glass": Search,
+  "magnifying-glass-chart": BarChart2,
   // Toggles & lists
   "toggle-on": ToggleRight,
   "list-bullet": List,
   list: List,
   // Content & docs
   "book-open": BookOpen,
+  book: Book,
+  file: File,
   "file-text": FileText,
+  "file-contract": File,
+  clipboard: Clipboard,
+  "clipboard-check": ClipboardCheck,
+  "clipboard-list": ClipboardList,
   // Network & workflow
   network: Network,
   workflow: Workflow,
   // Misc
   bolt: Zap,
   zap: Zap,
+  play: Play,
+  scale: Scale,
+  "scale-balanced": Scale,
+  "diagram-project": GitBranch,
   star: Star,
   tag: Tag,
   eye: Eye,
@@ -86,7 +120,92 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "check-circle": CheckCircle,
   message: MessageSquare,
   "alert-triangle": AlertTriangle,
+  "triangle-exclamation": AlertTriangle,
   info: InfoIcon,
+  // People (extended)
+  "user-circle": UserCircle,
+  "user-lock": UserLock,
+  "user-shield": UserCheck,
+  "user-tie": UserCheck,
+  "address-book": BookUser,
+  // Buildings & institutions
+  "building-columns": Landmark,
+  "building-flag": Flag,
+  landmark: Landmark,
+  briefcase: Briefcase,
+  industry: Factory,
+  // Charts (extended)
+  "chart-column": BarChart2,
+  "chart-gantt": GanttChart,
+  "chart-mixed": BarChart2,
+  gauge: Gauge,
+  "gauge-high": Gauge,
+  sliders: Sliders,
+  target: Target,
+  bullseye: Target,
+  // Calendar & time
+  calendar: Calendar,
+  "calendar-check": CalendarCheck,
+  "calendar-days": CalendarDays,
+  clock: Clock,
+  "clock-rotate-left": RotateCcw,
+  rotate: RotateCw,
+  // Files (extended)
+  "file-check": FileCheck,
+  "file-import": FileInput,
+  "file-invoice": FileText,
+  "file-invoice-dollar": Receipt,
+  "file-lines": FileText,
+  "file-plus": FilePlus,
+  "file-shield": FileLock2,
+  "file-signature": FilePen,
+  "file-chart-line": FileText,
+  // Communication
+  envelope: Mail,
+  "envelope-open-text": MailOpen,
+  phone: Phone,
+  comments: MessageSquare,
+  headset: Headphones,
+  video: Video,
+  // Finance
+  "dollar-sign": DollarSign,
+  "magnifying-glass-dollar": Search,
+  "money-bill-trend-up": TrendingUp,
+  "arrow-trend-up": TrendingUp,
+  // Transportation
+  truck: Truck,
+  road: Route,
+  route: Route,
+  "map-location-dot": MapPin,
+  "location-dot": MapPin,
+  // Legal & compliance
+  gavel: Gavel,
+  "shield-halved": Shield,
+  // People & sentiment
+  "face-smile": Smile,
+  heart: Heart,
+  "heart-pulse": HeartPulse,
+  "hand-holding-heart": HeartHandshake,
+  "hands-helping": HeartHandshake,
+  // Awards & goals
+  award: Award,
+  certificate: Award,
+  trophy: Trophy,
+  // Tech & tools
+  "laptop-code": Laptop,
+  cloud: Cloud,
+  "check-double": CheckCheck,
+  "list-check": ListChecks,
+  "presentation-screen": Monitor,
+  // Ideas
+  lightbulb: Lightbulb,
+  "lightbulb-on": LightbulbOff,
+  calculator: Calculator,
+  "wand-magic-sparkles": Wand,
+  "crystal-ball": Sparkles,
+  // Misc (extended)
+  newspaper: Newspaper,
+  gears: Settings,
 };
 
 function CardIcon({ name }: { name: string }) {
@@ -104,6 +223,8 @@ interface CardProps {
 }
 
 export function Card({ title, icon, href, children }: CardProps) {
+  const product = useContext(ProductContext);
+  const resolvedHref = href ? resolveHref(href, product) : undefined;
   const content = (
     <div className="group flex h-full flex-col gap-2 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4 transition-all duration-150 hover:border-[var(--bhg-blue)]/50 hover:shadow-md">
       {icon && (
@@ -112,11 +233,11 @@ export function Card({ title, icon, href, children }: CardProps) {
         </div>
       )}
       <span className="font-semibold text-sm text-[var(--text-primary)] group-hover:text-[var(--bhg-blue)] transition-colors leading-snug">{title}</span>
-      {children && <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-0.5">{children}</p>}
+      {children && <div className="text-xs text-[var(--text-secondary)] leading-relaxed mt-0.5">{children}</div>}
     </div>
   );
-  if (href) {
-    return <a href={href} className="no-underline block h-full">{content}</a>;
+  if (resolvedHref) {
+    return <a href={resolvedHref} className="no-underline block h-full">{content}</a>;
   }
   return content;
 }
@@ -151,7 +272,7 @@ export function Accordion({ title, icon, children }: AccordionProps) {
         className="flex w-full items-center justify-between px-4 py-3 text-left bg-[var(--card-bg)] hover:bg-[var(--light-gray)] transition-colors"
       >
         <div className="flex items-center gap-2">
-          {icon && <span className="text-[var(--bhg-blue)] text-sm">{icon}</span>}
+          {icon && <span className="text-[var(--bhg-blue)]"><CardIcon name={icon} /></span>}
           <span className="text-sm font-medium text-[var(--text-primary)]">{title}</span>
         </div>
         <svg
@@ -278,10 +399,10 @@ export function Tab({ children }: TabProps) {
 export function CodeGroup({ children }: { children?: ReactNode }) {
   return (
     <div className="my-4 rounded-lg border border-[var(--card-border)] overflow-hidden">
-      <div className="bg-[#1e293b] text-xs text-slate-400 px-4 py-2 border-b border-slate-700/50 font-mono">
+      <div className="bg-[var(--light-gray)] text-xs text-[var(--text-secondary)] px-4 py-2 border-b border-[var(--card-border)] font-mono">
         Code
       </div>
-      <div className="bg-[#0f172a]">{children}</div>
+      <div className="bg-[var(--card-bg)]">{children}</div>
     </div>
   );
 }

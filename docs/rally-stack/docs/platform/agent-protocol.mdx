@@ -1,8 +1,106 @@
 ---
 title: "Agent Protocol"
-description: "the Agent Protocol for AI agent communication."
+description: "The behavioral OS that governs how AI agents communicate, hand off tasks, and maintain consistent behavior across Rally Stack."
 ---
 
-# Agent Protocol
+## What is the Agent Protocol?
 
-Content coming soon. This page will cover the Agent Protocol for AI agent communication.
+The Agent Protocol is a set of behavioral rules and communication contracts that all AI agents in Rally Stack must follow. It's not an API — it's a **behavioral operating system** that ensures consistent, predictable agent behavior regardless of which underlying AI model is active.
+
+Without the Agent Protocol, each AI session would start fresh, make contradictory decisions, and lack coordination between agents. The Protocol gives agents:
+
+- Persistent identity and memory across sessions
+- Clear role boundaries (no agent oversteps its domain)
+- Standardized handoff messages between agents
+- Shared understanding of platform architecture and constraints
+
+## Agent Roles
+
+Rally Stack defines a set of named agents with distinct, non-overlapping roles:
+
+| Agent | Role | Scope |
+|-------|------|-------|
+| **HQ** | Strategic coordination, architecture decisions | Cross-platform |
+| **Dev** | Code generation, module implementation | Package level |
+| **Stack** | Infrastructure, deployment, environment config | Ops level |
+| **Design** | UI/UX, component architecture, design system | Frontend |
+| **QA** | Testing strategy, validation, quality gates | All |
+| **Docs** | Documentation generation and maintenance | All |
+
+These are the **internal development agents** — they build and maintain Rally Stack itself. They are distinct from the user-facing AI Orbs (Pulse, OpsChief, Ask, Knowledge) that run inside AICR deployments.
+
+## Handoff Protocol
+
+When one agent completes its work and another needs to pick up, a standardized handoff message is generated:
+
+```typescript
+interface HandoffMessage {
+  from: AgentRole;
+  to: AgentRole;
+  context: {
+    taskCompleted: string;
+    decisionsMade: Decision[];
+    openQuestions: string[];
+    nextSteps: string[];
+  };
+  artifacts: string[];     // file paths created or modified
+  constraints: string[];   // rules the next agent must respect
+}
+```
+
+This is written to the session context in the database so the receiving agent starts with full context — not a blank slate.
+
+## Memory Architecture
+
+Agents maintain three tiers of memory:
+
+### 1. Session Memory
+Short-term context for the current work session. Stored in the ALM context object, cleared when the session ends.
+
+### 2. Project Memory
+Medium-term context for the current project — architectural decisions, module selections, patterns established. Persists across sessions for the same project/tenant.
+
+### 3. Platform Memory
+Long-term, immutable knowledge about Rally Stack itself — the Three Laws, module contracts, architectural patterns. Loaded from indexed canonical documentation at startup. Never modified by agents.
+
+## Behavioral Rules
+
+All agents must adhere to these rules, enforced at runtime:
+
+<AccordionGroup>
+  <Accordion title="Never bypass the Three Laws">
+    No agent may suggest, generate, or execute code that violates the Three Laws (Neon Everywhere, Neon Branches, Prisma Only). Any such output is rejected before it reaches the user.
+  </Accordion>
+
+  <Accordion title="Stay in role">
+    Agents do not cross role boundaries. The Dev agent does not make architecture decisions (HQ's role). The Design agent does not modify database schema (Dev's role). Role crossings require explicit handoff.
+  </Accordion>
+
+  <Accordion title="Cite sources">
+    When agents make decisions based on platform documentation, they cite the canonical document. This keeps the decision trail auditable.
+  </Accordion>
+
+  <Accordion title="Escalate uncertainty">
+    Agents do not guess on high-stakes decisions. When confidence is below threshold, they escalate to the consensus engine or request human input.
+  </Accordion>
+</AccordionGroup>
+
+## Conflict Resolution
+
+When two agents disagree (or when an agent's output conflicts with a prior decision in session memory):
+
+1. The conflict is logged with both positions
+2. The consensus engine runs the disputed question against all three models
+3. If consensus is reached, it's committed to project memory
+4. If not, the conflict is surfaced to the human operator
+
+## Using the Protocol in Custom Agents
+
+If you're building a custom agent that integrates with Rally Stack, your agent should:
+
+1. Load platform memory from the canonical docs index at startup
+2. Register its role to prevent overlap with existing agents
+3. Use the HandoffMessage format when delegating or completing tasks
+4. Write decisions to project memory before ending a session
+
+See the [API Reference](/api-reference/ai-framework) for the agent registration endpoint.

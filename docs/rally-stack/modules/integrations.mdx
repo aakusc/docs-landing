@@ -1,8 +1,103 @@
 ---
 title: "Integrations"
-description: "third-party integration modules."
+description: "Third-party connectors for CRM, finance, email, storage, and ICM systems."
 ---
 
-# Integrations
+## Overview
 
-Content coming soon. This page will cover third-party integration modules.
+Integrations modules connect Rally Stack apps to external systems. They handle authentication, data sync, webhook processing, and error recovery — so your modules don't have to deal with the details of third-party APIs.
+
+## Categories
+
+### CRM
+
+| Module | ID | Systems |
+|--------|-----|---------|
+| **Salesforce Connector** | `int-salesforce` | Salesforce Sales Cloud, Service Cloud |
+| **HubSpot Connector** | `int-hubspot` | HubSpot CRM, Marketing Hub |
+| **Dynamics Connector** | `int-dynamics` | Microsoft Dynamics 365 |
+| **Pipedrive Connector** | `int-pipedrive` | Pipedrive CRM |
+
+### ICM (Incentive Compensation Management)
+
+| Module | ID | Systems |
+|--------|-----|---------|
+| **Verisent Connector** | `int-verisent` | Varicent (formerly IBM Incentive Comp) |
+| **Xactly Connector** | `int-xactly` | Xactly Incent |
+| **CapIQ Connector** | `int-capiq` | Capital IQ (S&P Global) |
+| **Callidus Connector** | `int-callidus` | SAP Commissions (Callidus) |
+
+### Finance & ERP
+
+| Module | ID | Systems |
+|--------|-----|---------|
+| **QuickBooks Connector** | `int-quickbooks` | QuickBooks Online |
+| **NetSuite Connector** | `int-netsuite` | Oracle NetSuite ERP |
+| **Stripe Connector** | `int-stripe` | Stripe payments and billing |
+
+### Communication
+
+| Module | ID | Systems |
+|--------|-----|---------|
+| **Slack Connector** | `int-slack` | Slack messaging and notifications |
+| **Email (SendGrid)** | `int-sendgrid` | Transactional and bulk email via SendGrid |
+| **Email (Resend)** | `int-resend` | Transactional email via Resend |
+| **SMS (Twilio)** | `int-twilio` | SMS notifications via Twilio |
+
+### Storage & Documents
+
+| Module | ID | Systems |
+|--------|-----|---------|
+| **AWS S3 Connector** | `int-s3` | AWS S3 file storage |
+| **Vercel Blob** | `int-blob` | Vercel Blob storage for assets |
+| **DocuSign Connector** | `int-docusign` | Electronic signature workflows |
+
+### HR & Identity
+
+| Module | ID | Systems |
+|--------|-----|---------|
+| **Workday Connector** | `int-workday` | Workday HCM for org hierarchy and roles |
+| **BambooHR Connector** | `int-bamboohr` | BambooHR employee data |
+| **Okta Connector** | `int-okta` | Okta SSO and directory sync |
+
+## Architecture
+
+All integration modules follow the same pattern:
+
+```typescript
+interface IntegrationConnector {
+  connect(credentials: Credentials): Promise<Connection>;
+  sync(connection: Connection, options: SyncOptions): Promise<SyncResult>;
+  webhook(payload: WebhookPayload): Promise<void>;
+  disconnect(connection: Connection): Promise<void>;
+}
+```
+
+Credentials are stored encrypted in the database. The integration module handles token refresh, rate limiting, and retry logic internally.
+
+## Example: Salesforce Sync
+
+```typescript
+import { SalesforceConnector } from '@rally/int-salesforce';
+
+const sf = new SalesforceConnector({
+  tenantId,
+  credentials: await getCredentials(tenantId, 'salesforce'),
+});
+
+// One-time sync
+const result = await sf.sync({
+  objects: ['Opportunity', 'Account', 'Contact'],
+  since: lastSyncDate,
+});
+
+// Set up webhook for real-time updates
+await sf.webhook({
+  events: ['OpportunityUpdated', 'AccountUpdated'],
+  callbackUrl: `${process.env.APP_URL}/webhooks/salesforce`,
+});
+```
+
+## SPOT — ICM Data Extraction
+
+The SPOT connector (`spm-spot` in the SPM module) specifically targets ICM systems to extract compensation rule logic — not just data. See the [SPM documentation](/modules/spm) for details.

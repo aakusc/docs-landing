@@ -1,8 +1,122 @@
 ---
 title: "SPM"
-description: "sales performance management modules."
+description: "Sales Performance Management modules — territory planning, quota management, incentive design, and the SPM Spark suite."
 ---
 
-# SPM
+## Overview
 
-Content coming soon. This page will cover sales performance management modules.
+SPM (Sales Performance Management) modules are Rally Stack's most sophisticated category. They handle the full lifecycle of sales compensation and performance management — from territory design and quota setting to incentive calculation and payout.
+
+The **SPM Spark Suite** is the flagship application built from these modules, targeting enterprise ICM (Incentive Compensation Management) use cases.
+
+## SPM Spark Suite
+
+The SPM Spark Suite is a collection of 6–8 tools being built at BHG:
+
+| Tool | Status | Description |
+|------|--------|-------------|
+| **SGM SPARCC** | Production | AI-powered sales quota and commission calculator |
+| **Commission Calculator** | Production | Real-time commission tool with what-if and Monte Carlo |
+| **SPOT — ICM Connector** | In Development | Universal ICM data extractor (Verisent, Exactly, CapIQ) |
+| **Territory Manager** | Planned | Geographic and account-based territory design |
+| **Roles & Hierarchies** | Planned | Sales org structure and reporting relationships |
+| **Pay Curves** | Planned | Incentive curve design and visualization |
+| **Monte Carlo Simulator** | Planned | Statistical modeling for comp plan design |
+| **Plan Builder** | Planned | End-to-end comp plan authoring |
+
+## Modules
+
+### Quota Management
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **SGM SPARCC** | `spm-sparcc` | AI-powered quota modeling with market analysis (SPARCC framework) |
+| **Quota Manager** | `spm-quota` | Quota assignment, approval workflows, and tracking |
+| **Quota Allocation** | `spm-allocation` | Top-down quota cascading across org hierarchy |
+| **Attainment Tracker** | `spm-attainment` | Real-time quota vs. actuals with period-end projections |
+
+### Commission Calculation
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Commission Calculator** | `spm-commission-calc` | Point-of-sale commission calculation with plan rule engine |
+| **Plan Rule Engine** | `spm-rules` | Flexible rule definitions: tiers, accelerators, draws, clawbacks |
+| **Monte Carlo** | `spm-monte-carlo` | Statistical simulation for comp plan modeling |
+| **Earnings Visibility** | `spm-earnings` | Rep-facing real-time earnings and what-if scenarios |
+
+### Territory Management
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Territory Designer** | `spm-territory` | Geographic and account-based territory carving |
+| **Alignment Manager** | `spm-alignment` | Rep-to-territory assignment and change management |
+| **Coverage Analysis** | `spm-coverage` | White space identification and territory optimization |
+
+### Integrations (ICM Connectors)
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **SPOT Connector** | `spm-spot` | Universal ICM rule extraction — Verisent, Exactly, CapIQ |
+| **Salesforce Sync** | `spm-sf-sync` | Bidirectional sync with Salesforce compensation data |
+| **Workday Connector** | `spm-workday` | Workday HCM integration for org hierarchy and roles |
+
+## SGM SPARCC
+
+SGM SPARCC is the primary AI-powered module in the SPM suite. SPARCC stands for:
+
+- **S** — Sales motion analysis
+- **P** — Pipeline and market data
+- **A** — AI-driven modeling
+- **R** — Role and territory mapping
+- **C** — Competitive benchmarking
+- **C** — Commission plan optimization
+
+SPARCC takes historical performance data, market benchmarks, and organizational constraints as inputs and generates defensible quota recommendations with supporting rationale.
+
+## Commission Calculator
+
+Built from Calladus source code, the Commission Calculator provides:
+
+- **Point-of-sale commission** — instant calculation as deals close
+- **What-if scenarios** — "what would I earn if I close this deal?"
+- **Monte Carlo simulation** — probability distributions over expected earnings
+- **Plan rule extraction** — paste your comp plan; AI extracts the rules
+
+Initial target customer: **Mattress Firm** (high-volume, simple tier structure).
+
+## SPOT — ICM Connector
+
+SPOT (Sales Performance Operations Tool) extracts compensation rule concepts from existing ICM systems:
+
+1. **Connect** to source ICM (Verisent, Exactly, CapIQ)
+2. **Extract** plan rules, logic, and data structures
+3. **Normalize** to Rally Stack's unified rule format
+4. **Feed** into the Plan Rule Engine for calculation
+
+Being built by Aaron + Keshav. Solves the ICM migration problem — extracting institutional knowledge locked in legacy systems.
+
+## AI Features
+
+SPM modules are Rally Stack's most AI-capable category:
+
+- **SGM SPARCC** — full AI quota modeling with market benchmarking
+- **Commission Calculator** — natural language plan rule extraction + Monte Carlo
+- **SPOT Connector** — AI-assisted rule interpretation from ICM exports
+- **Coverage Analysis** — AI-generated territory recommendations
+
+## Example Usage
+
+```typescript
+import { CommissionCalculator } from '@rally/spm-commission-calc';
+
+export async function RepCommissionPage({ tenantId, repId }: Props) {
+  return (
+    <CommissionCalculator
+      tenantId={tenantId}
+      repId={repId}
+      showWhatIf
+      showMonteCarlo
+    />
+  );
+}
+```

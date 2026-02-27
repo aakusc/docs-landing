@@ -1,8 +1,146 @@
 ---
 title: "Monorepo Structure"
-description: "the monorepo structure and organization."
+description: "How Rally Stack organizes code across packages, apps, and modules using Turborepo and pnpm workspaces."
 ---
 
-# Monorepo Structure
+## Overview
 
-Content coming soon. This page will cover the monorepo structure and organization.
+Rally Stack uses a **Turborepo monorepo** with pnpm workspaces. Everything lives in one repository — the platform core, all 130+ modules, apps, and tooling. Turborepo handles incremental builds and parallel task execution.
+
+## Directory Structure
+
+```
+rally-stack/
+├── apps/
+│   ├── web/              # Main Next.js application
+│   ├── docs/             # Documentation site
+│   └── storybook/        # Component development
+├── packages/
+│   ├── modules/          # All 130+ capability modules
+│   │   ├── business-management/
+│   │   ├── spm/
+│   │   ├── nonprofit/
+│   │   ├── operations/
+│   │   ├── ui-components/
+│   │   ├── integrations/
+│   │   ├── ai-tools/
+│   │   └── development/
+│   ├── core/             # Platform core (registry, guard, compiler)
+│   ├── ai-framework/     # Rally AI Framework
+│   ├── agent-protocol/   # Agent behavioral OS
+│   ├── db/               # Prisma schema and migrations
+│   └── ui/               # Shared design system
+├── turbo.json            # Turborepo pipeline config
+├── pnpm-workspace.yaml   # Workspace definitions
+└── package.json          # Root scripts
+```
+
+## Workspace Packages
+
+Each package in `packages/` is an independent npm package with its own `package.json`. They can depend on each other — the monorepo resolves these as local workspace links.
+
+```yaml
+# pnpm-workspace.yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'packages/modules/*'
+```
+
+## Turborepo Pipeline
+
+The `turbo.json` defines how tasks flow through the monorepo:
+
+```json
+{
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
+    },
+    "lint": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+`^build` means "build all my dependencies first." This ensures modules are compiled before apps that depend on them.
+
+## Running Tasks
+
+```bash
+# Run dev for all packages
+pnpm dev
+
+# Build everything
+pnpm build
+
+# Run tests across all packages
+pnpm test
+
+# Run for a specific package only
+pnpm --filter @rally/spm test
+pnpm --filter web dev
+
+# Run a Turborepo task with caching
+turbo run build --filter=web
+```
+
+## Adding a New Package
+
+```bash
+# Create the package directory
+mkdir packages/modules/my-new-module
+cd packages/modules/my-new-module
+
+# Initialize
+pnpm init
+```
+
+Then add the package to any app that needs it:
+
+```json
+// apps/web/package.json
+{
+  "dependencies": {
+    "@rally/my-new-module": "workspace:*"
+  }
+}
+```
+
+## Caching
+
+Turborepo caches task outputs by hashing inputs (source files, environment variables). On CI, remote caching with Vercel speeds up builds dramatically — unchanged packages are never rebuilt.
+
+```bash
+# View what would run (dry run)
+turbo run build --dry
+
+# Force rebuild ignoring cache
+turbo run build --force
+```
+
+## Module Package Convention
+
+Every module package follows this structure:
+
+```
+packages/modules/spm/
+├── package.json
+├── index.ts          # public exports
+├── contract.ts       # ModuleContract definition
+├── components/       # React components
+├── hooks/            # React hooks
+├── lib/              # Business logic
+├── types.ts          # TypeScript types
+└── README.md
+```
+
+The `contract.ts` file is required — it defines the module's typed interface that the registry uses for composition validation.

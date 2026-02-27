@@ -1,8 +1,100 @@
 ---
 title: "Quickstart"
-description: "getting started with Rally Stack."
+description: "Get Rally Stack running locally and build your first module in under 10 minutes."
 ---
 
-# Quickstart
+## Prerequisites
 
-Content coming soon. This page will cover getting started with Rally Stack.
+- Node.js 18+ and pnpm installed
+- PostgreSQL database (local or Neon serverless)
+- API keys: Anthropic, OpenAI (optional), or Gemini (optional)
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/AICodeRally/rally-stack.git
+cd rally-stack
+```
+
+## 2. Install Dependencies
+
+Rally Stack uses pnpm workspaces via Turborepo. Run from the root:
+
+```bash
+pnpm install
+```
+
+## 3. Configure Environment
+
+```bash
+cp .env.example .env.local
+```
+
+Open `.env.local` and fill in:
+
+```env
+# Database (Neon recommended — see Three Laws)
+DATABASE_URL="postgresql://user:pass@host/dbname?sslmode=require"
+
+# AI Models
+ANTHROPIC_API_KEY="sk-ant-..."
+OPENAI_API_KEY="sk-..."          # optional
+GOOGLE_AI_API_KEY="..."          # optional
+
+# App
+NEXTAUTH_SECRET="your-secret"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+<Warning>
+  **Three Laws — required.** Rally Stack enforces three locked rules: (1) Neon for all databases, (2) Neon for all branches, (3) Prisma as the only ORM. These cannot be overridden.
+</Warning>
+
+## 4. Set Up the Database
+
+```bash
+pnpm db:push        # sync schema to your database
+pnpm db:seed        # optional: seed demo data
+```
+
+## 5. Start the Development Server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You should see the Rally Stack dashboard.
+
+## 6. Verify Your Setup
+
+<Steps>
+  <Step title="Check the module registry">
+    Navigate to `/modules` — you should see the 130+ module library indexed and browsable.
+  </Step>
+  <Step title="Open Rally AI">
+    Click the Rally AI button. The AI framework should initialize and show the active ALM for your tier.
+  </Step>
+  <Step title="Run a health check">
+    ```bash
+    pnpm health
+    ```
+    All services should report green.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Architecture Deep Dive" icon="sitemap" href="/docs/architecture">
+    Understand the four-layer system before building
+  </Card>
+  <Card title="Create a Module" icon="code" href="/docs/development/module-creation">
+    Build your first reusable capability module
+  </Card>
+  <Card title="Explore Modules" icon="sitemap" href="/modules/overview">
+    Browse the 130+ production-ready modules
+  </Card>
+  <Card title="Rally AI Framework" icon="brain" href="/docs/platform/rally-ai-framework">
+    Configure multi-model AI orchestration
+  </Card>
+</CardGroup>

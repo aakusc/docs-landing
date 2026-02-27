@@ -1,8 +1,138 @@
 ---
 title: "Deployment"
-description: "deploying Rally Stack applications."
+description: "Deploying Rally Stack apps to Vercel with Neon database branching."
 ---
 
-# Deployment
+## Deployment Overview
 
-Content coming soon. This page will cover deploying Rally Stack applications.
+Rally Stack apps deploy to **Vercel**. The deployment pipeline is:
+
+```
+Local dev → PR preview (Vercel + Neon branch) → Staging → Production
+```
+
+Every environment has its own Neon database branch — they all share the same schema but have independent data.
+
+## Environments
+
+| Environment | Trigger | URL | Neon Branch |
+|-------------|---------|-----|-------------|
+| **Development** | Local `pnpm dev` | localhost:3000 | `dev/your-name` |
+| **Preview** | PR opened | Auto-generated Vercel URL | `preview/pr-{number}` |
+| **Staging** | Merge to `staging` | staging.rally.aicoderally.com | `staging` |
+| **Production** | Merge to `main` | rally.aicoderally.com | `main` |
+
+## Vercel Configuration
+
+Rally Stack uses a `vercel.json` at the repo root:
+
+```json
+{
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "ANTHROPIC_API_KEY": "@anthropic-api-key"
+  }
+}
+```
+
+Environment variables are managed in the Vercel dashboard and linked to each environment (development/preview/production).
+
+## Neon Database Branching
+
+Each Vercel environment should point to its own Neon branch:
+
+```bash
+# Create staging branch
+neon branches create --name staging
+
+# Get connection string
+neon connection-string staging
+# → postgresql://user:pass@host/dbname-staging
+```
+
+Set this as the `DATABASE_URL` in Vercel's staging environment variables.
+
+## Deploying
+
+### Automatic Deployment
+
+Merging to `main` automatically deploys to production via Vercel's GitHub integration.
+
+### Manual Deployment
+
+```bash
+# Install Vercel CLI
+pnpm add -g vercel
+
+# Deploy to preview
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+## Database Migrations
+
+Before deploying schema changes, run migrations:
+
+```bash
+# Generate migration from schema changes
+pnpm db:migrate
+
+# This generates a SQL file in prisma/migrations/
+# Commit this file — it's part of the deployment
+```
+
+Migrations run automatically on deploy via the `postbuild` script:
+
+```json
+// package.json
+{
+  "scripts": {
+    "postbuild": "prisma migrate deploy"
+  }
+}
+```
+
+<Warning>
+  Always test migrations on the staging Neon branch before deploying to production. Destructive migrations (dropping columns, tables) cannot be rolled back automatically.
+</Warning>
+
+## Rollback
+
+If a production deployment has a critical issue:
+
+1. In Vercel dashboard → Deployments → find the last good deployment → Promote to Production
+2. If the issue is database-related, restore from Neon's point-in-time recovery
+
+```bash
+# Revert last migration (development only)
+pnpm db:migrate:reset
+```
+
+## Build Optimization
+
+Turborepo's remote cache significantly speeds up CI builds. Enable it by connecting your Vercel project:
+
+```bash
+vercel link
+```
+
+After linking, `turbo run build` will use Vercel's remote cache — unchanged packages are never rebuilt, even across different machines.
+
+## Health Checks
+
+After deployment, verify:
+
+```bash
+pnpm health
+```
+
+This checks:
+- Database connectivity (Prisma → Neon)
+- AI API keys (Anthropic, optional OpenAI/Gemini)
+- Module registry integrity
+- Three Laws compliance check

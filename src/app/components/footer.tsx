@@ -82,11 +82,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/reference" className="transition-colors duration-200 hover:text-[var(--link-hover)]">
-                  Quick Reference
-                </Link>
-              </li>
-              <li>
                 <a href="https://www.aicoderally.com" target="_blank" rel="noopener noreferrer" className="transition-colors duration-200 hover:text-[var(--link-hover)]">
                   AI Code Rally
                 </a>

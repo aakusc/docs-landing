@@ -1,8 +1,120 @@
 ---
 title: "Modules Overview"
-description: "the 130+ modules available in Rally Stack."
+description: "The 130+ production-ready modules in Rally Stack, organized by category."
 ---
 
-# Modules Overview
+## What are Modules?
 
-Content coming soon. This page will cover the 130+ modules available in Rally Stack.
+Modules are **self-contained, reusable capability units** — the building blocks of every Rally Stack application. Each module:
+
+- Does one thing well
+- Exposes a typed contract (inputs, outputs, dependencies)
+- Can be composed with other modules
+- Works across Studio, Edge, and Summit tiers
+
+Modules are not apps. They're the parts catalog that apps are assembled from.
+
+## Module Categories
+
+<CardGroup cols={3}>
+  <Card title="Business Management" icon="building" href="/modules/business-management">
+    CRM, pipeline, forecasting, commissions, customer success
+  </Card>
+  <Card title="SPM" icon="chart-bar" href="/modules/spm">
+    Territory planning, quota management, incentive design, SPARCC
+  </Card>
+  <Card title="Nonprofit" icon="users" href="/modules/nonprofit">
+    Donor management, grants, programs, volunteers
+  </Card>
+  <Card title="Operations" icon="gear" href="/modules/operations">
+    Project management, resource allocation, workflows, scheduling
+  </Card>
+  <Card title="Development" icon="code" href="/modules/development">
+    Testing tools, deployment automation, monitoring, DevOps
+  </Card>
+  <Card title="UI Components" icon="code" href="/modules/ui-components">
+    Design system, forms, tables, dashboards, data visualization
+  </Card>
+  <Card title="Integrations" icon="plug" href="/modules/integrations">
+    CRM, finance, email, storage, and third-party connectors
+  </Card>
+  <Card title="AI Tools" icon="robot" href="/modules/ai-tools">
+    AI orchestration, context management, cost tracking, RAG
+  </Card>
+</CardGroup>
+
+## Module Count by Category
+
+| Category | Module Count | AI-Capable |
+|----------|-------------|------------|
+| Business Management | ~25 | Yes |
+| SPM | ~20 | Yes |
+| UI Components | ~20 | No |
+| Operations | ~15 | Partial |
+| Integrations | ~15 | Partial |
+| Nonprofit | ~15 | Yes |
+| AI Tools | ~10 | Yes |
+| Development | ~10 | No |
+| **Total** | **130+** | — |
+
+## Module Contract
+
+Every module exports a typed contract that the registry uses for validation and composition:
+
+```typescript
+interface ModuleContract {
+  id: string;           // unique identifier, e.g. 'spm-quota-manager'
+  version: string;      // semver
+  category: ModuleCategory;
+  inputs: ZodSchema;    // validated input shape
+  outputs: ZodSchema;   // guaranteed output shape
+  dependencies: string[]; // other modules required
+  aiCapable: boolean;   // has an AI Lifecycle Manager
+  description: string;
+}
+```
+
+The contract is the source of truth for what a module does and what it needs. The AI uses contracts to assemble applications — it doesn't read source code.
+
+## Using Modules
+
+Add a module to any app in the monorepo:
+
+```bash
+pnpm add --filter web @rally/spm
+```
+
+Then import from its public API:
+
+```typescript
+import { QuotaManager, useQuota } from '@rally/spm';
+```
+
+## AI-Capable Modules
+
+Modules marked `aiCapable: true` have an embedded AI Lifecycle Manager. When the Rally AI Framework is active, these modules can:
+
+- Answer natural language queries about their domain
+- Suggest configurations based on context
+- Generate reports and insights autonomously
+
+SPM modules are the most AI-capable category, with SGM SPARCC being the primary example.
+
+## Finding the Right Module
+
+Use the module registry query in your app:
+
+```typescript
+import { registry } from '@rally/core';
+
+// Search by category
+const spmModules = registry.search({ category: 'spm' });
+
+// Search by capability keyword
+const commissionModules = registry.search({ keywords: ['commission'] });
+
+// Check if a module exists
+const exists = registry.has('spm-commission-calculator');
+```
+
+Or browse by category in the sidebar.

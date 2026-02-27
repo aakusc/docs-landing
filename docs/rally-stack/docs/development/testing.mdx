@@ -1,8 +1,164 @@
 ---
 title: "Testing"
-description: "testing modules and applications."
+description: "Testing strategy for Rally Stack modules and applications — unit, integration, and end-to-end."
 ---
 
-# Testing
+## Testing Philosophy
 
-Content coming soon. This page will cover testing modules and applications.
+Every module in Rally Stack should be tested at three levels:
+
+1. **Unit tests** — pure functions and business logic in isolation
+2. **Integration tests** — database operations, server actions, and module compositions
+3. **End-to-end tests** — full user flows through the deployed app
+
+Tests live next to the code they test, not in a separate `tests/` directory.
+
+## Testing Stack
+
+| Tool | Level | Purpose |
+|------|-------|---------|
+| **Vitest** | Unit + Integration | Fast, TypeScript-native test runner |
+| **Playwright** | E2E | Browser automation |
+| **MSW** | Unit/Integration | Mock API calls (external services) |
+| **@prisma/client` test utils** | Integration | Isolated test database per suite |
+
+## Unit Tests
+
+Unit tests cover pure functions with no side effects. These are fast and require no database.
+
+```typescript
+// packages/modules/spm/__tests__/quota.test.ts
+import { describe, it, expect } from 'vitest';
+import { calculateQuotaAttainment } from '../lib/quota';
+
+describe('calculateQuotaAttainment', () => {
+  it('calculates percentage correctly', () => {
+    expect(calculateQuotaAttainment({ actual: 80000, quota: 100000 })).toBe(80);
+  });
+
+  it('handles zero quota', () => {
+    expect(calculateQuotaAttainment({ actual: 0, quota: 0 })).toBe(0);
+  });
+});
+```
+
+Run unit tests:
+
+```bash
+pnpm --filter @rally/spm test
+pnpm test          # all packages
+pnpm test --watch  # watch mode
+```
+
+## Integration Tests
+
+Integration tests hit the database. Rally Stack uses a **test database branch** for each test suite — never the production or staging database.
+
+```typescript
+// packages/modules/spm/__tests__/commission.integration.test.ts
+import { beforeEach, afterEach, describe, it, expect } from 'vitest';
+import { prisma } from '@rally/db/test';
+import { calculateCommission } from '../actions/commission-actions';
+
+beforeEach(async () => {
+  await prisma.$transaction([
+    prisma.tenant.create({ data: { id: 'test-tenant', name: 'Test' } }),
+    // seed required data
+  ]);
+});
+
+afterEach(async () => {
+  await prisma.$transaction([
+    prisma.commission.deleteMany({ where: { tenantId: 'test-tenant' } }),
+    prisma.tenant.delete({ where: { id: 'test-tenant' } }),
+  ]);
+});
+
+describe('calculateCommission', () => {
+  it('applies correct rate from plan', async () => {
+    const result = await calculateCommission({
+      tenantId: 'test-tenant',
+      repId: 'rep-1',
+      amount: 50000,
+    });
+    expect(result.commission).toBeGreaterThan(0);
+  });
+});
+```
+
+### Test Database Setup
+
+```env
+# .env.test
+DATABASE_URL="postgresql://user:pass@host/dbname-test?sslmode=require"
+```
+
+Use a separate Neon branch for tests:
+
+```bash
+neon branches create --name test
+```
+
+## End-to-End Tests
+
+E2E tests use Playwright and run against a local dev server.
+
+```typescript
+// e2e/commission-calculator.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('commission calculator shows correct result', async ({ page }) => {
+  await page.goto('/spm/commission-calculator');
+  await page.fill('[name="dealAmount"]', '50000');
+  await page.click('[data-testid="calculate"]');
+  await expect(page.locator('[data-testid="result"]')).toBeVisible();
+});
+```
+
+Run E2E tests:
+
+```bash
+pnpm e2e
+pnpm e2e --ui   # interactive mode
+```
+
+## CI Testing
+
+Tests run automatically on every pull request. The CI pipeline:
+
+1. Runs `pnpm lint` and `pnpm typecheck`
+2. Creates a fresh Neon branch for the PR
+3. Runs `pnpm test` across all packages
+4. Runs `pnpm e2e` against the Vercel preview deployment
+5. Tears down the Neon branch after tests pass
+
+## Coverage
+
+Generate coverage reports:
+
+```bash
+pnpm test --coverage
+```
+
+Coverage thresholds are enforced in `vitest.config.ts`:
+
+```typescript
+export default defineConfig({
+  test: {
+    coverage: {
+      thresholds: {
+        lines: 80,
+        functions: 80,
+      }
+    }
+  }
+});
+```
+
+## Testing Checklist
+
+<Check>Unit tests for all pure functions in `lib/`</Check>
+<Check>Integration test for each server action that writes to the database</Check>
+<Check>Tests pass against the test database branch, not production</Check>
+<Check>Coverage above 80% for new modules</Check>
+<Check>E2E test for any new user-facing feature</Check>

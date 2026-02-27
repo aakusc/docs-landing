@@ -1,8 +1,113 @@
 ---
 title: "Development"
-description: "development and DevOps modules."
+description: "Developer tooling, testing infrastructure, monitoring, and DevOps automation modules."
 ---
 
-# Development
+## Overview
 
-Content coming soon. This page will cover development and DevOps modules.
+Development modules are meta-tools — they help you build, test, deploy, and monitor the other modules and apps in Rally Stack. These are not user-facing; they're the plumbing that makes development reliable and fast.
+
+## Modules
+
+### Testing Infrastructure
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Test Database Factory** | `dev-test-db` | Spins up isolated Neon branches per test suite |
+| **Mock Server** | `dev-mock-server` | MSW-based mock API server for integration tests |
+| **Fixture Generator** | `dev-fixtures` | Type-safe test data generation from Prisma schema |
+| **Contract Validator** | `dev-contracts` | Validates module contracts at test time |
+
+### Build & Deploy
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Build Analyzer** | `dev-build` | Bundle size analysis and build performance tracking |
+| **Deploy Checker** | `dev-deploy` | Pre-deploy validation (Three Laws, contract integrity) |
+| **Migration Runner** | `dev-migrations` | Safe Prisma migration execution with rollback support |
+| **Environment Validator** | `dev-env` | Validates required env vars are present and correctly formatted |
+
+### Monitoring & Observability
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Error Logger** | `dev-errors` | Structured error logging to database and external sinks |
+| **Performance Monitor** | `dev-perf` | Request timing, DB query performance, AI latency |
+| **Health Check** | `dev-health` | Comprehensive platform health endpoint |
+| **Audit Logger** | `dev-audit` | Immutable audit trail for all write operations |
+
+### Code Generation
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Module Scaffolder** | `dev-scaffold` | CLI to generate new module boilerplate |
+| **Contract Generator** | `dev-contract-gen` | Generates `contract.ts` from TypeScript types |
+| **Migration Generator** | `dev-migration-gen` | Suggests Prisma migrations from schema diffs |
+
+## Three Laws Enforcement
+
+The `dev-deploy` module runs Three Laws checks before every deployment:
+
+```typescript
+import { deployChecker } from '@rally/dev-deploy';
+
+const result = await deployChecker.validate({
+  checkORM: true,        // ensures no non-Prisma DB clients
+  checkProvider: true,   // ensures DATABASE_URL points to Neon
+  checkContracts: true,  // validates all module contracts
+});
+
+if (!result.passed) {
+  console.error('THREE LAWS VIOLATION:', result.violations);
+  process.exit(1);
+}
+```
+
+This runs as a `prebuild` script in CI.
+
+## Module Scaffolder
+
+Generate new module boilerplate with the CLI:
+
+```bash
+npx @rally/dev-scaffold create my-module --category spm --ai-capable
+
+# Generates:
+# packages/modules/my-module/
+# ├── package.json
+# ├── index.ts
+# ├── contract.ts       (with aiCapable: true)
+# ├── types.ts
+# ├── components/
+# ├── hooks/
+# ├── lib/
+# ├── actions/
+# └── __tests__/
+```
+
+## Health Check Endpoint
+
+Add the health check module to expose `/api/health`:
+
+```typescript
+// app/api/health/route.ts
+import { createHealthHandler } from '@rally/dev-health';
+
+export const GET = createHealthHandler({
+  checks: ['database', 'ai-models', 'module-registry', 'three-laws'],
+});
+```
+
+Response:
+
+```json
+{
+  "status": "healthy",
+  "checks": {
+    "database": { "status": "ok", "latency_ms": 12 },
+    "ai-models": { "status": "ok", "models": ["claude", "gpt4"] },
+    "module-registry": { "status": "ok", "count": 132 },
+    "three-laws": { "status": "ok" }
+  }
+}
+```

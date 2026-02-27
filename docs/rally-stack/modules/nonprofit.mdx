@@ -1,8 +1,68 @@
 ---
 title: "Nonprofit"
-description: "nonprofit organization modules."
+description: "Donor management, grants, programs, and volunteer coordination modules for nonprofit organizations."
 ---
 
-# Nonprofit
+## Overview
 
-Content coming soon. This page will cover nonprofit organization modules.
+Nonprofit modules cover the specialized operational needs of nonprofit organizations — managing donor relationships, tracking grant applications, running programs, and coordinating volunteers.
+
+## Modules
+
+### Donor Management
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Donor CRM** | `np-donors` | Donor profiles, giving history, and relationship tracking |
+| **Donation Tracker** | `np-donations` | Donation intake, receipting, and reconciliation |
+| **Major Gifts Pipeline** | `np-major-gifts` | Moves management for major gift fundraising |
+| **Annual Fund** | `np-annual-fund` | Recurring giving programs and campaign management |
+| **Donor Portal** | `np-donor-portal` | Self-service portal for donors to view history and give |
+
+### Grants
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Grant Manager** | `np-grants` | Grant application tracking from prospect to reporting |
+| **Funder Database** | `np-funders` | Foundation and government funder research and records |
+| **Compliance Tracker** | `np-compliance` | Grant conditions, milestones, and reporting deadlines |
+| **Budget Tracker** | `np-grant-budget` | Grant-restricted fund tracking and spend monitoring |
+
+### Programs
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Program Manager** | `np-programs` | Program design, enrollment, and outcome tracking |
+| **Participant Tracker** | `np-participants` | Beneficiary records and service delivery history |
+| **Impact Reporting** | `np-impact` | Outcome metrics, impact stories, and annual report data |
+
+### Volunteers
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Volunteer Manager** | `np-volunteers` | Volunteer profiles, skills, and availability |
+| **Shift Scheduler** | `np-scheduling` | Shift creation, sign-up, and attendance tracking |
+| **Hour Tracker** | `np-hours` | Volunteer hours logging and reporting |
+
+## AI Features
+
+- **Donor CRM** — surfaces lapsed donors, suggests engagement actions, and identifies major gift prospects from giving patterns
+- **Grant Manager** — extracts requirements from grant RFPs and maps them to existing program data
+- **Impact Reporting** — generates impact narratives from program data
+
+## Example Usage
+
+```typescript
+import { DonorProfile, useGivingHistory } from '@rally/np-donors';
+
+export async function DonorDetail({ tenantId, donorId }: Props) {
+  return (
+    <DonorProfile
+      tenantId={tenantId}
+      donorId={donorId}
+      showGivingHistory
+      showEngagementTimeline
+    />
+  );
+}
+```

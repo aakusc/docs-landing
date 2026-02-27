@@ -1,8 +1,141 @@
 ---
 title: "UI Components"
-description: "reusable UI component modules."
+description: "Rally Stack's shared design system — forms, tables, dashboards, and data visualization components."
 ---
 
-# UI Components
+## Overview
 
-Content coming soon. This page will cover reusable UI component modules.
+UI Components is Rally Stack's internal design system. Every app built on Rally Stack uses these primitives — they're the visual language of the platform. This ensures consistent UX across Studio apps, Edge deployments, and Summit dashboards.
+
+## Design Tokens
+
+The design system uses CSS custom properties for theming:
+
+```css
+/* Light / dark mode support built in */
+--color-primary: #066aab;
+--color-secondary: #3666b0;
+--color-surface: #ffffff;
+--color-border: #e5e7eb;
+--text-primary: #111827;
+--text-secondary: #6b7280;
+```
+
+Override tokens at the tenant level for white-label deployments.
+
+## Component Categories
+
+### Layout
+
+| Component | Description |
+|-----------|-------------|
+| `PageLayout` | Standard page shell with header, sidebar, content areas |
+| `SidebarNav` | Collapsible navigation sidebar |
+| `TabPanel` | Tabbed content panels |
+| `SplitPane` | Resizable split-pane layout |
+| `Modal` | Accessible modal dialog with backdrop |
+| `Drawer` | Slide-in panel for detail views |
+
+### Forms
+
+| Component | Description |
+|-----------|-------------|
+| `FormField` | Label + input + error message wrapper |
+| `TextInput` | Single-line text input with validation |
+| `NumberInput` | Numeric input with format masks |
+| `DatePicker` | Calendar-based date selection |
+| `Select` | Single and multi-select dropdown |
+| `ComboBox` | Searchable select with async loading |
+| `FileUpload` | Drag-and-drop file upload |
+| `RichTextEditor` | WYSIWYG text editor |
+
+### Data Display
+
+| Component | Description |
+|-----------|-------------|
+| `DataTable` | Sortable, filterable, paginated table |
+| `VirtualTable` | Virtualized table for large datasets |
+| `KanbanBoard` | Drag-and-drop card board |
+| `MetricCard` | KPI card with trend indicator |
+| `StatRow` | Horizontal stats strip |
+| `Badge` | Status and label badges |
+| `Avatar` | User/entity avatar with fallback |
+
+### Charts & Visualization
+
+| Component | Description |
+|-----------|-------------|
+| `BarChart` | Grouped and stacked bar charts |
+| `LineChart` | Time-series line charts |
+| `AreaChart` | Filled area charts |
+| `FunnelChart` | Pipeline/conversion funnel |
+| `GaugeChart` | Attainment and progress gauges |
+| `HeatMap` | Grid-based data density visualization |
+| `TreeMap` | Hierarchical data visualization |
+
+### Feedback
+
+| Component | Description |
+|-----------|-------------|
+| `Toast` | Non-blocking notification toasts |
+| `Alert` | Inline status alerts (info, warning, error, success) |
+| `Skeleton` | Loading state placeholders |
+| `EmptyState` | Zero-data states with call-to-action |
+| `ErrorBoundary` | Graceful error display |
+
+## Usage
+
+```typescript
+import {
+  DataTable,
+  MetricCard,
+  PageLayout,
+  Badge
+} from '@rally/ui-components';
+
+export function SalesDashboard({ tenantId }: Props) {
+  return (
+    <PageLayout title="Sales Dashboard">
+      <div className="grid grid-cols-4 gap-4">
+        <MetricCard label="Revenue" value="$2.4M" trend="+12%" />
+        <MetricCard label="Deals Closed" value="147" trend="+8%" />
+      </div>
+      <DataTable
+        columns={columns}
+        data={deals}
+        sortable
+        filterable
+      />
+    </PageLayout>
+  );
+}
+```
+
+## Theming
+
+Override the default theme per tenant:
+
+```typescript
+import { ThemeProvider } from '@rally/ui-components';
+
+export function TenantApp({ tenant, children }: Props) {
+  return (
+    <ThemeProvider
+      theme={{
+        primary: tenant.brandColor,
+        logo: tenant.logoUrl,
+      }}
+    >
+      {children}
+    </ThemeProvider>
+  );
+}
+```
+
+## Accessibility
+
+All components follow WCAG 2.1 AA standards:
+- Keyboard navigable
+- Screen reader compatible (ARIA labels and roles)
+- Focus management in modals and drawers
+- Color contrast ratios meet AA requirements

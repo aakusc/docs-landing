@@ -1,8 +1,176 @@
 ---
 title: "AI Framework API"
-description: "the AI Framework API."
+description: "Invoke AI Lifecycle Managers, manage context, and run the consensus engine via the Rally Stack API."
 ---
 
-# AI Framework API
+## Endpoints
 
-Content coming soon. This page will cover the AI Framework API.
+### Invoke ALM
+
+```
+POST /api/v1/ai/invoke
+```
+
+Invokes an AI Lifecycle Manager with a prompt and context.
+
+**Request body:**
+
+```json
+{
+  "tenantId": "tenant_abc123",
+  "alm": "operator",
+  "prompt": "Analyze our Q1 pipeline and identify top risks",
+  "context": {
+    "period": "2025-Q1",
+    "includeModules": ["bm-pipeline", "bm-forecast"]
+  }
+}
+```
+
+**ALM options:** `creator` (Studio), `operator` (Edge), `enterprise` (Summit)
+
+**Response:**
+
+```json
+{
+  "data": {
+    "response": "Based on your Q1 pipeline...",
+    "model": "claude-3-5-sonnet",
+    "tokensUsed": 1240,
+    "contextId": "ctx_01xyz"
+  }
+}
+```
+
+### Run Consensus
+
+```
+POST /api/v1/ai/consensus
+```
+
+Runs a prompt against all configured models and returns synthesized results.
+
+**Request body:**
+
+```json
+{
+  "tenantId": "tenant_abc123",
+  "prompt": "What quota methodology best fits this territory profile?",
+  "context": { ... },
+  "threshold": 0.8
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "consensus": true,
+    "confidence": 0.92,
+    "answer": "Bottom-up quota methodology is recommended...",
+    "positions": {
+      "claude": "Bottom-up methodology based on...",
+      "gpt4": "Bottom-up quota approach given...",
+      "gemini": "Recommend bottom-up quota methodology..."
+    }
+  }
+}
+```
+
+### Get Context
+
+```
+GET /api/v1/ai/context/:contextId
+```
+
+Retrieves a saved context by ID.
+
+### Update Context
+
+```
+PATCH /api/v1/ai/context/:contextId
+```
+
+Appends entries to an existing context.
+
+**Request body:**
+
+```json
+{
+  "entries": [
+    {
+      "type": "decision",
+      "content": "Chose bottom-up quota methodology for 2025",
+      "timestamp": "2025-03-01T12:00:00Z"
+    }
+  ]
+}
+```
+
+### Register Agent
+
+```
+POST /api/v1/ai/agents
+```
+
+Registers a custom agent with the Agent Protocol.
+
+**Request body:**
+
+```json
+{
+  "tenantId": "tenant_abc123",
+  "role": "custom-spm-analyst",
+  "description": "Specialized agent for SPM analysis",
+  "constraints": ["no-schema-changes", "read-only-db"],
+  "allowedModules": ["spm-sparcc", "spm-quota", "bm-forecast"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "agentId": "agent_01abc",
+    "role": "custom-spm-analyst",
+    "apiKey": "ra_agent_..."
+  }
+}
+```
+
+### Query Docs (RAG)
+
+```
+POST /api/v1/ai/query
+```
+
+Query the tenant's indexed documents using RAG.
+
+**Request body:**
+
+```json
+{
+  "tenantId": "tenant_abc123",
+  "question": "What is the accelerator rate for deals over $500k?",
+  "sources": ["comp-plan-2025.pdf"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "answer": "Deals over $500k receive a 1.5x accelerator...",
+    "sources": [
+      {
+        "document": "comp-plan-2025.pdf",
+        "excerpt": "...accelerator rate of 1.5x applies to all deals exceeding $500,000...",
+        "confidence": 0.94
+      }
+    ]
+  }
+}
+```

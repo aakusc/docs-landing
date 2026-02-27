@@ -35,6 +35,8 @@ import {
   Th,
   Td,
 } from "@/app/components/mdx/index";
+import { ProductContextProvider } from "@/app/components/product-context-provider";
+import { resolveHref } from "@/lib/resolve-href";
 
 interface PageProps {
   params: Promise<{ product: string; slug?: string[] }>;
@@ -153,7 +155,18 @@ export default async function DocsPage({ params }: PageProps) {
       )}
 
       <div className="docs-prose">
-        <MDXRemote source={content} components={mdxComponents} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
+        <ProductContextProvider product={product}>
+          <MDXRemote
+            source={content}
+            components={{
+              ...mdxComponents,
+              a: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+                <a href={resolveHref(href ?? "", product)} {...props}>{children}</a>
+              ),
+            }}
+            options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          />
+        </ProductContextProvider>
       </div>
 
       {(prevPage || nextPage) && (

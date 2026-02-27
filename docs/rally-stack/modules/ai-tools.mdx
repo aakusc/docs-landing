@@ -1,8 +1,139 @@
 ---
 title: "AI Tools"
-description: "AI-powered tool modules."
+description: "AI orchestration, context management, RAG, and cost tracking modules."
 ---
 
-# AI Tools
+## Overview
 
-Content coming soon. This page will cover AI-powered tool modules.
+AI Tools modules provide the infrastructure for building AI-native features into Rally Stack apps. They abstract over the multi-model orchestration layer, context management, retrieval-augmented generation (RAG), and AI cost tracking.
+
+These modules are used internally by the Rally AI Framework and are also available to module authors who need direct AI access.
+
+## Modules
+
+### Orchestration
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Multi-Model Router** | `ai-router` | Routes tasks to Claude, GPT-4, or Gemini based on task type |
+| **ALM Manager** | `ai-alm` | AI Lifecycle Manager configuration and activation |
+| **Prompt Builder** | `ai-prompts` | Structured prompt construction with context injection |
+| **Response Parser** | `ai-parser` | Structured output parsing from AI responses |
+
+### Context & Memory
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Context Manager** | `ai-context` | Session, project, and platform memory management |
+| **Conversation History** | `ai-history` | Persistent conversation thread storage and retrieval |
+| **Knowledge Indexer** | `ai-indexer` | Document indexing for RAG (vector embeddings) |
+| **Vector Store** | `ai-vectors` | Pgvector-based similarity search in Neon |
+
+### RAG (Retrieval-Augmented Generation)
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Document Loader** | `ai-doc-loader` | Load and chunk documents (PDF, DOCX, MDX, plain text) |
+| **Embedding Generator** | `ai-embeddings` | Generate embeddings via OpenAI or Anthropic |
+| **Retrieval Engine** | `ai-retrieval` | Semantic search + keyword search hybrid retrieval |
+| **RAG Pipeline** | `ai-rag` | End-to-end RAG: load → embed → retrieve → generate |
+
+### Monitoring & Cost
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Token Tracker** | `ai-tokens` | Per-request and per-tenant token usage logging |
+| **Cost Calculator** | `ai-cost` | AI spend tracking and alerting by model and tenant |
+| **Quality Monitor** | `ai-quality` | Response quality scoring and anomaly detection |
+| **Latency Tracker** | `ai-latency` | Response time tracking across models |
+
+## The Consensus Engine
+
+The consensus engine runs a prompt against all configured models simultaneously, then synthesizes the results:
+
+```typescript
+import { ConsensusEngine } from '@rally/ai-router';
+
+const engine = new ConsensusEngine({ models: ['claude', 'gpt4', 'gemini'] });
+
+const result = await engine.resolve({
+  prompt: 'What quota allocation method best fits this territory profile?',
+  context: territoryData,
+  threshold: 0.8, // require 80% agreement
+});
+
+if (result.consensus) {
+  // All models agreed — high confidence answer
+  return result.answer;
+} else {
+  // Divergent — surface to human
+  return { needsReview: true, positions: result.positions };
+}
+```
+
+The consensus engine is used for:
+- High-stakes architectural decisions during development
+- Production: quota recommendations requiring defensible justification
+- Plan rule extraction where ambiguity exists
+
+## RAG Pipeline
+
+The RAG pipeline enables AI to answer questions from your document corpus:
+
+```typescript
+import { RAGPipeline } from '@rally/ai-rag';
+
+const rag = new RAGPipeline({
+  tenantId,
+  vectorStore: 'neon-pgvector',
+  embedModel: 'text-embedding-3-small',
+  llm: 'claude-3-5-sonnet',
+});
+
+// Index documents
+await rag.index([
+  { source: 'comp-plan-2025.pdf', content: pdfBuffer },
+  { source: 'territory-guide.docx', content: docxBuffer },
+]);
+
+// Query
+const answer = await rag.query('What is the accelerator rate for deals over $500k?');
+```
+
+This is used in **BHG Edge** for the "Ask" orb — enabling employees to query internal documents, policies, and data using natural language.
+
+## Cost Management
+
+Track AI spend per tenant:
+
+```typescript
+import { CostTracker } from '@rally/ai-cost';
+
+// Automatic — wraps your AI calls
+const tracked = CostTracker.wrap(anthropic, { tenantId });
+const response = await tracked.messages.create({ ... });
+// Usage automatically logged to the database
+
+// Query spend
+const spend = await CostTracker.getSpend({
+  tenantId,
+  period: '2025-Q1',
+  groupBy: 'model',
+});
+```
+
+## Vector Storage
+
+All vectors are stored in Neon using pgvector — maintaining Three Laws compliance. No external vector databases (Pinecone, Weaviate, etc.) are used.
+
+```sql
+-- Managed by Prisma schema
+model Embedding {
+  id        String   @id @default(cuid())
+  tenantId  String
+  source    String
+  content   String
+  vector    Unsupported("vector(1536)")
+  createdAt DateTime @default(now())
+}
+```

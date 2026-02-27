@@ -1,8 +1,97 @@
 ---
 title: "Authentication"
-description: "API authentication and authorization."
+description: "API key management, tenant scoping, and authorization for the Rally Stack API."
 ---
 
-# Authentication
+## API Keys
 
-Content coming soon. This page will cover API authentication and authorization.
+Rally Stack uses API keys for programmatic access. Keys are tenant-scoped — a key only has access to the tenant it was created for.
+
+### Creating an API Key
+
+In the Rally Stack dashboard:
+
+1. Navigate to **Settings → API Keys**
+2. Click **Generate New Key**
+3. Select the access level (read, write, or admin)
+4. Copy the key — it will not be shown again
+
+Store the key in your environment variables:
+
+```env
+RALLY_API_KEY="rs_live_..."
+```
+
+### Access Levels
+
+| Level | Capabilities |
+|-------|-------------|
+| **read** | Query module registry, read context, list resources |
+| **write** | Create resources, invoke ALMs, push data |
+| **admin** | All of the above + manage keys, configure tenant settings |
+
+## Using API Keys
+
+Include the key in the `Authorization` header:
+
+```bash
+curl https://rally.aicoderally.com/api/v1/modules \
+  -H "Authorization: Bearer rs_live_..."
+```
+
+In JavaScript:
+
+```typescript
+const response = await fetch('https://rally.aicoderally.com/api/v1/modules', {
+  headers: {
+    Authorization: `Bearer ${process.env.RALLY_API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+});
+```
+
+## Tenant Scoping
+
+All API responses are automatically scoped to the tenant associated with your API key. You cannot access data from other tenants.
+
+If you're building a multi-tenant application (like an integration), you'll need a separate API key per tenant — or use the service account model:
+
+```bash
+# Service account key (Summit tier only)
+curl https://rally.aicoderally.com/api/v1/modules \
+  -H "Authorization: Bearer rs_service_..." \
+  -H "X-Tenant-ID: tenant_abc123"
+```
+
+## Error Responses
+
+Authentication errors return `401`:
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid or expired API key"
+  }
+}
+```
+
+Authorization errors (valid key, insufficient access) return `403`:
+
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "This operation requires write access"
+  }
+}
+```
+
+## Key Rotation
+
+Rotate keys regularly. To rotate without downtime:
+
+1. Generate a new key with the same access level
+2. Update your environment variable to the new key
+3. Deploy your application
+4. Revoke the old key from the dashboard

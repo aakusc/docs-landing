@@ -1,8 +1,77 @@
 ---
 title: "Business Management"
-description: "business management modules."
+description: "CRM, pipeline, forecasting, commissions, and customer success modules."
 ---
 
-# Business Management
+## Overview
 
-Content coming soon. This page will cover business management modules.
+Business Management modules cover the core operations of a sales-oriented business — managing customers, tracking deals, forecasting revenue, and calculating commissions.
+
+## Modules
+
+### CRM & Pipeline
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Contact Manager** | `bm-contacts` | Unified contact and account records with activity history |
+| **Pipeline Manager** | `bm-pipeline` | Multi-stage deal tracking with probability weighting |
+| **Opportunity Tracker** | `bm-opportunities` | Opportunity lifecycle from lead to close |
+| **Account Health** | `bm-account-health` | Customer health scoring and churn risk signals |
+
+### Forecasting
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Revenue Forecaster** | `bm-forecast` | Bottom-up and top-down revenue forecasting |
+| **Pipeline Analytics** | `bm-pipeline-analytics` | Conversion rates, velocity, win/loss analysis |
+| **Quota vs. Actuals** | `bm-quota-actuals` | Real-time quota tracking and gap analysis |
+
+### Commissions
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Commission Calculator** | `bm-commission-calc` | Real-time commission calculation with plan rules |
+| **Payout Manager** | `bm-payouts` | Payout scheduling, adjustments, and dispute management |
+| **Plan Builder** | `bm-plan-builder` | Visual commission plan design with rule testing |
+| **Earnings Statement** | `bm-earnings` | Rep-facing earnings visibility and history |
+
+### Customer Success
+
+| Module | ID | Description |
+|--------|-----|-------------|
+| **Success Dashboard** | `bm-cs-dashboard` | Customer health, renewal, and expansion overview |
+| **Renewal Tracker** | `bm-renewals` | Renewal pipeline with risk scoring |
+| **NPS Manager** | `bm-nps` | Net Promoter Score collection and analysis |
+
+## AI Features
+
+Business Management modules with `aiCapable: true`:
+
+- **Commission Calculator** — extracts commission rules from plain-language descriptions and ICM system exports (Verisent, Exactly, CapIQ)
+- **Revenue Forecaster** — generates forecast narratives and flags anomalies
+- **Account Health** — surfaces churn risk signals from engagement data
+
+## Example Usage
+
+```typescript
+import { CommissionCalculator, useCommission } from '@rally/bm-commission-calc';
+
+// Server component
+export async function RepEarnings({ tenantId, repId }: Props) {
+  return (
+    <CommissionCalculator
+      tenantId={tenantId}
+      repId={repId}
+      period="2025-Q1"
+    />
+  );
+}
+```
+
+## Dependencies
+
+Most Business Management modules depend on:
+- `@rally/ui-components` — shared UI primitives
+- `@rally/integrations` — for CRM sync (Salesforce, HubSpot)
+
+Commission modules may also depend on `@rally/spm` for plan rule resolution.
